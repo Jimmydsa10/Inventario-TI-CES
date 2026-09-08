@@ -869,9 +869,10 @@ const NAV_ITEMS = [
   { key: "importar", label: "Importar/Exportar", icon: Upload },
 ];
 
-function Sidebar({ view, setView }) {
+function Sidebar({ view, setView, mobileOpen, onNavigate }) {
   return (
     <div
+      className={"app-sidebar" + (mobileOpen ? " open" : "")}
       style={{
         width: 220,
         flexShrink: 0,
@@ -895,7 +896,7 @@ function Sidebar({ view, setView }) {
           return (
             <button
               key={item.key}
-              onClick={() => setView(item.key)}
+              onClick={() => onNavigate(item.key)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -988,7 +989,7 @@ function Dashboard({ state, setView }) {
         ))}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
         <Panel title="Equipamentos por categoria">
           <BarChartHorizontal data={porCategoria} />
         </Panel>
@@ -1006,7 +1007,7 @@ function Dashboard({ state, setView }) {
         </Panel>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <Panel title="Equipamentos por sala">
           <div style={{ maxHeight: 280, overflow: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -1100,7 +1101,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
   }
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+    <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
       <Field label="Nº de patrimônio">
         <TextInput value={form.id} disabled={isNew} onChange={(e) => setForm({ ...form, id: e.target.value })} style={{ fontFamily: "ui-monospace, monospace", background: isNew ? "#F3F2ED" : "#fff" }} />
       </Field>
@@ -1330,7 +1331,7 @@ function Inventario({ state, setState }) {
       </div>
 
       <Panel style={{ marginBottom: 14 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr 1fr", gap: 10 }}>
+        <div className="grid-5" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr 1fr", gap: 10 }}>
           <div style={{ position: "relative" }}>
             <Search size={15} style={{ position: "absolute", left: 10, top: 10, color: COLORS.inkSoft }} />
             <TextInput
@@ -2151,7 +2152,7 @@ function Relatorios({ state }) {
         </div>
       </Panel>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 16 }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 16 }}>
         <Panel title="Contagem">
           <div style={{ maxHeight: 460, overflow: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
@@ -2362,7 +2363,7 @@ function Importar({ state, setState }) {
     <div>
       <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Importar e exportar</h2>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <Panel title="Importar planilha (.xlsx)">
           <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
             Envie um arquivo no formato da planilha original: colunas Categoria, Marca, Modelo, Nº de Série, Sala/Localização, Status, Responsável e Observações. Depois de ler o arquivo, você escolhe se quer substituir tudo ou adicionar aos equipamentos já existentes — assim dá pra evitar duplicar equipamentos ao reimportar a mesma planilha.
@@ -2570,7 +2571,7 @@ function Chamados({ state, setState }) {
         </Button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, height: 560 }}>
+      <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, height: 560 }}>
         <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
             {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
@@ -2620,7 +2621,7 @@ function Chamados({ state, setState }) {
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
               <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
                   <Field label="Sala relacionada (opcional)">
                     <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                       <option value="">Nenhuma</option>
@@ -2864,7 +2865,7 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
           </Button>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 520 }}>
+        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 520 }}>
           <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
               {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
@@ -2902,7 +2903,7 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
                       <TextInput value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Como podemos te chamar" />
                     </Field>
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                  <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                         <option value="">Nenhuma</option>
@@ -3003,6 +3004,46 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
   );
 }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => (typeof window !== "undefined" ? window.innerWidth <= 860 : false));
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 860px)");
+    const handler = (e) => setIsMobile(e.matches);
+    setIsMobile(mq.matches);
+    if (mq.addEventListener) mq.addEventListener("change", handler);
+    else mq.addListener(handler);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", handler);
+      else mq.removeListener(handler);
+    };
+  }, []);
+  return isMobile;
+}
+
+const RESPONSIVE_CSS = `
+.app-topbar-mobile { display: none; }
+@media (max-width: 860px) {
+  .app-topbar-mobile { display: flex !important; }
+  .app-sidebar {
+    position: fixed !important;
+    top: 0; left: 0; bottom: 0;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.25);
+  }
+  .app-sidebar.open { transform: translateX(0); }
+  .app-sidebar-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 55;
+  }
+  .app-main { width: 100%; padding: 16px !important; padding-top: 8px !important; }
+  .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr !important; }
+  .grid-chat { grid-template-columns: 1fr !important; height: auto !important; }
+  .grid-chat > div:first-child { height: 220px !important; }
+  .grid-chat > div:last-child { height: 480px !important; }
+}
+`;
+
 function LoadingScreen() {
   return (
     <div style={{ padding: 60, textAlign: "center", color: COLORS.inkSoft, fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
@@ -3023,6 +3064,7 @@ function App() {
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const saveTimer = useRef(null);
 
   async function carregarInicial() {
@@ -3098,6 +3140,7 @@ function App() {
   if (!auth.isAdmin) {
     return (
       <>
+        <style>{RESPONSIVE_CSS}</style>
         <ChamadosSolicitante state={state} setState={setState} onAdminClick={() => setLoginOpen(true)} />
         {loginOpen && (
           <Modal
@@ -3140,19 +3183,53 @@ function App() {
     );
   }
 
+  const NAV_TITLES = {
+    dashboard: "Painel",
+    inventario: "Inventário",
+    categorias: "Categorias",
+    areas: "Salas",
+    responsaveis: "Responsáveis",
+    relatorios: "Relatórios",
+    chamados: "Chamados",
+    importar: "Importar/Exportar",
+  };
+
   return (
-    <div style={{ display: "flex", minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      <Sidebar view={view} setView={setView} />
-      <main style={{ flex: 1, padding: 28, overflow: "auto" }}>
-        {view === "dashboard" && <Dashboard state={state} setView={setView} />}
-        {view === "inventario" && <Inventario state={state} setState={setState} />}
-        {view === "categorias" && <Categorias state={state} setState={setState} />}
-        {view === "areas" && <Areas state={state} setState={setState} />}
-        {view === "responsaveis" && <Responsaveis state={state} setState={setState} />}
-        {view === "relatorios" && <Relatorios state={state} />}
-        {view === "chamados" && <Chamados state={state} setState={setState} />}
-        {view === "importar" && <Importar state={state} setState={setState} />}
-      </main>
+    <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      <style>{RESPONSIVE_CSS}</style>
+      <div className="app-topbar-mobile" style={{ alignItems: "center", gap: 10, padding: "12px 16px", background: COLORS.ink, color: "#fff", position: "sticky", top: 0, zIndex: 30 }}>
+        <button
+          onClick={() => setMobileMenuOpen(true)}
+          style={{ background: "none", border: "none", color: "#fff", padding: 4, cursor: "pointer", display: "flex" }}
+          aria-label="Abrir menu"
+        >
+          <Menu size={22} />
+        </button>
+        <span style={{ fontSize: 15, fontWeight: 700 }}>{NAV_TITLES[view] || "Inventário de TI"}</span>
+      </div>
+
+      {mobileMenuOpen && <div className="app-sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />}
+
+      <div style={{ display: "flex", minHeight: 640 }}>
+        <Sidebar
+          view={view}
+          mobileOpen={mobileMenuOpen}
+          onNavigate={(key) => {
+            setView(key);
+            setMobileMenuOpen(false);
+          }}
+        />
+        <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
+          {view === "dashboard" && <Dashboard state={state} setView={setView} />}
+          {view === "inventario" && <Inventario state={state} setState={setState} />}
+          {view === "categorias" && <Categorias state={state} setState={setState} />}
+          {view === "areas" && <Areas state={state} setState={setState} />}
+          {view === "responsaveis" && <Responsaveis state={state} setState={setState} />}
+          {view === "relatorios" && <Relatorios state={state} />}
+          {view === "chamados" && <Chamados state={state} setState={setState} />}
+          {view === "importar" && <Importar state={state} setState={setState} />}
+        </main>
+      </div>
     </div>
   );
 }
