@@ -1,0 +1,3171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Inventário de TI — Escola Espírito Santo</title>
+<meta name="theme-color" content="#16233D" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACzElEQVR4nO3dwW1TQRRAURtRAYs0kDpSAmtqZE1f1MAiUgQhsSIu0rwnn1PB6Ol67PEfy9eHx6cL/KtPpxfAbgIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiOTz6QW868e3n6eXMMvX719OL+EN12n/WKib26ZlNCsg9XzQnIwGfQZSz8fNmdWUgOZMZIshExsR0JBZrDNhbucDmjCFvY5P73xArDb3e6DLpLPGccd3mvcc3oFuzEU9v7sxjbNtDX0LU8/fZs5kaEBsISASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIRl9pfWXstc7/bubdsTfZgUgERCIgEgGRCIhk0yls0dnkftiBSAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkWy6VO+nzQPZgUgERCIgEgGRCIhk0yls0dnkftiBSAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkWy6VO+nzQPZgUgERCIgEgGRCIhk0yls0dnkftiBSAREIiASAZEIiERAJAIiERCJgEgERDI0oPu5O/ZxM2dyOKAbj7dmzuuUG9M4+4hw9MNUDc13/i3MM/bi+PTOB8RqIwI6/jJaasLcRgR0mTGLXYZMbEpAlzETWWHOrK4Pj0+n1/AHJ6/b5qTzbFxAL5T0yrR0ns0NiBUGfQZiIwGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkfwCWs5OYUpms78AAAAASUVORK5CYII=" />
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACzElEQVR4nO3dwW1TQRRAURtRAYs0kDpSAmtqZE1f1MAiUgQhsSIu0rwnn1PB6Ol67PEfy9eHx6cL/KtPpxfAbgIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiOTz6QW868e3n6eXMMvX719OL+EN12n/WKib26ZlNCsg9XzQnIwGfQZSz8fNmdWUgOZMZIshExsR0JBZrDNhbucDmjCFvY5P73xArDb3e6DLpLPGccd3mvcc3oFuzEU9v7sxjbNtDX0LU8/fZs5kaEBsISASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIRl9pfWXstc7/bubdsTfZgUgERCIgEgGRCIhk0yls0dnkftiBSAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkWy6VO+nzQPZgUgERCIgEgGRCIhk0yls0dnkftiBSAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkWy6VO+nzQPZgUgERCIgEgGRCIhk0yls0dnkftiBSAREIiASAZEIiERAJAIiERCJgEgERDI0oPu5O/ZxM2dyOKAbj7dmzuuUG9M4+4hw9MNUDc13/i3MM/bi+PTOB8RqIwI6/jJaasLcRgR0mTGLXYZMbEpAlzETWWHOrK4Pj0+n1/AHJ6/b5qTzbFxAL5T0yrR0ns0NiBUGfQZiIwGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkfwCWs5OYUpms78AAAAASUVORK5CYII=" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Inventário TI" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.24.7/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+  html, body { margin: 0; padding: 0; background: #F7F5EF; }
+  * { box-sizing: border-box; }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #root { min-height: 100vh; }
+  select, input, textarea, button { font-family: inherit; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #C9C3B2; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useMemo } = React;
+
+// ---------- Local storage shim (mesma interface usada no app original) ----------
+
+const storage = {
+  get: async (key) => {
+    try {
+      const v = localStorage.getItem(key);
+      return v ? { value: v } : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  set: async (key, value) => {
+    localStorage.setItem(key, value);
+    return {};
+  },
+};
+
+// ---------- Ícones simples em SVG (substituem lucide-react) ----------
+
+const ICON_PATHS = {
+  dashboard: "M4 4h6v8H4V4zm10 0h6v5h-6V4zM4 14h6v6H4v-6zm10 3h6v3h-6v-3z",
+  boxes: "M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3zm0 2.3L6 8.5v7L12 18.7l6-3.2v-7L12 5.3zM12 12l6-3.3M12 12v9M12 12L6 8.7",
+  tag: "M20 12l-8 8-9-9V4h7l10 8zM7 7.01L7.01 7",
+  door: "M6 3h9v18H6V3zm9 4h3v14h-3M9 12v.01",
+  users: "M8 11a3 3 0 100-6 3 3 0 000 6zm8 0a3 3 0 100-6 3 3 0 000 6zM2 20c0-3 3-5 6-5s6 2 6 5m2-5c2.5 0 5 2 5 5",
+  filebar: "M6 3h9l4 4v14H6V3zm3 12v3m4-6v6m4-3v3",
+  upload: "M12 16V4m0 0L7 9m5-5l5 5M5 20h14",
+  plus: "M12 5v14M5 12h14",
+  pencil: "M4 20l4-1 11-11-3-3L5 16l-1 4zM14 4l3 3",
+  trash: "M4 7h16M9 7V4h6v3m-8 0l1 13h8l1-13",
+  search: "M11 4a7 7 0 100 14 7 7 0 000-14zm10 17l-5.5-5.5",
+  x: "M5 5l14 14M19 5L5 19",
+  download: "M12 4v12m0 0l-5-5m5 5l5-5M4 20h16",
+  alert: "M12 3l10 18H2L12 3zm0 6v5m0 3h.01",
+  check: "M4 12l6 6L20 6",
+  chevronLeft: "M15 5l-7 7 7 7",
+  chevronRight: "M9 5l7 7-7 7",
+  filesheet: "M6 3h9l4 4v14H6V3zm0 8h13m-13 4h13m-13 4h13M12 7v14",
+  message: "M4 4h16v12H8l-4 4V4z",
+  send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
+};
+
+function Icon({ name, size = 16, ...rest }) {
+  const d = ICON_PATHS[name] || "";
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...rest}>
+      <path d={d} />
+    </svg>
+  );
+}
+
+const IconWrap = (name) => (props) => <Icon name={name} {...props} />;
+
+const LayoutDashboard = IconWrap("dashboard");
+const Boxes = IconWrap("boxes");
+const Tag = IconWrap("tag");
+const DoorOpen = IconWrap("door");
+const Users = IconWrap("users");
+const FileBarChart = IconWrap("filebar");
+const Upload = IconWrap("upload");
+const Plus = IconWrap("plus");
+const Pencil = IconWrap("pencil");
+const Trash2 = IconWrap("trash");
+const Search = IconWrap("search");
+const X = IconWrap("x");
+const Download = IconWrap("download");
+const TriangleAlert = IconWrap("alert");
+const Check = IconWrap("check");
+const ChevronLeft = IconWrap("chevronLeft");
+const ChevronRight = IconWrap("chevronRight");
+const FileSpreadsheet = IconWrap("filesheet");
+const MessageSquare = IconWrap("message");
+const Send = IconWrap("send");
+
+// ---------- Gráficos com Chart.js (substituem recharts) ----------
+
+function BarChartHorizontal({ data }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    const ctx = canvasRef.current.getContext("2d");
+    chartRef.current = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: data.map((d) => d.name),
+        datasets: [{ data: data.map((d) => d.value), backgroundColor: "#C97A2B", borderRadius: 3 }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: true } },
+        scales: {
+          x: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: "#E1DDD0" } },
+          y: { ticks: { font: { size: 11 } }, grid: { display: false } },
+        },
+      },
+    });
+    return () => {
+      if (chartRef.current) chartRef.current.destroy();
+    };
+  }, [JSON.stringify(data)]);
+
+  return (
+    <div style={{ position: "relative", height: Math.max(280, data.length * 24) }}>
+      <canvas ref={canvasRef}></canvas>
+    </div>
+  );
+}
+
+function DonutChart({ data, colors }) {
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    const ctx = canvasRef.current.getContext("2d");
+    chartRef.current = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: data.map((d) => d.name),
+        datasets: [{ data: data.map((d) => d.value), backgroundColor: data.map((d) => colors[d.name] || "#999"), borderWidth: 2, borderColor: "#fff" }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        cutout: "62%",
+      },
+    });
+    return () => {
+      if (chartRef.current) chartRef.current.destroy();
+    };
+  }, [JSON.stringify(data)]);
+
+  return (
+    <div style={{ position: "relative", height: 300 }}>
+      <canvas ref={canvasRef}></canvas>
+    </div>
+  );
+}
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzGvIBQli7lFcWTfnJwmtp4cBneZZCuU9IPRqoe3Xt3PQX-my9Olbwadz_-F5pWf0-N/exec";
+
+let __jsonpCounter = 0;
+function jsonpRequest(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = "__jsonp_cb_" + __jsonpCounter++ + "_" + Date.now();
+    const script = document.createElement("script");
+    let settled = false;
+    let timer;
+    const cleanup = () => {
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      clearTimeout(timer);
+    };
+    window[callbackName] = (data) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve(data);
+    };
+    timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error("Tempo esgotado ao conectar no backend (tente novamente, ou verifique sua conexão)."));
+    }, 25000);
+    script.onerror = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      reject(new Error("Falha ao carregar resposta do backend (verifique a URL configurada)."));
+    };
+    const sep = url.indexOf("?") === -1 ? "?" : "&";
+    script.src = url + sep + "callback=" + callbackName;
+    document.head.appendChild(script);
+  });
+}
+
+async function backendGet(secret) {
+  const url = BACKEND_URL + (secret ? "?secret=" + encodeURIComponent(secret) : "");
+  return jsonpRequest(url);
+}
+
+async function backendPost(action, payload) {
+  try {
+    await fetch(BACKEND_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action, ...(payload || {}) }),
+    });
+    return { ok: true };
+  } catch (e) {
+    throw new Error("Falha ao enviar dados para o backend: " + ((e && e.message) || e));
+  }
+}
+
+
+const LOGO_DATA_URL = "data:image/png;base64,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";
+
+const SEED_INVENTORY = [{id:"CES-0001",categoria:"Notebook",marca:"Lenovo",modelo:"chorme book",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0002",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0003",categoria:"Roteador",marca:"Ubiquiti",modelo:"Access Point",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0004",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0005",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0006",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0007",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 103",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0008",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0009",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0010",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0011",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0012",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0013",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0014",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0015",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0016",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0017",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 104",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0018",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0019",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0020",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0021",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0022",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0023",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0024",categoria:"Câmera",marca:"",modelo:"",serie:"",sala:"Sala 105",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0025",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0026",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0027",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0028",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0029",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0030",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0031",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0032",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0033",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0034",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 106",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0035",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0036",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0037",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0038",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0039",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0040",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"somente 1 caixa funcionando",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0041",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0042",categoria:"Projetor",marca:"",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0043",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0044",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 107",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0045",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0046",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0047",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0048",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0049",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0050",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0051",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 108",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0052",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0053",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0054",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0055",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0056",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"1 caixa de som",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0057",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0058",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 201",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0059",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0060",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0061",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0062",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0063",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0064",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0065",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0066",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0067",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0068",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 202",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0069",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0070",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0071",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0072",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0073",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0074",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0075",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0076",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0077",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0078",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 203",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0079",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0080",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0081",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0082",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0083",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0084",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0085",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0086",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"1 caixa de som",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0087",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0088",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 204",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0089",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0090",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0091",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0092",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0093",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0094",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0095",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 205",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0096",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0097",categoria:"Projetor",marca:"Epso",modelo:"",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0098",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0099",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0100",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0101",categoria:"Roteador",marca:"Ubiquite",modelo:"",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0102",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 206",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0103",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0104",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0105",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0106",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0107",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0108",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0109",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0110",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0111",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0112",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 207",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0113",categoria:"Computador desktop",marca:"Dell",modelo:"chormebook",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0114",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0115",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0116",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0117",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0118",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0119",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0120",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0121",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0122",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 208",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0123",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 209",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0124",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 209",status:"Em manutenção",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0125",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 209",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0126",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 209",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0127",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 209",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0128",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 209",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0129",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 209",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0130",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0131",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0132",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0133",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0134",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0135",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0136",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 210",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0137",categoria:"Computador desktop",marca:"Dell",modelo:"chormebokk",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0138",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0139",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0140",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0141",categoria:"Projetor",marca:"",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0142",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0143",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0144",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0145",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0146",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 211",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0147",categoria:"Notebook",marca:"Lenovo",modelo:"chormebook",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0148",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0149",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0150",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0151",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0152",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0153",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 212",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0154",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0155",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0156",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0157",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0158",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0159",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0160",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0161",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0162",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0163",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 213",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0164",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0165",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0166",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0167",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0168",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0169",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0170",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0171",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0172",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0173",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 214",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0174",categoria:"Notebook",marca:"Lenovo",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0175",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0176",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0177",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0178",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0179",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0180",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 215",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0181",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0182",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0183",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0184",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0185",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0186",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0187",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0188",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0189",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0190",categoria:"Câmera",marca:"",modelo:"",serie:"",sala:"Sala 216",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0191",categoria:"Notebook",marca:"Lenovo",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0192",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0193",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0194",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0195",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0196",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0197",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 217",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0198",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0199",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0200",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0201",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0202",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0203",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0204",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0205",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0206",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0207",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 218",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0208",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0209",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0210",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0211",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0212",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0213",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0214",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0215",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"1 caixa de som",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0216",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0217",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 219",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0218",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0219",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0220",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0221",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0222",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0223",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0224",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0225",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0226",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0227",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 220",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0228",categoria:"Notebook",marca:"Dell",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0229",categoria:"Projetor",marca:"Epson",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0230",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0231",categoria:"Sistema de som",marca:"",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0232",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0233",categoria:"Roteador",marca:"Ubiquiti",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0234",categoria:"Câmera",marca:"Intelbras",modelo:"",serie:"",sala:"Sala 221",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0235",categoria:"Mini PC",marca:"Dell",modelo:"",serie:"",sala:"Sala Orientação",status:"Em uso",responsavel:"adriana",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0236",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala Orientação",status:"Em uso",responsavel:"adriana",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0237",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala Orientação",status:"Em uso",responsavel:"adriana",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0238",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala Orientação",status:"Em uso",responsavel:"adriana",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0239",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Sala Orientação",status:"Em uso",responsavel:"adriana",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0240",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0241",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0242",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0243",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0244",categoria:"Telefone/ramal",marca:"Intelbras",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0245",categoria:"Fone de ouvido",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0246",categoria:"Rádio",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0247",categoria:"Rádio",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0248",categoria:"Rádio",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0249",categoria:"Rádio",marca:"",modelo:"",serie:"",sala:"Entrada Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0250",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0251",categoria:"Computador desktop",marca:"Lenovo",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0252",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0253",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0254",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0255",categoria:"Webcam",marca:"",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0256",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Secretaria",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0257",categoria:"Notebook",marca:"",modelo:"",serie:"",sala:"Entrada Alunos",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0258",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Entrada Alunos",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0259",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0260",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0261",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0262",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0263",categoria:"Impressora/Multifuncional",marca:"Epson",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0264",categoria:"Impressora/Multifuncional",marca:"Epson",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0265",categoria:"Nobreak/Estabilizador",marca:"",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0266",categoria:"Impressora/Multifuncional",marca:"Samsung",modelo:"",serie:"",sala:"Sala Xerox",status:"Precisa de manutenção",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0267",categoria:"Impressora/Multifuncional",marca:"Samsung",modelo:"",serie:"",sala:"Sala Xerox",status:"Precisa de manutenção",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0268",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Sala Xerox",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0269",categoria:"Computador desktop",marca:"Dell",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0270",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0271",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0272",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0273",categoria:"Mini PC",marca:"Dell",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0274",categoria:"Monitor",marca:"Dell",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0275",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0276",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0277",categoria:"Caixa de som",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0278",categoria:"Leitor de código",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0279",categoria:"Nobreak/Estabilizador",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0280",categoria:"Impressora/Multifuncional",marca:"Hp",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0281",categoria:"Impressora/Multifuncional",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"imprimi etiqueta",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0282",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Biblioteca",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0283",categoria:"Projetor",marca:"",modelo:"",serie:"",sala:"Laboratório De Ciências",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0284",categoria:"Tela-projetor",marca:"",modelo:"",serie:"",sala:"Laboratório De Ciências",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0285",categoria:"Caixa de som",marca:"Jbl",modelo:"",serie:"",sala:"Laboratório De Ciências",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0286",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Laboratório De Ciências",status:"Precisa de manutenção",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0287",categoria:"Mini PC",marca:"Dell",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0288",categoria:"Monitor",marca:"",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0289",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0290",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0291",categoria:"Webcam",marca:"",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0292",categoria:"Rádio",marca:"",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0293",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Coordenaçãp 2 Sonia",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0294",categoria:"Computador desktop",marca:"",modelo:"",serie:"",sala:"Coordenaçao Dos Turno",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0295",categoria:"Monitor",marca:"",modelo:"",serie:"",sala:"Coordenaçao Dos Turno",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0296",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Coordenaçao Dos Turno",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0297",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Coordenaçao Dos Turno",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0298",categoria:"Nvr",marca:"",modelo:"",serie:"",sala:"Coordenaçao Dos Turno",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0299",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Coordenaçao Dos Turno",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0300",categoria:"Computador desktop",marca:"",modelo:"",serie:"",sala:"Sala Rh Ponto",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0301",categoria:"Monitor",marca:"",modelo:"",serie:"",sala:"Sala Rh Ponto",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0302",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Sala Rh Ponto",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0303",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Sala Rh Ponto",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0304",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Sala Rh Ponto",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0305",categoria:"Mini PC",marca:"Dell",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0306",categoria:"Monitor",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0307",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0308",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0309",categoria:"Mini PC",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0310",categoria:"Monitor",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0311",categoria:"Teclado",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0312",categoria:"Mouse",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0313",categoria:"Impressora/Multifuncional",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0314",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0315",categoria:"Telefone/ramal",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0316",categoria:"Leitor de código",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0317",categoria:"Leitor de código",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""},
+{id:"CES-0318",categoria:"Triturador",marca:"",modelo:"",serie:"",sala:"Financeiro",status:"Em uso",responsavel:"",observacoes:"",dataCompra:"",valor:"",vidaUtil:""}];
+
+const SEED_AREAS = [{id:"AR-001",nome:"Biblioteca",tipo:"Biblioteca"},
+{id:"AR-002",nome:"Coordenaçao Dos Turno",tipo:"Administrativo"},
+{id:"AR-003",nome:"Coordenaçãp 2 Sonia",tipo:"Administrativo"},
+{id:"AR-004",nome:"Entrada Alunos",tipo:"Administrativo"},
+{id:"AR-005",nome:"Entrada Secretaria",tipo:"Administrativo"},
+{id:"AR-006",nome:"Financeiro",tipo:"Administrativo"},
+{id:"AR-007",nome:"Laboratório De Ciências",tipo:"Laboratório"},
+{id:"AR-008",nome:"Sala 103",tipo:"Sala de aula"},
+{id:"AR-009",nome:"Sala 104",tipo:"Sala de aula"},
+{id:"AR-010",nome:"Sala 105",tipo:"Sala de aula"},
+{id:"AR-011",nome:"Sala 106",tipo:"Sala de aula"},
+{id:"AR-012",nome:"Sala 107",tipo:"Sala de aula"},
+{id:"AR-013",nome:"Sala 108",tipo:"Sala de aula"},
+{id:"AR-014",nome:"Sala 201",tipo:"Sala de aula"},
+{id:"AR-015",nome:"Sala 202",tipo:"Sala de aula"},
+{id:"AR-016",nome:"Sala 203",tipo:"Sala de aula"},
+{id:"AR-017",nome:"Sala 204",tipo:"Sala de aula"},
+{id:"AR-018",nome:"Sala 205",tipo:"Sala de aula"},
+{id:"AR-019",nome:"Sala 206",tipo:"Sala de aula"},
+{id:"AR-020",nome:"Sala 207",tipo:"Sala de aula"},
+{id:"AR-021",nome:"Sala 208",tipo:"Sala de aula"},
+{id:"AR-022",nome:"Sala 209",tipo:"Sala de aula"},
+{id:"AR-023",nome:"Sala 210",tipo:"Sala de aula"},
+{id:"AR-024",nome:"Sala 211",tipo:"Sala de aula"},
+{id:"AR-025",nome:"Sala 212",tipo:"Sala de aula"},
+{id:"AR-026",nome:"Sala 213",tipo:"Sala de aula"},
+{id:"AR-027",nome:"Sala 214",tipo:"Sala de aula"},
+{id:"AR-028",nome:"Sala 215",tipo:"Sala de aula"},
+{id:"AR-029",nome:"Sala 216",tipo:"Sala de aula"},
+{id:"AR-030",nome:"Sala 217",tipo:"Sala de aula"},
+{id:"AR-031",nome:"Sala 218",tipo:"Sala de aula"},
+{id:"AR-032",nome:"Sala 219",tipo:"Sala de aula"},
+{id:"AR-033",nome:"Sala 220",tipo:"Sala de aula"},
+{id:"AR-034",nome:"Sala 221",tipo:"Sala de aula"},
+{id:"AR-035",nome:"Sala Orientação",tipo:"Administrativo"},
+{id:"AR-036",nome:"Sala Rh Ponto",tipo:"Administrativo"},
+{id:"AR-037",nome:"Sala Xerox",tipo:"Administrativo"},
+{id:"AR-038",nome:"Secretaria",tipo:"Administrativo"}];
+
+const DEFAULT_CATEGORIES = ["Computador desktop","Notebook","Mini PC","Monitor","Teclado","Mouse","Projetor","Tela-projetor","Roteador","Nobreak/Estabilizador","Impressora/Multifuncional","Nvr","Câmera","Caixa de som","Sistema de som","Telefone/ramal","Fone de ouvido","Webcam","Rádio","Triturador","Leitor de código"];
+const STATUS_OPTIONS = ["Em uso", "Em manutenção", "Precisa de manutenção", "Em estoque", "Descartado"];
+const TIPO_AREA_OPTIONS = ["Sala de aula", "Laboratório", "Biblioteca", "Administrativo", "Outro"];
+
+const COLORS = {
+  ink: "#16233D",
+  inkSoft: "#4B5768",
+  paper: "#F7F5EF",
+  surface: "#FFFFFF",
+  line: "#E1DDD0",
+  lineStrong: "#C9C3B2",
+  accent: "#C97A2B",
+  accentSoft: "#F3E2C8",
+  danger: "#B23A32",
+  dangerSoft: "#F6E1DE",
+};
+
+const STATUS_COLORS = {
+  "Em uso": "#2F6F5E",
+  "Em manutenção": "#C97A2B",
+  "Precisa de manutenção": "#B23A32",
+  "Em estoque": "#6B7280",
+  "Descartado": "#9CA3AF",
+};
+
+const STATUS_BG = {
+  "Em uso": "#E3EEE9",
+  "Em manutenção": "#F3E2C8",
+  "Precisa de manutenção": "#F6E1DE",
+  "Em estoque": "#E9EAEC",
+  "Descartado": "#EEEEEE",
+};
+
+function uid(prefix) {
+  return prefix + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function nextPatrimonio(inventario, prefixo) {
+  let max = 0;
+  inventario.forEach((r) => {
+    const m = /(\d+)$/.exec(r.id || "");
+    if (m) {
+      const n = parseInt(m[1], 10);
+      if (r.id.startsWith(prefixo) && n > max) max = n;
+    }
+  });
+  return prefixo + "-" + String(max + 1).padStart(4, "0");
+}
+
+function buildSeedState() {
+  return {
+    prefixo: "CES",
+    categorias: DEFAULT_CATEGORIES.slice(),
+    areas: SEED_AREAS.map((a) => ({ ...a })),
+    responsaveis: [],
+    inventario: SEED_INVENTORY.map((r) => ({ ...r })),
+    chamados: [],
+  };
+}
+
+const PRIORIDADE_OPTIONS = ["Baixa", "Média", "Alta"];
+const CHAMADO_STATUS_OPTIONS = ["Aberto", "Em andamento", "Resolvido"];
+const CHAMADO_STATUS_COLORS = {
+  Aberto: "#B23A32",
+  "Em andamento": "#C97A2B",
+  Resolvido: "#2F6F5E",
+};
+const CHAMADO_STATUS_BG = {
+  Aberto: "#F6E1DE",
+  "Em andamento": "#F3E2C8",
+  Resolvido: "#E3EEE9",
+};
+
+function formatDateTime(iso) {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString("pt-BR") + " " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  } catch (e) {
+    return "";
+  }
+}
+
+function downloadBlob(filename, blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function toCSV(rows, columns) {
+  const esc = (v) => {
+    const s = v === undefined || v === null ? "" : String(v);
+    if (/[",\n;]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  };
+  const header = columns.map((c) => esc(c.label)).join(";");
+  const body = rows.map((r) => columns.map((c) => esc(r[c.key])).join(";")).join("\n");
+  return header + "\n" + body;
+}
+
+// ---------- Shared UI bits ----------
+
+function Field({ label, children }) {
+  return (
+    <label style={{ display: "block", marginBottom: 14 }}>
+      <span style={{ display: "block", fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>{label}</span>
+      {children}
+    </label>
+  );
+}
+
+const inputStyle = {
+  width: "100%",
+  boxSizing: "border-box",
+  padding: "8px 10px",
+  fontSize: 14,
+  border: `1px solid ${COLORS.lineStrong}`,
+  borderRadius: 6,
+  background: "#fff",
+  color: COLORS.ink,
+  outline: "none",
+};
+
+function TextInput(props) {
+  return <input {...props} style={{ ...inputStyle, ...(props.style || {}) }} />;
+}
+
+function Select(props) {
+  return (
+    <select {...props} style={{ ...inputStyle, ...(props.style || {}) }}>
+      {props.children}
+    </select>
+  );
+}
+
+function Button({ variant = "ghost", icon: Icon, children, style, ...rest }) {
+  const base = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 13.5,
+    fontWeight: 600,
+    padding: "8px 14px",
+    borderRadius: 6,
+    cursor: "pointer",
+    border: "1px solid transparent",
+    lineHeight: 1,
+  };
+  const variants = {
+    primary: { background: COLORS.ink, color: "#fff", border: `1px solid ${COLORS.ink}` },
+    accent: { background: COLORS.accent, color: "#fff", border: `1px solid ${COLORS.accent}` },
+    ghost: { background: "#fff", color: COLORS.ink, border: `1px solid ${COLORS.lineStrong}` },
+    danger: { background: "#fff", color: COLORS.danger, border: `1px solid ${COLORS.danger}` },
+  };
+  return (
+    <button {...rest} style={{ ...base, ...variants[variant], ...(style || {}) }}>
+      {Icon ? <Icon size={15} /> : null}
+      {children}
+    </button>
+  );
+}
+
+function StatusPill({ status }) {
+  const c = STATUS_COLORS[status] || COLORS.inkSoft;
+  const bg = STATUS_BG[status] || "#eee";
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        padding: "3px 10px",
+        borderRadius: 999,
+        fontSize: 12.5,
+        fontWeight: 600,
+        color: c,
+        background: bg,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {status}
+    </span>
+  );
+}
+
+function Panel({ title, action, children, style }) {
+  return (
+    <div
+      style={{
+        background: COLORS.surface,
+        border: `1px solid ${COLORS.line}`,
+        borderRadius: 8,
+        padding: 20,
+        ...style,
+      }}
+    >
+      {(title || action) && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+          {title ? <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: COLORS.ink }}>{title}</h3> : <span />}
+          {action}
+        </div>
+      )}
+      {children}
+    </div>
+  );
+}
+
+function Modal({ title, onClose, children, width = 460 }) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(22,35,61,0.45)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
+        padding: 20,
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          background: "#fff",
+          borderRadius: 10,
+          padding: 24,
+          width,
+          maxWidth: "100%",
+          maxHeight: "85vh",
+          overflow: "auto",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: COLORS.ink }}>{title}</h3>
+          <button
+            onClick={onClose}
+            style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }}
+            aria-label="Fechar"
+          >
+            <X size={18} />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function EmptyState({ text }) {
+  return (
+    <div style={{ padding: "32px 12px", textAlign: "center", color: COLORS.inkSoft, fontSize: 14 }}>{text}</div>
+  );
+}
+
+// ---------- Sidebar ----------
+
+const NAV_ITEMS = [
+  { key: "dashboard", label: "Painel", icon: LayoutDashboard },
+  { key: "inventario", label: "Inventário", icon: Boxes },
+  { key: "categorias", label: "Categorias", icon: Tag },
+  { key: "areas", label: "Salas", icon: DoorOpen },
+  { key: "responsaveis", label: "Responsáveis", icon: Users },
+  { key: "relatorios", label: "Relatórios", icon: FileBarChart },
+  { key: "chamados", label: "Chamados", icon: MessageSquare },
+  { key: "importar", label: "Importar/Exportar", icon: Upload },
+];
+
+function Sidebar({ view, setView }) {
+  return (
+    <div
+      style={{
+        width: 220,
+        flexShrink: 0,
+        background: COLORS.ink,
+        color: "#fff",
+        padding: "22px 14px",
+        minHeight: "100%",
+      }}
+    >
+      <div style={{ padding: "0 8px 20px 8px", display: "flex", alignItems: "center", gap: 10 }}>
+        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 34, height: 34, flexShrink: 0, background: "#fff", borderRadius: 6, padding: 2 }} />
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.2, color: "#fff" }}>Inventário de TI</div>
+          <div style={{ fontSize: 12, color: "#9AA6B8", marginTop: 2 }}>Escola Espírito Santo</div>
+        </div>
+      </div>
+      <nav>
+        {NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const active = view === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => setView(item.key)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                width: "100%",
+                padding: "9px 10px",
+                marginBottom: 2,
+                background: active ? "rgba(255,255,255,0.12)" : "transparent",
+                border: "none",
+                borderRadius: 6,
+                color: active ? "#fff" : "#B7C0CF",
+                fontSize: 13.5,
+                fontWeight: active ? 600 : 500,
+                cursor: "pointer",
+                textAlign: "left",
+              }}
+            >
+              <Icon size={16} />
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+    </div>
+  );
+}
+
+// ---------- Dashboard ----------
+
+function Dashboard({ state, setView }) {
+  const inv = state.inventario;
+
+  const porStatus = useMemo(() => {
+    const map = {};
+    STATUS_OPTIONS.forEach((s) => (map[s] = 0));
+    inv.forEach((r) => (map[r.status] = (map[r.status] || 0) + 1));
+    return STATUS_OPTIONS.map((s) => ({ name: s, value: map[s] })).filter((d) => d.value > 0);
+  }, [inv]);
+
+  const porCategoria = useMemo(() => {
+    const map = {};
+    inv.forEach((r) => (map[r.categoria] = (map[r.categoria] || 0) + 1));
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [inv]);
+
+  const porSala = useMemo(() => {
+    const map = {};
+    inv.forEach((r) => {
+      const k = r.sala || "Sem sala";
+      map[k] = (map[k] || 0) + 1;
+    });
+    return Object.entries(map)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value);
+  }, [inv]);
+
+  const precisamAtencao = useMemo(
+    () => inv.filter((r) => r.status === "Precisa de manutenção" || r.status === "Em manutenção"),
+    [inv]
+  );
+
+  const total = inv.length;
+  const emUso = inv.filter((r) => r.status === "Em uso").length;
+  const emManutencao = inv.filter((r) => r.status === "Em manutenção").length;
+  const precisaManutencao = inv.filter((r) => r.status === "Precisa de manutenção").length;
+
+  const kpis = [
+    { label: "Total de equipamentos", value: total },
+    { label: "Em uso", value: emUso },
+    { label: "Em manutenção", value: emManutencao },
+    { label: "Precisa de manutenção", value: precisaManutencao },
+    { label: "Salas cadastradas", value: state.areas.length },
+    { label: "Categorias cadastradas", value: state.categorias.length },
+  ];
+
+  const pieColors = ["#2F6F5E", "#C97A2B", "#B23A32", "#6B7280", "#9CA3AF"];
+
+  return (
+    <div>
+      <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Painel geral</h2>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
+        {kpis.map((k) => (
+          <div key={k.label} style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "14px 16px" }}>
+            <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 6 }}>{k.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.ink }}>{k.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
+        <Panel title="Equipamentos por categoria">
+          <BarChartHorizontal data={porCategoria} />
+        </Panel>
+
+        <Panel title="Distribuição por status">
+          <DonutChart data={porStatus} colors={STATUS_COLORS} />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 14px", marginTop: 4 }}>
+            {porStatus.map((s) => (
+              <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: COLORS.inkSoft }}>
+                <span style={{ width: 9, height: 9, borderRadius: 2, background: STATUS_COLORS[s.name], display: "inline-block" }} />
+                {s.name} ({s.value})
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <Panel title="Equipamentos por sala">
+          <div style={{ maxHeight: 280, overflow: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <tbody>
+                {porSala.slice(0, 15).map((s) => (
+                  <tr key={s.name} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                    <td style={{ padding: "7px 4px", color: COLORS.ink }}>{s.name}</td>
+                    <td style={{ padding: "7px 4px", textAlign: "right", fontWeight: 600, color: COLORS.ink }}>{s.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {porSala.length > 15 && (
+            <div style={{ marginTop: 10 }}>
+              <Button variant="ghost" onClick={() => setView("relatorios")}>
+                Ver todas as salas
+              </Button>
+            </div>
+          )}
+        </Panel>
+
+        <Panel
+          title="Precisam de atenção"
+          action={
+            precisamAtencao.length > 0 ? (
+              <span style={{ color: COLORS.danger, display: "flex", alignItems: "center", gap: 5, fontSize: 12.5, fontWeight: 600 }}>
+                <TriangleAlert size={14} /> {precisamAtencao.length}
+              </span>
+            ) : null
+          }
+        >
+          {precisamAtencao.length === 0 ? (
+            <EmptyState text="Nenhum equipamento precisa de atenção no momento." />
+          ) : (
+            <div style={{ maxHeight: 280, overflow: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <tbody>
+                  {precisamAtencao.map((r) => (
+                    <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                      <td style={{ padding: "7px 4px", fontFamily: "ui-monospace, monospace", fontSize: 12, color: COLORS.inkSoft }}>{r.id}</td>
+                      <td style={{ padding: "7px 4px", color: COLORS.ink }}>{r.categoria}</td>
+                      <td style={{ padding: "7px 4px", color: COLORS.inkSoft }}>{r.sala}</td>
+                      <td style={{ padding: "7px 4px", textAlign: "right" }}>
+                        <StatusPill status={r.status} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Inventário ----------
+
+const PAGE_SIZE = 18;
+
+function emptyEquipForm() {
+  return {
+    id: "",
+    categoria: "",
+    marca: "",
+    modelo: "",
+    serie: "",
+    sala: "",
+    status: "Em uso",
+    responsavel: "",
+    observacoes: "",
+    dataCompra: "",
+    valor: "",
+    vidaUtil: "",
+  };
+}
+
+function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
+  const [novaCategoria, setNovaCategoria] = useState(false);
+  const [novaCategoriaTexto, setNovaCategoriaTexto] = useState("");
+
+  function confirmarNovaCategoria() {
+    const v = novaCategoriaTexto.trim();
+    if (!v) return;
+    onAddCategoria(v);
+    setForm({ ...form, categoria: v });
+    setNovaCategoriaTexto("");
+    setNovaCategoria(false);
+  }
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
+      <Field label="Nº de patrimônio">
+        <TextInput value={form.id} disabled={isNew} onChange={(e) => setForm({ ...form, id: e.target.value })} style={{ fontFamily: "ui-monospace, monospace", background: isNew ? "#F3F2ED" : "#fff" }} />
+      </Field>
+      <Field label="Categoria">
+        {!novaCategoria ? (
+          <div style={{ display: "flex", gap: 6 }}>
+            <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} style={{ flex: 1 }}>
+              <option value="">Selecione</option>
+              {state.categorias.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </Select>
+            <button
+              type="button"
+              onClick={() => setNovaCategoria(true)}
+              title="Adicionar nova categoria"
+              style={{ background: "#fff", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.ink, width: 36, flexShrink: 0 }}
+            >
+              <Plus size={15} style={{ margin: "0 auto" }} />
+            </button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: 6 }}>
+            <TextInput
+              autoFocus
+              value={novaCategoriaTexto}
+              onChange={(e) => setNovaCategoriaTexto(e.target.value)}
+              placeholder="Nome da nova categoria"
+              onKeyDown={(e) => e.key === "Enter" && confirmarNovaCategoria()}
+              style={{ flex: 1 }}
+            />
+            <button type="button" onClick={confirmarNovaCategoria} title="Confirmar" style={{ background: COLORS.ink, border: "none", borderRadius: 6, cursor: "pointer", color: "#fff", width: 36, flexShrink: 0 }}>
+              <Check size={15} style={{ margin: "0 auto" }} />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setNovaCategoria(false);
+                setNovaCategoriaTexto("");
+              }}
+              title="Cancelar"
+              style={{ background: "#fff", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.inkSoft, width: 36, flexShrink: 0 }}
+            >
+              <X size={15} style={{ margin: "0 auto" }} />
+            </button>
+          </div>
+        )}
+      </Field>
+      <Field label="Marca">
+        <TextInput value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Dell, Epson, Lenovo..." />
+      </Field>
+      <Field label="Modelo">
+        <TextInput value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} placeholder="Opcional" />
+      </Field>
+      <Field label="Nº de série">
+        <TextInput value={form.serie} onChange={(e) => setForm({ ...form, serie: e.target.value })} placeholder="Opcional" />
+      </Field>
+      <Field label="Sala/Localização">
+        <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
+          <option value="">Selecione</option>
+          {state.areas.map((a) => (
+            <option key={a.id} value={a.nome}>
+              {a.nome}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label="Status">
+        <Select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label="Responsável">
+        <Select value={form.responsavel} onChange={(e) => setForm({ ...form, responsavel: e.target.value })}>
+          <option value="">Nenhum</option>
+          {state.responsaveis.map((r) => (
+            <option key={r.id} value={r.nome}>
+              {r.nome}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <Field label="Data de compra">
+        <TextInput type="date" value={form.dataCompra} onChange={(e) => setForm({ ...form, dataCompra: e.target.value })} />
+      </Field>
+      <Field label="Valor de aquisição (R$)">
+        <TextInput type="number" step="0.01" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} placeholder="Opcional" />
+      </Field>
+      <Field label="Vida útil estimada (anos)">
+        <TextInput type="number" value={form.vidaUtil} onChange={(e) => setForm({ ...form, vidaUtil: e.target.value })} placeholder="Opcional" />
+      </Field>
+      <div style={{ gridColumn: "1 / -1" }}>
+        <Field label="Observações">
+          <textarea
+            value={form.observacoes}
+            onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
+            rows={3}
+            style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
+          />
+        </Field>
+      </div>
+    </div>
+  );
+}
+
+function Inventario({ state, setState }) {
+  const [search, setSearch] = useState("");
+  const [fCategoria, setFCategoria] = useState("");
+  const [fSala, setFSala] = useState("");
+  const [fStatus, setFStatus] = useState("");
+  const [fResp, setFResp] = useState("");
+  const [page, setPage] = useState(1);
+  const [modal, setModal] = useState(null); // { mode: 'new'|'edit', form }
+  const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [selected, setSelected] = useState(() => new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+
+  function addCategoria(nome) {
+    setState((prev) => (prev.categorias.some((c) => c.toLowerCase() === nome.toLowerCase()) ? prev : { ...prev, categorias: [...prev.categorias, nome] }));
+  }
+
+  function toggleSelect(id) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAllOnPage(rows) {
+    setSelected((prev) => {
+      const allSelected = rows.length > 0 && rows.every((r) => prev.has(r.id));
+      const next = new Set(prev);
+      if (allSelected) {
+        rows.forEach((r) => next.delete(r.id));
+      } else {
+        rows.forEach((r) => next.add(r.id));
+      }
+      return next;
+    });
+  }
+
+  function bulkDelete() {
+    setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => !selected.has(r.id)) }));
+    setSelected(new Set());
+    setBulkDeleteOpen(false);
+  }
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return state.inventario.filter((r) => {
+      if (fCategoria && r.categoria !== fCategoria) return false;
+      if (fSala && r.sala !== fSala) return false;
+      if (fStatus && r.status !== fStatus) return false;
+      if (fResp && r.responsavel !== fResp) return false;
+      if (!q) return true;
+      return (
+        (r.id || "").toLowerCase().includes(q) ||
+        (r.categoria || "").toLowerCase().includes(q) ||
+        (r.marca || "").toLowerCase().includes(q) ||
+        (r.modelo || "").toLowerCase().includes(q) ||
+        (r.serie || "").toLowerCase().includes(q) ||
+        (r.sala || "").toLowerCase().includes(q) ||
+        (r.responsavel || "").toLowerCase().includes(q)
+      );
+    });
+  }, [state.inventario, search, fCategoria, fSala, fStatus, fResp]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const pageRows = filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+
+  function openNew() {
+    const form = emptyEquipForm();
+    form.id = nextPatrimonio(state.inventario, state.prefixo);
+    setModal({ mode: "new", form });
+    setError("");
+  }
+
+  function openEdit(row) {
+    setModal({ mode: "edit", original: row, form: { ...row } });
+    setError("");
+  }
+
+  function save() {
+    const f = modal.form;
+    if (!f.id.trim()) return setError("Informe o número de patrimônio.");
+    if (!f.categoria) return setError("Selecione uma categoria.");
+    if (!f.sala) return setError("Selecione a sala/localização.");
+    const idOwner = modal.mode === "edit" ? modal.original : null;
+    const idTaken = state.inventario.some((r) => r.id === f.id && r !== idOwner);
+    if (idTaken) return setError("Já existe um equipamento com esse número de patrimônio.");
+    setState((prev) => {
+      let inventario;
+      if (modal.mode === "new") {
+        inventario = [...prev.inventario, f];
+      } else {
+        inventario = prev.inventario.map((r) => (r === modal.original ? f : r));
+      }
+      return { ...prev, inventario };
+    });
+    setModal(null);
+  }
+
+  function remove(row) {
+    setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => r !== row) }));
+    setDeleteTarget(null);
+  }
+
+  const activeFilters = fCategoria || fSala || fStatus || fResp || search;
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Inventário</h2>
+        <Button variant="primary" icon={Plus} onClick={openNew}>
+          Novo equipamento
+        </Button>
+      </div>
+
+      <Panel style={{ marginBottom: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr 1fr", gap: 10 }}>
+          <div style={{ position: "relative" }}>
+            <Search size={15} style={{ position: "absolute", left: 10, top: 10, color: COLORS.inkSoft }} />
+            <TextInput
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Buscar por patrimônio, marca, sala..."
+              style={{ paddingLeft: 32 }}
+            />
+          </div>
+          <Select
+            value={fCategoria}
+            onChange={(e) => {
+              setFCategoria(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">Todas categorias</option>
+            {state.categorias.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </Select>
+          <Select
+            value={fSala}
+            onChange={(e) => {
+              setFSala(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">Todas salas</option>
+            {state.areas.map((a) => (
+              <option key={a.id} value={a.nome}>
+                {a.nome}
+              </option>
+            ))}
+          </Select>
+          <Select
+            value={fStatus}
+            onChange={(e) => {
+              setFStatus(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">Todos status</option>
+            {STATUS_OPTIONS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </Select>
+          <Select
+            value={fResp}
+            onChange={(e) => {
+              setFResp(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">Todos responsáveis</option>
+            {state.responsaveis.map((r) => (
+              <option key={r.id} value={r.nome}>
+                {r.nome}
+              </option>
+            ))}
+          </Select>
+        </div>
+        {activeFilters ? (
+          <div style={{ marginTop: 10 }}>
+            <button
+              onClick={() => {
+                setSearch("");
+                setFCategoria("");
+                setFSala("");
+                setFStatus("");
+                setFResp("");
+                setPage(1);
+              }}
+              style={{ background: "none", border: "none", color: COLORS.accent, fontSize: 12.5, cursor: "pointer", padding: 0, fontWeight: 600 }}
+            >
+              Limpar filtros
+            </button>
+          </div>
+        ) : null}
+      </Panel>
+
+      <Panel>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+          <div style={{ fontSize: 12.5, color: COLORS.inkSoft }}>
+            {filtered.length} equipamento{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
+          </div>
+          {selected.size > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ fontSize: 12.5, color: COLORS.ink, fontWeight: 600 }}>{selected.size} selecionado{selected.size !== 1 ? "s" : ""}</span>
+              <button
+                onClick={() => setSelected(new Set())}
+                style={{ background: "none", border: "none", color: COLORS.inkSoft, fontSize: 12.5, cursor: "pointer", padding: 0 }}
+              >
+                Limpar
+              </button>
+              <Button variant="danger" icon={Trash2} onClick={() => setBulkDeleteOpen(true)}>
+                Excluir selecionados
+              </Button>
+            </div>
+          )}
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                <th style={{ padding: "8px 6px", width: 28 }}>
+                  <input
+                    type="checkbox"
+                    checked={pageRows.length > 0 && pageRows.every((r) => selected.has(r.id))}
+                    onChange={() => toggleSelectAllOnPage(pageRows)}
+                    style={{ cursor: "pointer" }}
+                  />
+                </th>
+                {["Patrimônio", "Categoria", "Marca / Modelo", "Sala", "Status", "Responsável", ""].map((h) => (
+                  <th key={h} style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontWeight: 600, fontSize: 12 }}>
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {pageRows.map((r) => (
+                <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}`, background: selected.has(r.id) ? COLORS.accentSoft : "transparent" }}>
+                  <td style={{ padding: "9px 6px" }}>
+                    <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} style={{ cursor: "pointer" }} />
+                  </td>
+                  <td style={{ padding: "9px 6px", fontFamily: "ui-monospace, monospace", fontSize: 12.5, color: COLORS.ink }}>{r.id}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.ink }}>{r.categoria}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>
+                    {r.marca}
+                    {r.modelo ? " · " + r.modelo : ""}
+                  </td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.sala}</td>
+                  <td style={{ padding: "9px 6px" }}>
+                    <StatusPill status={r.status} />
+                  </td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.responsavel || "—"}</td>
+                  <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <button onClick={() => openEdit(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                      <Pencil size={15} />
+                    </button>
+                    <button onClick={() => setDeleteTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                      <Trash2 size={15} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {pageRows.length === 0 && (
+                <tr>
+                  <td colSpan={8}>
+                    <EmptyState text="Nenhum equipamento encontrado com esses filtros." />
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {totalPages > 1 && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 16 }}>
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={pageSafe === 1}
+              style={{ background: "none", border: "none", cursor: pageSafe === 1 ? "default" : "pointer", color: pageSafe === 1 ? COLORS.line : COLORS.ink }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <span style={{ fontSize: 13, color: COLORS.inkSoft }}>
+              Página {pageSafe} de {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={pageSafe === totalPages}
+              style={{ background: "none", border: "none", cursor: pageSafe === totalPages ? "default" : "pointer", color: pageSafe === totalPages ? COLORS.line : COLORS.ink }}
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
+      </Panel>
+
+      {modal && (
+        <Modal title={modal.mode === "new" ? "Novo equipamento" : "Editar equipamento"} onClose={() => setModal(null)} width={620}>
+          <EquipForm form={modal.form} setForm={(f) => setModal({ ...modal, form: f })} state={state} isNew={modal.mode === "new"} onAddCategoria={addCategoria} />
+          {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button variant="ghost" onClick={() => setModal(null)}>
+              Cancelar
+            </Button>
+            <Button variant="primary" icon={Check} onClick={save}>
+              Salvar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {deleteTarget && (
+        <Modal title="Excluir equipamento" onClose={() => setDeleteTarget(null)} width={380}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Tem certeza que deseja excluir o equipamento <strong style={{ fontFamily: "ui-monospace, monospace" }}>{deleteTarget.id}</strong> ({deleteTarget.categoria})? Essa ação não pode ser desfeita.
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => remove(deleteTarget)}>
+              Excluir
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {bulkDeleteOpen && (
+        <Modal title="Excluir equipamentos selecionados" onClose={() => setBulkDeleteOpen(false)} width={380}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Tem certeza que deseja excluir <strong>{selected.size}</strong> equipamento{selected.size !== 1 ? "s" : ""} selecionado{selected.size !== 1 ? "s" : ""}? Essa ação não pode ser desfeita.
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setBulkDeleteOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={bulkDelete}>
+              Excluir {selected.size}
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ---------- Categorias ----------
+
+function Categorias({ state, setState }) {
+  const [novo, setNovo] = useState("");
+  const [error, setError] = useState("");
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [editModal, setEditModal] = useState(null);
+  const [editError, setEditError] = useState("");
+
+  const counts = useMemo(() => {
+    const map = {};
+    state.inventario.forEach((r) => (map[r.categoria] = (map[r.categoria] || 0) + 1));
+    return map;
+  }, [state.inventario]);
+
+  function add() {
+    const v = novo.trim();
+    if (!v) return;
+    if (state.categorias.some((c) => c.toLowerCase() === v.toLowerCase())) {
+      setError("Essa categoria já existe.");
+      return;
+    }
+    setState((prev) => ({ ...prev, categorias: [...prev.categorias, v] }));
+    setNovo("");
+    setError("");
+  }
+
+  function remove(cat) {
+    setState((prev) => ({ ...prev, categorias: prev.categorias.filter((c) => c !== cat) }));
+    setRemoveTarget(null);
+  }
+
+  function openEdit(cat) {
+    setEditModal({ original: cat, nome: cat });
+    setEditError("");
+  }
+
+  function saveEdit() {
+    const novoNome = editModal.nome.trim();
+    if (!novoNome) return setEditError("Informe o nome da categoria.");
+    const dup = state.categorias.some((c) => c !== editModal.original && c.toLowerCase() === novoNome.toLowerCase());
+    if (dup) return setEditError("Já existe uma categoria com esse nome.");
+    setState((prev) => ({
+      ...prev,
+      categorias: prev.categorias.map((c) => (c === editModal.original ? novoNome : c)),
+      inventario: prev.inventario.map((r) => (r.categoria === editModal.original ? { ...r, categoria: novoNome } : r)),
+    }));
+    setEditModal(null);
+  }
+
+  return (
+    <div>
+      <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Categorias de equipamento</h2>
+
+      <Panel style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 10 }}>
+          <TextInput
+            value={novo}
+            onChange={(e) => {
+              setNovo(e.target.value);
+              setError("");
+            }}
+            placeholder="Nome da nova categoria"
+            onKeyDown={(e) => e.key === "Enter" && add()}
+          />
+          <Button variant="primary" icon={Plus} onClick={add}>
+            Adicionar
+          </Button>
+        </div>
+        {error && <div style={{ color: COLORS.danger, fontSize: 13, marginTop: 8 }}>{error}</div>}
+      </Panel>
+
+      <Panel>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+              <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Categoria</th>
+              <th style={{ textAlign: "right", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Equipamentos</th>
+              <th style={{ padding: "8px 6px" }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.categorias.map((c) => (
+              <tr key={c} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                <td style={{ padding: "9px 6px", color: COLORS.ink }}>{c}</td>
+                <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[c] || 0}</td>
+                <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                  <button onClick={() => openEdit(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                    <Pencil size={15} />
+                  </button>
+                  <button onClick={() => setRemoveTarget(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                    <Trash2 size={15} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Panel>
+
+      {editModal && (
+        <Modal title="Editar categoria" onClose={() => setEditModal(null)} width={380}>
+          <Field label="Nome">
+            <TextInput
+              autoFocus
+              value={editModal.nome}
+              onChange={(e) => setEditModal({ ...editModal, nome: e.target.value })}
+              onKeyDown={(e) => e.key === "Enter" && saveEdit()}
+            />
+          </Field>
+          {counts[editModal.original] > 0 && (
+            <p style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: -6 }}>
+              Isso vai atualizar os {counts[editModal.original]} equipamento(s) que usam essa categoria.
+            </p>
+          )}
+          {editError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{editError}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button variant="ghost" onClick={() => setEditModal(null)}>
+              Cancelar
+            </Button>
+            <Button variant="primary" icon={Check} onClick={saveEdit}>
+              Salvar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {removeTarget && (
+        <Modal title="Excluir categoria" onClose={() => setRemoveTarget(null)} width={380}>
+          {counts[removeTarget] > 0 ? (
+            <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+              Essa categoria está em uso por <strong>{counts[removeTarget]}</strong> equipamento(s). Reatribua-os antes de excluí-la, ou a categoria continuará aparecendo nos registros existentes.
+            </p>
+          ) : (
+            <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+              Tem certeza que deseja excluir a categoria <strong>{removeTarget}</strong>?
+            </p>
+          )}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => remove(removeTarget)}>
+              Excluir mesmo assim
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ---------- Áreas / Salas ----------
+
+
+function Areas({ state, setState }) {
+  const [modal, setModal] = useState(null);
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [error, setError] = useState("");
+  const [viewing, setViewing] = useState(null);
+
+  const equipDaSala = useMemo(() => {
+    if (!viewing) return [];
+    return state.inventario.filter((r) => r.sala === viewing.nome);
+  }, [state.inventario, viewing]);
+
+  const counts = useMemo(() => {
+    const map = {};
+    state.inventario.forEach((r) => (map[r.sala] = (map[r.sala] || 0) + 1));
+    return map;
+  }, [state.inventario]);
+
+  function openNew() {
+    setModal({ mode: "new", form: { id: uid("AR"), nome: "", tipo: "Sala de aula" } });
+    setError("");
+  }
+  function openEdit(a) {
+    setModal({ mode: "edit", form: { ...a } });
+    setError("");
+  }
+  function save() {
+    const f = modal.form;
+    if (!f.nome.trim()) return setError("Informe o nome da sala/área.");
+    const dupNome = state.areas.some((a) => a.id !== f.id && a.nome.toLowerCase() === f.nome.trim().toLowerCase());
+    if (dupNome) return setError("Já existe uma sala/área com esse nome.");
+    setState((prev) => {
+      const exists = prev.areas.some((a) => a.id === f.id);
+      const areas = exists ? prev.areas.map((a) => (a.id === f.id ? f : a)) : [...prev.areas, f];
+      let inventario = prev.inventario;
+      if (exists) {
+        const old = prev.areas.find((a) => a.id === f.id);
+        if (old && old.nome !== f.nome) {
+          inventario = prev.inventario.map((r) => (r.sala === old.nome ? { ...r, sala: f.nome } : r));
+        }
+      }
+      return { ...prev, areas, inventario };
+    });
+    setModal(null);
+  }
+  function remove(a) {
+    setState((prev) => ({ ...prev, areas: prev.areas.filter((x) => x.id !== a.id) }));
+    setRemoveTarget(null);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Salas e áreas</h2>
+        <Button variant="primary" icon={Plus} onClick={openNew}>
+          Nova sala/área
+        </Button>
+      </div>
+
+      <Panel>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+              <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+              <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Tipo</th>
+              <th style={{ textAlign: "right", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Equipamentos</th>
+              <th style={{ padding: "8px 6px" }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {state.areas.map((a) => (
+              <tr
+                key={a.id}
+                onClick={() => setViewing(a)}
+                style={{ borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = COLORS.paper)}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{a.nome}</td>
+                <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{a.tipo}</td>
+                <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[a.nome] || 0}</td>
+                <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEdit(a);
+                    }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }}
+                    aria-label="Editar"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRemoveTarget(a);
+                    }}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }}
+                    aria-label="Excluir"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Panel>
+
+      {modal && (
+        <Modal title={modal.mode === "new" ? "Nova sala/área" : "Editar sala/área"} onClose={() => setModal(null)}>
+          <Field label="Nome">
+            <TextInput value={modal.form.nome} onChange={(e) => setModal({ ...modal, form: { ...modal.form, nome: e.target.value } })} placeholder="Ex: Sala 103, Biblioteca..." />
+          </Field>
+          <Field label="Tipo de ambiente">
+            <Select value={modal.form.tipo} onChange={(e) => setModal({ ...modal, form: { ...modal.form, tipo: e.target.value } })}>
+              {TIPO_AREA_OPTIONS.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button variant="ghost" onClick={() => setModal(null)}>
+              Cancelar
+            </Button>
+            <Button variant="primary" icon={Check} onClick={save}>
+              Salvar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {removeTarget && (
+        <Modal title="Excluir sala/área" onClose={() => setRemoveTarget(null)} width={380}>
+          {counts[removeTarget.nome] > 0 ? (
+            <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+              Essa sala tem <strong>{counts[removeTarget.nome]}</strong> equipamento(s) associado(s). Eles continuarão com essa localização registrada mesmo após a exclusão do cadastro.
+            </p>
+          ) : (
+            <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+              Tem certeza que deseja excluir <strong>{removeTarget.nome}</strong>?
+            </p>
+          )}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => remove(removeTarget)}>
+              Excluir mesmo assim
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {viewing && (
+        <Modal title={`Equipamentos em ${viewing.nome}`} onClose={() => setViewing(null)} width={640}>
+          {equipDaSala.length === 0 ? (
+            <EmptyState text="Nenhum equipamento cadastrado nessa sala ainda." />
+          ) : (
+            <div style={{ maxHeight: "55vh", overflow: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                    {["Patrimônio", "Categoria", "Marca / Modelo", "Status", "Responsável"].map((h) => (
+                      <th key={h} style={{ textAlign: "left", padding: "7px 5px", color: COLORS.inkSoft, fontSize: 11.5, position: "sticky", top: 0, background: "#fff" }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {equipDaSala.map((r) => (
+                    <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                      <td style={{ padding: "7px 5px", fontFamily: "ui-monospace, monospace", fontSize: 12 }}>{r.id}</td>
+                      <td style={{ padding: "7px 5px" }}>{r.categoria}</td>
+                      <td style={{ padding: "7px 5px", color: COLORS.inkSoft }}>
+                        {r.marca}
+                        {r.modelo ? " · " + r.modelo : ""}
+                      </td>
+                      <td style={{ padding: "7px 5px" }}>
+                        <StatusPill status={r.status} />
+                      </td>
+                      <td style={{ padding: "7px 5px", color: COLORS.inkSoft }}>{r.responsavel || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+            <Button variant="ghost" onClick={() => setViewing(null)}>
+              Fechar
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ---------- Responsáveis ----------
+
+function Responsaveis({ state, setState }) {
+  const [modal, setModal] = useState(null);
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [error, setError] = useState("");
+
+  const counts = useMemo(() => {
+    const map = {};
+    state.inventario.forEach((r) => {
+      if (r.responsavel) map[r.responsavel] = (map[r.responsavel] || 0) + 1;
+    });
+    return map;
+  }, [state.inventario]);
+
+  function openNew() {
+    setModal({ mode: "new", form: { id: uid("RE"), nome: "", cargo: "", contato: "" } });
+    setError("");
+  }
+  function openEdit(r) {
+    setModal({ mode: "edit", form: { ...r } });
+    setError("");
+  }
+  function save() {
+    const f = modal.form;
+    if (!f.nome.trim()) return setError("Informe o nome do responsável.");
+    setState((prev) => {
+      const exists = prev.responsaveis.some((r) => r.id === f.id);
+      const responsaveis = exists ? prev.responsaveis.map((r) => (r.id === f.id ? f : r)) : [...prev.responsaveis, f];
+      let inventario = prev.inventario;
+      if (exists) {
+        const old = prev.responsaveis.find((r) => r.id === f.id);
+        if (old && old.nome !== f.nome) {
+          inventario = prev.inventario.map((r) => (r.responsavel === old.nome ? { ...r, responsavel: f.nome } : r));
+        }
+      }
+      return { ...prev, responsaveis, inventario };
+    });
+    setModal(null);
+  }
+  function remove(r) {
+    setState((prev) => ({ ...prev, responsaveis: prev.responsaveis.filter((x) => x.id !== r.id) }));
+    setRemoveTarget(null);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Responsáveis</h2>
+        <Button variant="primary" icon={Plus} onClick={openNew}>
+          Novo responsável
+        </Button>
+      </div>
+
+      <Panel>
+        {state.responsaveis.length === 0 ? (
+          <EmptyState text="Nenhum responsável cadastrado ainda." />
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Cargo/setor</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Contato</th>
+                <th style={{ textAlign: "right", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Equipamentos</th>
+                <th style={{ padding: "8px 6px" }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {state.responsaveis.map((r) => (
+                <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                  <td style={{ padding: "9px 6px", color: COLORS.ink }}>{r.nome}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.cargo}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.contato}</td>
+                  <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[r.nome] || 0}</td>
+                  <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <button onClick={() => openEdit(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                      <Pencil size={15} />
+                    </button>
+                    <button onClick={() => setRemoveTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                      <Trash2 size={15} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Panel>
+
+      {modal && (
+        <Modal title={modal.mode === "new" ? "Novo responsável" : "Editar responsável"} onClose={() => setModal(null)}>
+          <Field label="Nome">
+            <TextInput value={modal.form.nome} onChange={(e) => setModal({ ...modal, form: { ...modal.form, nome: e.target.value } })} />
+          </Field>
+          <Field label="Cargo/setor">
+            <TextInput value={modal.form.cargo} onChange={(e) => setModal({ ...modal, form: { ...modal.form, cargo: e.target.value } })} placeholder="Ex: Coordenação, Secretaria..." />
+          </Field>
+          <Field label="Contato">
+            <TextInput value={modal.form.contato} onChange={(e) => setModal({ ...modal, form: { ...modal.form, contato: e.target.value } })} placeholder="Telefone ou e-mail" />
+          </Field>
+          {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button variant="ghost" onClick={() => setModal(null)}>
+              Cancelar
+            </Button>
+            <Button variant="primary" icon={Check} onClick={save}>
+              Salvar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {removeTarget && (
+        <Modal title="Excluir responsável" onClose={() => setRemoveTarget(null)} width={380}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Tem certeza que deseja excluir <strong>{removeTarget.nome}</strong>?
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => remove(removeTarget)}>
+              Excluir
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ---------- Relatórios ----------
+
+const DIMENSOES = [
+  { key: "sala", label: "Por sala/localização" },
+  { key: "categoria", label: "Por categoria" },
+  { key: "status", label: "Por status" },
+  { key: "responsavel", label: "Por responsável" },
+];
+
+function Relatorios({ state }) {
+  const [dimensao, setDimensao] = useState("sala");
+  const [valor, setValor] = useState("");
+
+  const opcoesValor = useMemo(() => {
+    if (dimensao === "sala") return state.areas.map((a) => a.nome);
+    if (dimensao === "categoria") return state.categorias;
+    if (dimensao === "status") return STATUS_OPTIONS;
+    if (dimensao === "responsavel") return state.responsaveis.map((r) => r.nome);
+    return [];
+  }, [dimensao, state]);
+
+  useEffect(() => {
+    setValor("");
+  }, [dimensao]);
+
+  const linhas = useMemo(() => {
+    return state.inventario.filter((r) => {
+      if (!valor) return true;
+      return (r[dimensao] || "") === valor;
+    });
+  }, [state.inventario, dimensao, valor]);
+
+  const agrupado = useMemo(() => {
+    const map = {};
+    state.inventario.forEach((r) => {
+      const k = r[dimensao] || "—";
+      map[k] = (map[k] || 0) + 1;
+    });
+    return Object.entries(map).sort((a, b) => b[1] - a[1]);
+  }, [state.inventario, dimensao]);
+
+  const columns = [
+    { key: "id", label: "Patrimônio" },
+    { key: "categoria", label: "Categoria" },
+    { key: "marca", label: "Marca" },
+    { key: "modelo", label: "Modelo" },
+    { key: "sala", label: "Sala" },
+    { key: "status", label: "Status" },
+    { key: "responsavel", label: "Responsável" },
+  ];
+
+  function exportar() {
+    const csv = toCSV(linhas, columns);
+    downloadBlob(`relatorio-${dimensao}${valor ? "-" + valor : ""}.csv`, new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
+  }
+
+  return (
+    <div>
+      <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Relatórios</h2>
+
+      <Panel style={{ marginBottom: 14 }}>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ minWidth: 200 }}>
+            <Field label="Agrupar por">
+              <Select value={dimensao} onChange={(e) => setDimensao(e.target.value)}>
+                {DIMENSOES.map((d) => (
+                  <option key={d.key} value={d.key}>
+                    {d.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+          <div style={{ minWidth: 220, flex: 1 }}>
+            <Field label="Filtrar valor específico (opcional)">
+              <Select value={valor} onChange={(e) => setValor(e.target.value)}>
+                <option value="">Todos</option>
+                {opcoesValor.map((v) => (
+                  <option key={v} value={v}>
+                    {v}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <Button variant="accent" icon={Download} onClick={exportar}>
+              Exportar CSV
+            </Button>
+          </div>
+        </div>
+      </Panel>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: 16 }}>
+        <Panel title="Contagem">
+          <div style={{ maxHeight: 460, overflow: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <tbody>
+                {agrupado.map(([k, v]) => (
+                  <tr
+                    key={k}
+                    onClick={() => setValor(k === valor ? "" : k)}
+                    style={{ borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer", background: valor === k ? COLORS.accentSoft : "transparent" }}
+                  >
+                    <td style={{ padding: "7px 4px", color: COLORS.ink }}>{k}</td>
+                    <td style={{ padding: "7px 4px", textAlign: "right", fontWeight: 600, color: COLORS.ink }}>{v}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+
+        <Panel title={`Equipamentos${valor ? " — " + valor : ""}`}>
+          <div style={{ maxHeight: 460, overflow: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12.5 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                  {columns.map((c) => (
+                    <th key={c.key} style={{ textAlign: "left", padding: "7px 5px", color: COLORS.inkSoft, fontSize: 11.5, position: "sticky", top: 0, background: COLORS.surface }}>
+                      {c.label}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {linhas.map((r) => (
+                  <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                    <td style={{ padding: "6px 5px", fontFamily: "ui-monospace, monospace" }}>{r.id}</td>
+                    <td style={{ padding: "6px 5px" }}>{r.categoria}</td>
+                    <td style={{ padding: "6px 5px" }}>{r.marca}</td>
+                    <td style={{ padding: "6px 5px" }}>{r.modelo}</td>
+                    <td style={{ padding: "6px 5px" }}>{r.sala}</td>
+                    <td style={{ padding: "6px 5px" }}>
+                      <StatusPill status={r.status} />
+                    </td>
+                    <td style={{ padding: "6px 5px" }}>{r.responsavel}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Importar / Exportar ----------
+
+function Importar({ state, setState }) {
+  const fileRef = useRef(null);
+  const [status, setStatus] = useState(null); // {type: 'ok'|'error', msg}
+  const [busy, setBusy] = useState(false);
+  const [clearOpen, setClearOpen] = useState(false);
+  const [clearConfirmText, setClearConfirmText] = useState("");
+  const [pending, setPending] = useState(null); // array de equipamentos lidos do arquivo, aguardando confirmação
+
+  function clearInventario() {
+    setState((prev) => ({ ...prev, inventario: [] }));
+    setClearOpen(false);
+    setClearConfirmText("");
+  }
+
+  function handleFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setBusy(true);
+    setStatus(null);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const wb = XLSX.read(ev.target.result, { type: "array" });
+        const sheetName = wb.SheetNames.find((n) => n.toLowerCase().includes("invent")) || wb.SheetNames[0];
+        const sheet = wb.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null });
+
+        const brutos = [];
+        for (let i = 1; i < rows.length; i++) {
+          const r = rows[i] || [];
+          const categoria = r[1];
+          const marca = r[2];
+          const modelo = r[3];
+          const serie = r[4];
+          const sala = r[5];
+          const statusVal = r[6];
+          const resp = r[7];
+          const obs = r[8];
+          const allEmpty = r.slice(0, 9).every((x) => x === null || x === undefined || x === "");
+          if (allEmpty) continue;
+          if (!categoria) continue; // linha de lote/cabeçalho, sem categoria
+          brutos.push({
+            categoria: String(categoria).trim(),
+            marca: marca ? String(marca).trim() : "",
+            modelo: modelo ? String(modelo).trim() : "",
+            serie: serie ? String(serie).trim() : "",
+            sala: sala ? String(sala).trim() : "",
+            status: statusVal ? String(statusVal).trim() : "Em uso",
+            responsavel: resp ? String(resp).trim() : "",
+            observacoes: obs ? String(obs).trim() : "",
+          });
+        }
+
+        if (brutos.length === 0) {
+          setStatus({ type: "error", msg: "Nenhum equipamento foi encontrado na planilha. Confira se a aba segue o modelo com as colunas Categoria, Marca, Modelo, Nº de Série, Sala/Localização, Status, Responsável, Observações." });
+          setBusy(false);
+        } else {
+          setPending(brutos);
+          setBusy(false);
+        }
+      } catch (err) {
+        setStatus({ type: "error", msg: "Não foi possível ler esse arquivo. Verifique se é um .xlsx válido no formato esperado." });
+        setBusy(false);
+      }
+      if (fileRef.current) fileRef.current.value = "";
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function confirmarImportacao(modo) {
+    const brutos = pending;
+    if (!brutos) return;
+
+    const baseInventario = modo === "substituir" ? [] : state.inventario;
+    let seqBase = 0;
+    if (modo === "adicionar") {
+      state.inventario.forEach((r) => {
+        const m = /(\d+)$/.exec(r.id || "");
+        if (m) seqBase = Math.max(seqBase, parseInt(m[1], 10));
+      });
+    }
+
+    const novaCategorias = new Set(modo === "substituir" ? state.categorias : state.categorias);
+    const novaAreas = new Map((modo === "substituir" ? state.areas : state.areas).map((a) => [a.nome, a]));
+    const novos = brutos.map((b) => {
+      seqBase += 1;
+      novaCategorias.add(b.categoria);
+      if (b.sala && !novaAreas.has(b.sala)) {
+        novaAreas.set(b.sala, { id: uid("AR"), nome: b.sala, tipo: "Outro" });
+      }
+      return {
+        id: state.prefixo + "-" + String(seqBase).padStart(4, "0"),
+        categoria: b.categoria,
+        marca: b.marca,
+        modelo: b.modelo,
+        serie: b.serie,
+        sala: b.sala,
+        status: b.status,
+        responsavel: b.responsavel,
+        observacoes: b.observacoes,
+        dataCompra: "",
+        valor: "",
+        vidaUtil: "",
+      };
+    });
+
+    setState((prev) => ({
+      ...prev,
+      categorias: Array.from(novaCategorias),
+      areas: Array.from(novaAreas.values()),
+      inventario: [...baseInventario, ...novos],
+    }));
+
+    setStatus({
+      type: "ok",
+      msg:
+        modo === "substituir"
+          ? `Inventário substituído: ${novos.length} equipamento(s) importado(s), cada um com patrimônio próprio.`
+          : `${novos.length} equipamento(s) adicionado(s) aos já existentes, cada um com patrimônio próprio.`,
+    });
+    setPending(null);
+  }
+
+  function exportarXlsx() {
+    const cols = [
+      ["Nº Patrimônio", "Categoria", "Marca", "Modelo", "Nº de Série", "Sala/Localização", "Status", "Responsável", "Observações", "Data de compra", "Valor de aquisição", "Vida útil (anos)"],
+    ];
+    const data = state.inventario.map((r) => [r.id, r.categoria, r.marca, r.modelo, r.serie, r.sala, r.status, r.responsavel, r.observacoes, r.dataCompra, r.valor, r.vidaUtil]);
+    const ws = XLSX.utils.aoa_to_sheet([...cols, ...data]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Inventário");
+    XLSX.writeFile(wb, "inventario_ti_atual.xlsx");
+  }
+
+  function exportarCSV() {
+    const columns = [
+      { key: "id", label: "Nº Patrimônio" },
+      { key: "categoria", label: "Categoria" },
+      { key: "marca", label: "Marca" },
+      { key: "modelo", label: "Modelo" },
+      { key: "serie", label: "Nº de Série" },
+      { key: "sala", label: "Sala/Localização" },
+      { key: "status", label: "Status" },
+      { key: "responsavel", label: "Responsável" },
+      { key: "observacoes", label: "Observações" },
+    ];
+    const csv = toCSV(state.inventario, columns);
+    downloadBlob("inventario_ti_atual.csv", new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
+  }
+
+  return (
+    <div>
+      <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Importar e exportar</h2>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+        <Panel title="Importar planilha (.xlsx)">
+          <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
+            Envie um arquivo no formato da planilha original: colunas Categoria, Marca, Modelo, Nº de Série, Sala/Localização, Status, Responsável e Observações. Depois de ler o arquivo, você escolhe se quer substituir tudo ou adicionar aos equipamentos já existentes — assim dá pra evitar duplicar equipamentos ao reimportar a mesma planilha.
+          </p>
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
+          <Button variant="primary" icon={FileSpreadsheet} onClick={() => fileRef.current && fileRef.current.click()} disabled={busy}>
+            {busy ? "Importando..." : "Selecionar arquivo .xlsx"}
+          </Button>
+          {status && (
+            <div
+              style={{
+                marginTop: 14,
+                padding: "10px 12px",
+                borderRadius: 6,
+                fontSize: 13,
+                background: status.type === "ok" ? "#E3EEE9" : COLORS.dangerSoft,
+                color: status.type === "ok" ? "#1F4D40" : COLORS.danger,
+              }}
+            >
+              {status.msg}
+            </div>
+          )}
+        </Panel>
+
+        <Panel title="Exportar inventário atual">
+          <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
+            Baixe todos os {state.inventario.length} equipamentos cadastrados hoje, para backup ou para compartilhar com a direção da escola.
+          </p>
+          <div style={{ display: "flex", gap: 10 }}>
+            <Button variant="accent" icon={Download} onClick={exportarXlsx}>
+              Baixar .xlsx
+            </Button>
+            <Button variant="ghost" icon={Download} onClick={exportarCSV}>
+              Baixar .csv
+            </Button>
+          </div>
+        </Panel>
+      </div>
+
+      <Panel title="Zona de risco" style={{ marginTop: 16, borderColor: COLORS.dangerSoft }}>
+        <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
+          Exclui todos os {state.inventario.length} equipamentos cadastrados no inventário — útil para apagar os dados iniciais da planilha, que já estão desatualizados, antes de importar uma planilha nova ou recomeçar o cadastro do zero. As categorias, salas e responsáveis cadastrados não são afetados.
+        </p>
+        <Button variant="danger" icon={Trash2} onClick={() => setClearOpen(true)} disabled={state.inventario.length === 0}>
+          Excluir todos os equipamentos
+        </Button>
+      </Panel>
+
+      {pending && (
+        <Modal title="Confirmar importação" onClose={() => setPending(null)} width={460}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Encontramos <strong>{pending.length}</strong> equipamento(s) nessa planilha. O inventário atual já tem <strong>{state.inventario.length}</strong> equipamento(s) cadastrado(s). O que você quer fazer?
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 6 }}>
+            <button
+              onClick={() => confirmarImportacao("substituir")}
+              style={{
+                textAlign: "left",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: `1px solid ${COLORS.danger}`,
+                background: COLORS.dangerSoft,
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ fontWeight: 700, color: COLORS.danger, fontSize: 13.5 }}>Substituir tudo</div>
+              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: 2 }}>
+                Apaga os {state.inventario.length} equipamentos atuais e coloca só os {pending.length} desta planilha. Use quando essa planilha é a versão correta e mais atual.
+              </div>
+            </button>
+            <button
+              onClick={() => confirmarImportacao("adicionar")}
+              style={{
+                textAlign: "left",
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: `1px solid ${COLORS.lineStrong}`,
+                background: "#fff",
+                cursor: "pointer",
+              }}
+            >
+              <div style={{ fontWeight: 700, color: COLORS.ink, fontSize: 13.5 }}>Adicionar aos existentes</div>
+              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: 2 }}>
+                Mantém os {state.inventario.length} equipamentos atuais e soma os {pending.length} desta planilha. Só use se tiver certeza de que não é a mesma planilha já cadastrada — senão os equipamentos ficam duplicados.
+              </div>
+            </button>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14 }}>
+            <Button variant="ghost" onClick={() => setPending(null)}>
+              Cancelar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {clearOpen && (
+        <Modal
+          title="Excluir todos os equipamentos"
+          onClose={() => {
+            setClearOpen(false);
+            setClearConfirmText("");
+          }}
+          width={420}
+        >
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Isso vai excluir permanentemente os <strong>{state.inventario.length}</strong> equipamentos cadastrados no inventário. Essa ação não pode ser desfeita. Se quiser manter um registro, exporte antes usando os botões acima.
+          </p>
+          <Field label='Digite EXCLUIR para confirmar'>
+            <TextInput value={clearConfirmText} onChange={(e) => setClearConfirmText(e.target.value)} placeholder="EXCLUIR" />
+          </Field>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setClearOpen(false);
+                setClearConfirmText("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={clearInventario} disabled={clearConfirmText.trim().toUpperCase() !== "EXCLUIR"}>
+              Excluir tudo
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ---------- App ----------
+
+
+// ---------- Chamados (chat de abertura de chamados) ----------
+
+function novoChamadoForm() {
+  return { sala: "", categoria: "", prioridade: "Média", texto: "" };
+}
+
+function Chamados({ state, setState }) {
+  const [selectedId, setSelectedId] = useState(null);
+  const [novoMode, setNovoMode] = useState(false);
+  const [form, setForm] = useState(novoChamadoForm());
+  const [replyText, setReplyText] = useState("");
+  const scrollRef = useRef(null);
+
+  const chamados = state.chamados || [];
+  const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
+  const selecionado = chamados.find((c) => c.id === selectedId) || null;
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [selecionado, selecionado && selecionado.mensagens.length]);
+
+  function abrirNovo() {
+    setNovoMode(true);
+    setSelectedId(null);
+    setForm(novoChamadoForm());
+  }
+
+  function enviarNovoChamado() {
+    const texto = form.texto.trim();
+    if (!texto) return;
+    const chamado = {
+      id: uid("CH"),
+      assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
+      sala: form.sala,
+      categoria: form.categoria,
+      prioridade: form.prioridade,
+      status: "Aberto",
+      criadoEm: new Date().toISOString(),
+      mensagens: [{ autor: "solicitante", texto, data: new Date().toISOString() }],
+    };
+    setState((prev) => ({ ...prev, chamados: [...(prev.chamados || []), chamado] }));
+    setNovoMode(false);
+    setForm(novoChamadoForm());
+    setSelectedId(chamado.id);
+  }
+
+  function enviarResposta() {
+    const texto = replyText.trim();
+    if (!texto || !selecionado) return;
+    setState((prev) => ({
+      ...prev,
+      chamados: prev.chamados.map((c) =>
+        c.id === selecionado.id ? { ...c, mensagens: [...c.mensagens, { autor: "ti", texto, data: new Date().toISOString() }] } : c
+      ),
+    }));
+    setReplyText("");
+  }
+
+  function mudarStatus(status) {
+    setState((prev) => ({
+      ...prev,
+      chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, status } : c)),
+    }));
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
+        <Button variant="primary" icon={Plus} onClick={abrirNovo}>
+          Novo chamado
+        </Button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, height: 560 }}>
+        <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
+            {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
+          </div>
+          <div style={{ overflow: "auto", flex: 1 }}>
+            {ordenados.length === 0 ? (
+              <EmptyState text="Nenhum chamado aberto ainda." />
+            ) : (
+              ordenados.map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => {
+                    setSelectedId(c.id);
+                    setNovoMode(false);
+                  }}
+                  style={{
+                    padding: "10px 14px",
+                    borderBottom: `1px solid ${COLORS.line}`,
+                    cursor: "pointer",
+                    background: selectedId === c.id ? COLORS.accentSoft : "transparent",
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>{c.assunto}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</span>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        color: CHAMADO_STATUS_COLORS[c.status],
+                        background: CHAMADO_STATUS_BG[c.status],
+                      }}
+                    >
+                      {c.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Panel>
+
+        <Panel style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {novoMode ? (
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
+              <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                  <Field label="Sala relacionada (opcional)">
+                    <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
+                      <option value="">Nenhuma</option>
+                      {state.areas.map((a) => (
+                        <option key={a.id} value={a.nome}>
+                          {a.nome}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Categoria relacionada (opcional)">
+                    <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
+                      <option value="">Nenhuma</option>
+                      {state.categorias.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Prioridade">
+                    <Select value={form.prioridade} onChange={(e) => setForm({ ...form, prioridade: e.target.value })}>
+                      {PRIORIDADE_OPTIONS.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                </div>
+                <Field label="Descreva o problema">
+                  <textarea
+                    value={form.texto}
+                    onChange={(e) => setForm({ ...form, texto: e.target.value })}
+                    rows={4}
+                    placeholder="Ex: O projetor da sala 108 não liga mais..."
+                    style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
+                  />
+                </Field>
+              </div>
+              <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <Button variant="ghost" onClick={() => setNovoMode(false)}>
+                  Cancelar
+                </Button>
+                <Button variant="primary" icon={Send} onClick={enviarNovoChamado}>
+                  Abrir chamado
+                </Button>
+              </div>
+            </div>
+          ) : !selecionado ? (
+            <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
+                  <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
+                    {selecionado.solicitante ? "De " + selecionado.solicitante + " · " : ""}
+                    {selecionado.sala || "Sem sala"}
+                    {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade}
+                  </div>
+                </div>
+                <Select value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: 160 }}>
+                  {CHAMADO_STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+
+              <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
+                {selecionado.mensagens.map((m, i) => (
+                  <div key={i} style={{ display: "flex", justifyContent: m.autor === "ti" ? "flex-end" : "flex-start" }}>
+                    <div
+                      style={{
+                        maxWidth: "70%",
+                        padding: "9px 13px",
+                        borderRadius: 12,
+                        fontSize: 13.5,
+                        background: m.autor === "ti" ? COLORS.ink : "#fff",
+                        color: m.autor === "ti" ? "#fff" : COLORS.ink,
+                        border: m.autor === "ti" ? "none" : `1px solid ${COLORS.line}`,
+                      }}
+                    >
+                      <div>{m.texto}</div>
+                      <div style={{ fontSize: 10.5, marginTop: 4, opacity: 0.65 }}>{formatDateTime(m.data)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+                <TextInput
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Escrever uma atualização..."
+                  onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                  style={{ flex: 1 }}
+                />
+                <Button variant="primary" icon={Send} onClick={enviarResposta}>
+                  Enviar
+                </Button>
+              </div>
+            </div>
+          )}
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function ErrorScreen({ msg, detail }) {
+  return (
+    <div style={{ padding: 60, textAlign: "center", color: COLORS.danger, fontFamily: "ui-sans-serif, system-ui, sans-serif", maxWidth: 560, margin: "0 auto" }}>
+      <div style={{ fontWeight: 700, marginBottom: 8 }}>Não foi possível conectar</div>
+      <div style={{ fontSize: 14, color: COLORS.inkSoft, marginBottom: detail ? 14 : 0 }}>{msg}</div>
+      {detail && (
+        <div
+          style={{
+            textAlign: "left",
+            fontFamily: "ui-monospace, monospace",
+            fontSize: 12,
+            background: "#fff",
+            border: `1px solid ${COLORS.line}`,
+            borderRadius: 6,
+            padding: 12,
+            color: COLORS.ink,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}
+        >
+          {detail}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopBarSolicitante({ onAdminClick }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: COLORS.ink, color: "#fff" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <img src={LOGO_DATA_URL} alt="Logo" style={{ width: 30, height: 30, background: "#fff", borderRadius: 6, padding: 2 }} />
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700 }}>Chamados de TI</div>
+          <div style={{ fontSize: 11.5, color: "#9AA6B8" }}>Escola Espírito Santo</div>
+        </div>
+      </div>
+      <button
+        onClick={onAdminClick}
+        style={{ background: "none", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 6, color: "#fff", fontSize: 12, padding: "6px 10px", cursor: "pointer" }}
+      >
+        Sou administrador
+      </button>
+    </div>
+  );
+}
+
+function novoChamadoSolicitanteForm() {
+  return { nome: "", sala: "", categoria: "", prioridade: "Média", texto: "" };
+}
+
+function ChamadosSolicitante({ state, setState, onAdminClick }) {
+  const areas = state.areas || [];
+  const categorias = state.categorias || [];
+  const chamados = state.chamados || [];
+  const [selectedId, setSelectedId] = useState(null);
+  const [novoMode, setNovoMode] = useState(chamados.length === 0);
+  const [form, setForm] = useState(novoChamadoSolicitanteForm());
+  const [replyText, setReplyText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [erro, setErro] = useState("");
+  const scrollRef = useRef(null);
+
+  const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
+  const selecionado = chamados.find((c) => c.id === selectedId) || null;
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [selecionado, selecionado && selecionado.mensagens.length]);
+
+  async function enviarNovoChamado() {
+    const texto = form.texto.trim();
+    const nome = form.nome.trim();
+    if (!texto || !nome) return;
+    setBusy(true);
+    setErro("");
+    const chamado = {
+      id: uid("CH"),
+      assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
+      solicitante: nome,
+      sala: form.sala,
+      categoria: form.categoria,
+      prioridade: form.prioridade,
+      status: "Aberto",
+      criadoEm: new Date().toISOString(),
+      mensagens: [{ autor: "solicitante", texto, data: new Date().toISOString() }],
+    };
+    try {
+      const res = await backendPost("novoChamado", { chamado });
+      if (!res.ok) throw new Error(res.error || "Erro ao abrir chamado");
+      setState((prev) => ({ ...prev, chamados: [...(prev.chamados || []), chamado] }));
+      setNovoMode(false);
+      setForm(novoChamadoSolicitanteForm());
+      setSelectedId(chamado.id);
+    } catch (e) {
+      setErro("Não foi possível abrir o chamado. Tente novamente.");
+    }
+    setBusy(false);
+  }
+
+  async function enviarResposta() {
+    const texto = replyText.trim();
+    if (!texto || !selecionado) return;
+    setBusy(true);
+    setErro("");
+    const mensagem = { autor: "solicitante", texto, data: new Date().toISOString() };
+    try {
+      const res = await backendPost("novaMensagem", { chamadoId: selecionado.id, mensagem });
+      if (!res.ok) throw new Error(res.error || "Erro ao enviar mensagem");
+      setState((prev) => ({
+        ...prev,
+        chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, mensagens: [...c.mensagens, mensagem] } : c)),
+      }));
+      setReplyText("");
+    } catch (e) {
+      setErro("Não foi possível enviar. Tente novamente.");
+    }
+    setBusy(false);
+  }
+
+  return (
+    <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      <TopBarSolicitante onAdminClick={onAdminClick} />
+      <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
+          <Button variant="primary" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }}>
+            Novo chamado
+          </Button>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 520 }}>
+          <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
+              {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
+            </div>
+            <div style={{ overflow: "auto", flex: 1 }}>
+              {ordenados.length === 0 ? (
+                <EmptyState text="Nenhum chamado aberto ainda." />
+              ) : (
+                ordenados.map((c) => (
+                  <div
+                    key={c.id}
+                    onClick={() => { setSelectedId(c.id); setNovoMode(false); }}
+                    style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer", background: selectedId === c.id ? COLORS.accentSoft : "transparent" }}
+                  >
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>{c.assunto}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.sala || "Sem sala"}</span>
+                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: CHAMADO_STATUS_COLORS[c.status], background: CHAMADO_STATUS_BG[c.status] }}>
+                        {c.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Panel>
+
+          <Panel style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            {novoMode ? (
+              <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
+                <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
+                  <div style={{ marginBottom: 14 }}>
+                    <Field label="Seu nome">
+                      <TextInput value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Como podemos te chamar" />
+                    </Field>
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                    <Field label="Sala relacionada (opcional)">
+                      <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
+                        <option value="">Nenhuma</option>
+                        {areas.map((a) => (
+                          <option key={a.id} value={a.nome}>{a.nome}</option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label="Categoria relacionada (opcional)">
+                      <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
+                        <option value="">Nenhuma</option>
+                        {categorias.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label="Prioridade">
+                      <Select value={form.prioridade} onChange={(e) => setForm({ ...form, prioridade: e.target.value })}>
+                        {PRIORIDADE_OPTIONS.map((p) => (
+                          <option key={p} value={p}>{p}</option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </div>
+                  <Field label="Descreva o problema">
+                    <textarea
+                      value={form.texto}
+                      onChange={(e) => setForm({ ...form, texto: e.target.value })}
+                      rows={4}
+                      placeholder="Ex: O projetor da sala 108 não liga mais..."
+                      style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
+                    />
+                  </Field>
+                  {erro && <div style={{ color: COLORS.danger, fontSize: 13 }}>{erro}</div>}
+                </div>
+                <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                  {chamados.length > 0 && (
+                    <Button variant="ghost" onClick={() => setNovoMode(false)}>
+                      Cancelar
+                    </Button>
+                  )}
+                  <Button variant="primary" icon={Send} onClick={enviarNovoChamado} disabled={busy || !form.nome.trim() || !form.texto.trim()}>
+                    {busy ? "Enviando..." : "Abrir chamado"}
+                  </Button>
+                </div>
+              </div>
+            ) : !selecionado ? (
+              <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}` }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
+                  <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
+                    {selecionado.sala || "Sem sala"}
+                    {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade} ·{" "}
+                    <span style={{ color: CHAMADO_STATUS_COLORS[selecionado.status], fontWeight: 600 }}>{selecionado.status}</span>
+                  </div>
+                </div>
+                <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {selecionado.mensagens.map((m, i) => (
+                    <div key={i} style={{ display: "flex", justifyContent: m.autor === "ti" ? "flex-start" : "flex-end" }}>
+                      <div
+                        style={{
+                          maxWidth: "70%",
+                          padding: "9px 13px",
+                          borderRadius: 12,
+                          fontSize: 13.5,
+                          background: m.autor === "ti" ? "#fff" : COLORS.ink,
+                          color: m.autor === "ti" ? COLORS.ink : "#fff",
+                          border: m.autor === "ti" ? `1px solid ${COLORS.line}` : "none",
+                        }}
+                      >
+                        <div>{m.texto}</div>
+                        <div style={{ fontSize: 10.5, marginTop: 4, opacity: 0.65 }}>{formatDateTime(m.data)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+                  <TextInput
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Escrever uma mensagem..."
+                    onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                    style={{ flex: 1 }}
+                  />
+                  <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy}>
+                    Enviar
+                  </Button>
+                </div>
+                {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: "0 14px 10px" }}>{erro}</div>}
+              </div>
+            )}
+          </Panel>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoadingScreen() {
+  return (
+    <div style={{ padding: 60, textAlign: "center", color: COLORS.inkSoft, fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
+      Carregando inventário...
+    </div>
+  );
+}
+
+function App() {
+  const [secret, setSecret] = useState("");
+  const [auth, setAuth] = useState(null); // { isAdmin }
+  const [state, setState] = useState(null);
+  const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [loadErrorDetail, setLoadErrorDetail] = useState(null);
+  const [view, setView] = useState("dashboard");
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [loginBusy, setLoginBusy] = useState(false);
+  const saveTimer = useRef(null);
+
+  async function carregarInicial() {
+    try {
+      const data = await backendGet("");
+      if (!data.ok) throw new Error(data.error || "Erro desconhecido");
+      setAuth({ isAdmin: false });
+      setState(data.state);
+      setLoaded(true);
+    } catch (e) {
+      setLoadError("Não foi possível conectar ao servidor do inventário. Veja o detalhe técnico abaixo — tire um print e me mande.");
+      setLoadErrorDetail(String((e && e.message) || e));
+      setLoaded(true);
+    }
+  }
+
+  useEffect(() => {
+    let mounted = true;
+    carregarInicial().then(() => {
+      if (!mounted) return;
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!loaded || !state || !auth || !auth.isAdmin) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      backendPost("salvarTudo", { state, secret }).catch(() => {});
+    }, 600);
+    return () => clearTimeout(saveTimer.current);
+  }, [state, loaded, auth, secret]);
+
+  async function tentarLogin() {
+    setLoginBusy(true);
+    setLoginError("");
+    try {
+      const data = await backendGet(loginPassword);
+      if (!data.ok) throw new Error(data.error || "Erro desconhecido");
+      if (data.isAdmin) {
+        setAuth({ isAdmin: true });
+        setState({
+          prefixo: "CES",
+          categorias: [],
+          areas: [],
+          responsaveis: [],
+          inventario: [],
+          chamados: [],
+          ...data.state,
+        });
+        setSecret(loginPassword);
+        setLoginOpen(false);
+        setLoginPassword("");
+      } else {
+        setLoginError("Senha incorreta. Confira a aba Config da planilha e tente de novo.");
+      }
+    } catch (e) {
+      setLoginError("Não foi possível conectar (" + String((e && e.message) || e) + "). Verifique sua internet e tente de novo.");
+    }
+    setLoginBusy(false);
+  }
+
+  if (!loaded) {
+    return <LoadingScreen />;
+  }
+
+  if (loadError) {
+    return <ErrorScreen msg={loadError} detail={loadErrorDetail} />;
+  }
+
+  if (!auth.isAdmin) {
+    return (
+      <>
+        <ChamadosSolicitante state={state} setState={setState} onAdminClick={() => setLoginOpen(true)} />
+        {loginOpen && (
+          <Modal
+            title="Entrar como administrador"
+            onClose={() => {
+              setLoginOpen(false);
+              setLoginError("");
+              setLoginPassword("");
+            }}
+            width={360}
+          >
+            <Field label="Senha de administrador">
+              <TextInput
+                type="password"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
+                autoFocus
+              />
+            </Field>
+            {loginError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{loginError}</div>}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setLoginOpen(false);
+                  setLoginError("");
+                  setLoginPassword("");
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button variant="primary" icon={Check} onClick={tentarLogin} disabled={loginBusy}>
+                {loginBusy ? "Entrando..." : "Entrar"}
+              </Button>
+            </div>
+          </Modal>
+        )}
+      </>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      <Sidebar view={view} setView={setView} />
+      <main style={{ flex: 1, padding: 28, overflow: "auto" }}>
+        {view === "dashboard" && <Dashboard state={state} setView={setView} />}
+        {view === "inventario" && <Inventario state={state} setState={setState} />}
+        {view === "categorias" && <Categorias state={state} setState={setState} />}
+        {view === "areas" && <Areas state={state} setState={setState} />}
+        {view === "responsaveis" && <Responsaveis state={state} setState={setState} />}
+        {view === "relatorios" && <Relatorios state={state} />}
+        {view === "chamados" && <Chamados state={state} setState={setState} />}
+        {view === "importar" && <Importar state={state} setState={setState} />}
+      </main>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+</script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
