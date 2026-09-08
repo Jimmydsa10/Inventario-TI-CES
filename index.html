@@ -869,7 +869,22 @@ const NAV_ITEMS = [
   { key: "importar", label: "Importar/Exportar", icon: Upload },
 ];
 
-function Sidebar({ view, setView, mobileOpen, onNavigate }) {
+const ADMIN_NAV_ITEM = { key: "administradores", label: "Administradores", icon: Users };
+
+function getAllowedSections(permissoes) {
+  if (!permissoes || permissoes === "todas") return NAV_ITEMS.map((i) => i.key);
+  return permissoes
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
+  const isMaster = permissoes === "todas";
+  const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
+  const items = NAV_ITEMS.filter((item) => allowed.has(item.key));
+  const allItems = isMaster ? [...items, ADMIN_NAV_ITEM] : items;
+
   return (
     <div
       className={"app-sidebar" + (mobileOpen ? " open" : "")}
@@ -880,6 +895,8 @@ function Sidebar({ view, setView, mobileOpen, onNavigate }) {
         color: "#fff",
         padding: "22px 14px",
         minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <div style={{ padding: "0 8px 20px 8px", display: "flex", alignItems: "center", gap: 10 }}>
@@ -889,8 +906,8 @@ function Sidebar({ view, setView, mobileOpen, onNavigate }) {
           <div style={{ fontSize: 12, color: "#9AA6B8", marginTop: 2 }}>Escola Espírito Santo</div>
         </div>
       </div>
-      <nav>
-        {NAV_ITEMS.map((item) => {
+      <nav style={{ flex: 1 }}>
+        {allItems.map((item) => {
           const Icon = item.icon;
           const active = view === item.key;
           return (
@@ -920,6 +937,25 @@ function Sidebar({ view, setView, mobileOpen, onNavigate }) {
           );
         })}
       </nav>
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)", paddingTop: 12, marginTop: 12 }}>
+        <div style={{ fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 2 }}>{nome || "Administrador"}</div>
+        <div style={{ fontSize: 11, color: "#9AA6B8", marginBottom: 10 }}>{isMaster ? "Acesso total" : "Acesso restrito"}</div>
+        <button
+          onClick={onLogout}
+          style={{
+            width: "100%",
+            padding: "7px 10px",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            borderRadius: 6,
+            color: "#fff",
+            fontSize: 12.5,
+            cursor: "pointer",
+          }}
+        >
+          Sair
+        </button>
+      </div>
     </div>
   );
 }
@@ -2508,6 +2544,7 @@ function Chamados({ state, setState }) {
   const [novoMode, setNovoMode] = useState(false);
   const [form, setForm] = useState(novoChamadoForm());
   const [replyText, setReplyText] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const scrollRef = useRef(null);
 
   const chamados = state.chamados || [];
@@ -2562,6 +2599,12 @@ function Chamados({ state, setState }) {
     }));
   }
 
+  function excluirChamado(chamado) {
+    setState((prev) => ({ ...prev, chamados: prev.chamados.filter((c) => c.id !== chamado.id) }));
+    if (selectedId === chamado.id) setSelectedId(null);
+    setDeleteTarget(null);
+  }
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -2592,9 +2635,22 @@ function Chamados({ state, setState }) {
                     borderBottom: `1px solid ${COLORS.line}`,
                     cursor: "pointer",
                     background: selectedId === c.id ? COLORS.accentSoft : "transparent",
+                    position: "relative",
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>{c.assunto}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>{c.assunto}</div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteTarget(c);
+                      }}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, flexShrink: 0 }}
+                      aria-label="Excluir chamado"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</span>
                     <span
@@ -2684,13 +2740,23 @@ function Chamados({ state, setState }) {
                     {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade}
                   </div>
                 </div>
-                <Select value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: 160 }}>
-                  {CHAMADO_STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </Select>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <Select value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: 160 }}>
+                    {CHAMADO_STATUS_OPTIONS.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </Select>
+                  <button
+                    onClick={() => setDeleteTarget(selecionado)}
+                    style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "8px 10px" }}
+                    aria-label="Excluir chamado"
+                    title="Excluir chamado"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               </div>
 
               <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
@@ -2730,6 +2796,22 @@ function Chamados({ state, setState }) {
           )}
         </Panel>
       </div>
+
+      {deleteTarget && (
+        <Modal title="Excluir chamado" onClose={() => setDeleteTarget(null)} width={380}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Tem certeza que deseja excluir o chamado <strong>{deleteTarget.assunto}</strong>? Essa ação não pode ser desfeita.
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setDeleteTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => excluirChamado(deleteTarget)}>
+              Excluir
+            </Button>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }
@@ -3044,6 +3126,230 @@ const RESPONSIVE_CSS = `
 }
 `;
 
+// ---------- Administradores ----------
+
+const SECTION_LABELS = {
+  dashboard: "Painel",
+  inventario: "Inventário",
+  categorias: "Categorias",
+  areas: "Salas",
+  responsaveis: "Responsáveis",
+  relatorios: "Relatórios",
+  chamados: "Chamados",
+  importar: "Importar/Exportar",
+};
+
+function emptyAdminForm() {
+  return { nome: "", senha: "", acessoTotal: true, secoes: {} };
+}
+
+function Administradores({ admins, secret, onAdminsChanged }) {
+  const [lista, setLista] = useState(admins || []);
+  const [modal, setModal] = useState(null); // { mode: 'new'|'edit', original, form }
+  const [error, setError] = useState("");
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    setLista(admins || []);
+  }, [admins]);
+
+  function openNew() {
+    setModal({ mode: "new", form: emptyAdminForm() });
+    setError("");
+  }
+
+  function openEdit(a) {
+    const secoes = {};
+    if (a.permissoes !== "todas") {
+      a.permissoes.split(",").forEach((k) => (secoes[k.trim()] = true));
+    }
+    setModal({ mode: "edit", original: a, form: { nome: a.nome, senha: "", acessoTotal: a.permissoes === "todas", secoes } });
+    setError("");
+  }
+
+  async function persistir(novaLista) {
+    setBusy(true);
+    setStatus(null);
+    try {
+      const res = await backendPost("salvarAdmins", { secret, admins: novaLista });
+      setLista(novaLista);
+      onAdminsChanged(novaLista);
+      setStatus({ type: "ok", msg: "Salvo com sucesso." });
+    } catch (e) {
+      setStatus({ type: "error", msg: "Não foi possível salvar. Tente novamente." });
+    }
+    setBusy(false);
+  }
+
+  function save() {
+    const f = modal.form;
+    const nome = f.nome.trim();
+    if (!nome) return setError("Informe o nome.");
+    if (modal.mode === "new" && !f.senha.trim()) return setError("Defina uma senha.");
+    const dupNome = lista.some((a) => a !== modal.original && a.nome.toLowerCase() === nome.toLowerCase());
+    if (dupNome) return setError("Já existe um administrador com esse nome.");
+
+    const secoesEscolhidas = Object.keys(f.secoes).filter((k) => f.secoes[k]);
+    if (!f.acessoTotal && secoesEscolhidas.length === 0) return setError("Selecione pelo menos uma seção, ou marque acesso total.");
+
+    const permissoes = f.acessoTotal ? "todas" : secoesEscolhidas.join(",");
+    const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
+
+    const novoAdmin = { nome, senha: senhaFinal, permissoes };
+    let novaLista;
+    if (modal.mode === "new") {
+      novaLista = [...lista, novoAdmin];
+    } else {
+      novaLista = lista.map((a) => (a === modal.original ? novoAdmin : a));
+    }
+    setModal(null);
+    persistir(novaLista);
+  }
+
+  function remove(a) {
+    const novaLista = lista.filter((x) => x !== a);
+    setRemoveTarget(null);
+    persistir(novaLista);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Administradores</h2>
+        <Button variant="primary" icon={Plus} onClick={openNew}>
+          Novo administrador
+        </Button>
+      </div>
+
+      <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0, marginBottom: 16 }}>
+        Cada administrador entra com seu próprio nome e senha, e só vê no menu as seções que você marcar para ele. Quem tiver "acesso total" também pode gerenciar outros administradores.
+      </p>
+
+      {status && (
+        <div
+          style={{
+            marginBottom: 14,
+            padding: "10px 12px",
+            borderRadius: 6,
+            fontSize: 13,
+            background: status.type === "ok" ? "#E3EEE9" : COLORS.dangerSoft,
+            color: status.type === "ok" ? "#1F4D40" : COLORS.danger,
+          }}
+        >
+          {status.msg}
+        </div>
+      )}
+
+      <Panel>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+              <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+              <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Acesso</th>
+              <th style={{ padding: "8px 6px" }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {lista.map((a) => (
+              <tr key={a.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{a.nome}</td>
+                <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>
+                  {a.permissoes === "todas"
+                    ? "Acesso total"
+                    : a.permissoes
+                        .split(",")
+                        .map((k) => SECTION_LABELS[k.trim()] || k.trim())
+                        .join(", ")}
+                </td>
+                <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                  <button onClick={() => openEdit(a)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                    <Pencil size={15} />
+                  </button>
+                  {lista.length > 1 && (
+                    <button onClick={() => setRemoveTarget(a)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                      <Trash2 size={15} />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Panel>
+
+      {modal && (
+        <Modal title={modal.mode === "new" ? "Novo administrador" : "Editar administrador"} onClose={() => setModal(null)} width={460}>
+          <Field label="Nome">
+            <TextInput value={modal.form.nome} onChange={(e) => setModal({ ...modal, form: { ...modal.form, nome: e.target.value } })} />
+          </Field>
+          <Field label={modal.mode === "new" ? "Senha" : "Nova senha (deixe em branco para manter a atual)"}>
+            <TextInput type="text" value={modal.form.senha} onChange={(e) => setModal({ ...modal, form: { ...modal.form, senha: e.target.value } })} placeholder={modal.mode === "new" ? "" : "••••••••"} />
+          </Field>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={modal.form.acessoTotal}
+              onChange={(e) => setModal({ ...modal, form: { ...modal.form, acessoTotal: e.target.checked } })}
+            />
+            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Acesso total (vê tudo e pode gerenciar administradores)</span>
+          </label>
+          {!modal.form.acessoTotal && (
+            <div style={{ marginBottom: 10 }}>
+              <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 6 }}>Seções que esse administrador pode ver:</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                {NAV_ITEMS.map((item) => (
+                  <label key={item.key} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={!!modal.form.secoes[item.key]}
+                      onChange={(e) =>
+                        setModal({
+                          ...modal,
+                          form: { ...modal.form, secoes: { ...modal.form.secoes, [item.key]: e.target.checked } },
+                        })
+                      }
+                    />
+                    {item.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+          {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button variant="ghost" onClick={() => setModal(null)}>
+              Cancelar
+            </Button>
+            <Button variant="primary" icon={Check} onClick={save} disabled={busy}>
+              Salvar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {removeTarget && (
+        <Modal title="Excluir administrador" onClose={() => setRemoveTarget(null)} width={380}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Tem certeza que deseja excluir o administrador <strong>{removeTarget.nome}</strong>? Ele não vai mais conseguir entrar com essa senha.
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => remove(removeTarget)}>
+              Excluir
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+const SECRET_STORAGE_KEY = "inventario-ti-secret";
+
 function LoadingScreen() {
   return (
     <div style={{ padding: 60, textAlign: "center", color: COLORS.inkSoft, fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
@@ -3054,7 +3360,8 @@ function LoadingScreen() {
 
 function App() {
   const [secret, setSecret] = useState("");
-  const [auth, setAuth] = useState(null); // { isAdmin }
+  const [auth, setAuth] = useState(null); // { isAdmin, nome, permissoes }
+  const [admins, setAdmins] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -3067,12 +3374,45 @@ function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const saveTimer = useRef(null);
 
-  async function carregarInicial() {
+  function aplicarLoginAdmin(data, senhaUsada) {
+    setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas" });
+    setAdmins(data.admins || []);
+    setState({
+      prefixo: "CES",
+      categorias: [],
+      areas: [],
+      responsaveis: [],
+      inventario: [],
+      chamados: [],
+      ...data.state,
+    });
+    setSecret(senhaUsada);
     try {
-      const data = await backendGet("");
+      localStorage.setItem(SECRET_STORAGE_KEY, senhaUsada);
+    } catch (e) {}
+    const allowed = getAllowedSections(data.permissoes || "todas");
+    setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
+  }
+
+  async function carregarInicial() {
+    let savedSecret = "";
+    try {
+      savedSecret = localStorage.getItem(SECRET_STORAGE_KEY) || "";
+    } catch (e) {}
+    try {
+      const data = await backendGet(savedSecret);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
-      setAuth({ isAdmin: false });
-      setState(data.state);
+      if (savedSecret && data.isAdmin) {
+        aplicarLoginAdmin(data, savedSecret);
+      } else {
+        if (savedSecret) {
+          try {
+            localStorage.removeItem(SECRET_STORAGE_KEY);
+          } catch (e) {}
+        }
+        setAuth({ isAdmin: false });
+        setState(data.state);
+      }
       setLoaded(true);
     } catch (e) {
       setLoadError("Não foi possível conectar ao servidor do inventário. Veja o detalhe técnico abaixo — tire um print e me mande.");
@@ -3107,26 +3447,27 @@ function App() {
       const data = await backendGet(loginPassword);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
       if (data.isAdmin) {
-        setAuth({ isAdmin: true });
-        setState({
-          prefixo: "CES",
-          categorias: [],
-          areas: [],
-          responsaveis: [],
-          inventario: [],
-          chamados: [],
-          ...data.state,
-        });
-        setSecret(loginPassword);
+        aplicarLoginAdmin(data, loginPassword);
         setLoginOpen(false);
         setLoginPassword("");
       } else {
-        setLoginError("Senha incorreta. Confira a aba Config da planilha e tente de novo.");
+        setLoginError("Senha incorreta. Confira com quem cadastrou os administradores.");
       }
     } catch (e) {
       setLoginError("Não foi possível conectar (" + String((e && e.message) || e) + "). Verifique sua internet e tente de novo.");
     }
     setLoginBusy(false);
+  }
+
+  function logout() {
+    try {
+      localStorage.removeItem(SECRET_STORAGE_KEY);
+    } catch (e) {}
+    setSecret("");
+    setAuth(null);
+    setState(null);
+    setLoaded(false);
+    carregarInicial();
   }
 
   if (!loaded) {
@@ -3192,7 +3533,11 @@ function App() {
     relatorios: "Relatórios",
     chamados: "Chamados",
     importar: "Importar/Exportar",
+    administradores: "Administradores",
   };
+
+  const isMaster = auth.permissoes === "todas";
+  const allowed = new Set(getAllowedSections(auth.permissoes));
 
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
@@ -3214,20 +3559,24 @@ function App() {
         <Sidebar
           view={view}
           mobileOpen={mobileMenuOpen}
+          nome={auth.nome}
+          permissoes={auth.permissoes}
+          onLogout={logout}
           onNavigate={(key) => {
             setView(key);
             setMobileMenuOpen(false);
           }}
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
-          {view === "dashboard" && <Dashboard state={state} setView={setView} />}
-          {view === "inventario" && <Inventario state={state} setState={setState} />}
-          {view === "categorias" && <Categorias state={state} setState={setState} />}
-          {view === "areas" && <Areas state={state} setState={setState} />}
-          {view === "responsaveis" && <Responsaveis state={state} setState={setState} />}
-          {view === "relatorios" && <Relatorios state={state} />}
-          {view === "chamados" && <Chamados state={state} setState={setState} />}
-          {view === "importar" && <Importar state={state} setState={setState} />}
+          {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} />}
+          {view === "inventario" && allowed.has("inventario") && <Inventario state={state} setState={setState} />}
+          {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} />}
+          {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} />}
+          {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} />}
+          {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} />}
+          {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} />}
+          {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} />}
+          {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
       </div>
     </div>
