@@ -871,8 +871,12 @@ const NAV_ITEMS = [
 
 const ADMIN_NAV_ITEM = { key: "administradores", label: "Administradores", icon: Users };
 
+function isAcessoTotal(permissoes) {
+  return !permissoes || String(permissoes).trim().toLowerCase() === "todas";
+}
+
 function getAllowedSections(permissoes) {
-  if (!permissoes || permissoes === "todas") return NAV_ITEMS.map((i) => i.key);
+  if (isAcessoTotal(permissoes)) return NAV_ITEMS.map((i) => i.key);
   return permissoes
     .split(",")
     .map((s) => s.trim())
@@ -880,7 +884,7 @@ function getAllowedSections(permissoes) {
 }
 
 function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
-  const isMaster = permissoes === "todas";
+  const isMaster = isAcessoTotal(permissoes);
   const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
   const items = NAV_ITEMS.filter((item) => allowed.has(item.key));
   const allItems = isMaster ? [...items, ADMIN_NAV_ITEM] : items;
@@ -3165,7 +3169,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
     if (a.permissoes !== "todas") {
       a.permissoes.split(",").forEach((k) => (secoes[k.trim()] = true));
     }
-    setModal({ mode: "edit", original: a, form: { nome: a.nome, senha: "", acessoTotal: a.permissoes === "todas", secoes } });
+    setModal({ mode: "edit", original: a, form: { nome: a.nome, senha: "", acessoTotal: isAcessoTotal(a.permissoes), secoes } });
     setError("");
   }
 
@@ -3256,7 +3260,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
               <tr key={a.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                 <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{a.nome}</td>
                 <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>
-                  {a.permissoes === "todas"
+                  {isAcessoTotal(a.permissoes)
                     ? "Acesso total"
                     : a.permissoes
                         .split(",")
@@ -3536,7 +3540,7 @@ function App() {
     administradores: "Administradores",
   };
 
-  const isMaster = auth.permissoes === "todas";
+  const isMaster = isAcessoTotal(auth.permissoes);
   const allowed = new Set(getAllowedSections(auth.permissoes));
 
   return (
