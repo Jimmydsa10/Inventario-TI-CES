@@ -881,7 +881,15 @@ const NAV_ITEMS = [
   { key: "importar", label: "Importar/Exportar", icon: Upload },
 ];
 
+const NAV_GROUPS = [
+  { label: "Painel", keys: ["dashboard"] },
+  { label: "Inventário", keys: ["inventario", "categorias", "areas", "responsaveis"] },
+  { label: "Chamados", keys: ["chamados"] },
+  { label: "Administração", keys: ["relatorios", "importar", "administradores"] },
+];
+
 const ADMIN_NAV_ITEM = { key: "administradores", label: "Administradores", icon: Users };
+const NAV_ITEM_MAP = { ...Object.fromEntries(NAV_ITEMS.map((i) => [i.key, i])), administradores: ADMIN_NAV_ITEM };
 
 function isAcessoTotal(permissoes) {
   return !permissoes || String(permissoes).trim().toLowerCase() === "todas";
@@ -898,8 +906,11 @@ function getAllowedSections(permissoes) {
 function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
   const isMaster = isAcessoTotal(permissoes);
   const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
-  const items = NAV_ITEMS.filter((item) => allowed.has(item.key));
-  const allItems = isMaster ? [...items, ADMIN_NAV_ITEM] : items;
+
+  const groups = NAV_GROUPS.map((g) => ({
+    label: g.label,
+    items: g.keys.filter((k) => (k === "administradores" ? isMaster : allowed.has(k))).map((k) => NAV_ITEM_MAP[k]),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <div
@@ -923,13 +934,16 @@ function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
         </div>
       </div>
       <nav style={{ flex: 1 }}>
-        {allItems.map((item) => {
-          const Icon = item.icon;
-          const active = view === item.key;
-          return (
-            <button
-              key={item.key}
-              onClick={() => onNavigate(item.key)}
+        {groups.map((group) => (
+          <div key={group.label} style={{ marginBottom: 4 }}>
+            <div style={{ fontSize: 10, letterSpacing: 0.4, textTransform: "uppercase", color: "#7D8AA0", padding: "10px 10px 4px" }}>{group.label}</div>
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const active = view === item.key;
+              return (
+                <button
+                  key={item.key}
+                  onClick={() => onNavigate(item.key)}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -950,8 +964,10 @@ function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
               <Icon size={16} />
               {item.label}
             </button>
-          );
-        })}
+              );
+            })}
+          </div>
+        ))}
       </nav>
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)", paddingTop: 12, marginTop: 12 }}>
         <div style={{ fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 2 }}>{nome || "Administrador"}</div>
@@ -980,6 +996,7 @@ function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
 
 function Dashboard({ state, setView }) {
   const inv = state.inventario;
+  const [dashView, setDashView] = useState("graficos");
 
   const porStatus = useMemo(() => {
     const map = {};
@@ -1030,7 +1047,41 @@ function Dashboard({ state, setView }) {
 
   return (
     <div>
-      <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Painel geral</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Painel geral</h2>
+        <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3 }}>
+          <button
+            onClick={() => setDashView("kanban")}
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              padding: "7px 14px",
+              borderRadius: 6,
+              cursor: "pointer",
+              color: COLORS.ink,
+              background: dashView === "kanban" ? "#fff" : "transparent",
+              border: dashView === "kanban" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+            }}
+          >
+            Kanban
+          </button>
+          <button
+            onClick={() => setDashView("graficos")}
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              padding: "7px 14px",
+              borderRadius: 6,
+              cursor: "pointer",
+              color: COLORS.ink,
+              background: dashView === "graficos" ? "#fff" : "transparent",
+              border: dashView === "graficos" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+            }}
+          >
+            Gráficos
+          </button>
+        </div>
+      </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
         {kpis.map((k) => (
@@ -1041,6 +1092,10 @@ function Dashboard({ state, setView }) {
         ))}
       </div>
 
+      {dashView === "kanban" ? (
+        <EquipamentosKanban inventario={inv} />
+      ) : (
+        <>
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
         <Panel title="Equipamentos por categoria">
           <BarChartHorizontal data={porCategoria} />
@@ -1114,6 +1169,52 @@ function Dashboard({ state, setView }) {
           )}
         </Panel>
       </div>
+      </>
+      )}
+    </div>
+  );
+}
+
+function EquipamentosKanban({ inventario }) {
+  const colunas = useMemo(() => {
+    const map = {};
+    STATUS_OPTIONS.forEach((s) => (map[s] = []));
+    inventario.forEach((r) => {
+      if (!map[r.status]) map[r.status] = [];
+      map[r.status].push(r);
+    });
+    return STATUS_OPTIONS.map((s) => ({ status: s, itens: map[s] || [] }));
+  }, [inventario]);
+
+  const LIMITE = 40;
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(${STATUS_OPTIONS.length}, minmax(0,1fr))`, gap: 12 }}>
+      {colunas.map((col) => (
+        <div key={col.status}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 999, background: STATUS_COLORS[col.status], display: "inline-block", flexShrink: 0 }} />
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink }}>{col.status}</span>
+            <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{col.itens.length}</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 520, overflow: "auto" }}>
+            {col.itens.length === 0 ? (
+              <div style={{ fontSize: 12, color: COLORS.inkSoft, padding: "8px 2px" }}>—</div>
+            ) : (
+              col.itens.slice(0, LIMITE).map((r) => (
+                <div key={r.id} style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 10 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.ink }}>{r.categoria}</div>
+                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 2 }}>{r.sala || "Sem sala"}</div>
+                  <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 2, fontFamily: "ui-monospace, monospace" }}>{r.id}</div>
+                </div>
+              ))
+            )}
+            {col.itens.length > LIMITE && (
+              <div style={{ fontSize: 11.5, color: COLORS.inkSoft, textAlign: "center", padding: "4px 0" }}>+{col.itens.length - LIMITE} mais</div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
