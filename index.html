@@ -646,6 +646,36 @@ function uid(prefix) {
   return prefix + "-" + Math.random().toString(36).slice(2, 8).toUpperCase();
 }
 
+function resizeImageParaBase64(file, maxDim, qualidade) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width;
+        let h = img.height;
+        if (w > h && w > maxDim) {
+          h = Math.round(h * (maxDim / w));
+          w = maxDim;
+        } else if (h > maxDim) {
+          w = Math.round(w * (maxDim / h));
+          h = maxDim;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", qualidade));
+      };
+      img.onerror = reject;
+      img.src = ev.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 function nextPatrimonio(inventario, prefixo) {
   let max = 0;
   inventario.forEach((r) => {
@@ -2662,6 +2692,7 @@ function Chamados({ state, setState }) {
   const [form, setForm] = useState(novoChamadoForm());
   const [replyText, setReplyText] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [viewMode, setViewMode] = useState("lista");
   const scrollRef = useRef(null);
 
   const chamados = state.chamados || [];
@@ -2724,13 +2755,60 @@ function Chamados({ state, setState }) {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
-        <Button variant="primary" icon={Plus} onClick={abrirNovo}>
-          Novo chamado
-        </Button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3 }}>
+            <button
+              onClick={() => setViewMode("lista")}
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                padding: "7px 14px",
+                borderRadius: 6,
+                cursor: "pointer",
+                color: COLORS.ink,
+                background: viewMode === "lista" ? "#fff" : "transparent",
+                border: viewMode === "lista" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+              }}
+            >
+              Lista
+            </button>
+            <button
+              onClick={() => setViewMode("quadro")}
+              style={{
+                fontSize: 12.5,
+                fontWeight: 600,
+                padding: "7px 14px",
+                borderRadius: 6,
+                cursor: "pointer",
+                color: COLORS.ink,
+                background: viewMode === "quadro" ? "#fff" : "transparent",
+                border: viewMode === "quadro" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+              }}
+            >
+              Quadro
+            </button>
+          </div>
+          <Button variant="primary" icon={Plus} onClick={abrirNovo}>
+            Novo chamado
+          </Button>
+        </div>
       </div>
 
+      {viewMode === "quadro" && (
+        <ChamadosKanban
+          chamados={ordenados}
+          onSelect={(c) => {
+            setSelectedId(c.id);
+            setNovoMode(false);
+            setViewMode("lista");
+          }}
+        />
+      )}
+
+      {viewMode === "lista" && (
+      <>
       <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, height: 560 }}>
         <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
@@ -2848,13 +2926,20 @@ function Chamados({ state, setState }) {
             <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
-                  <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
-                    {selecionado.solicitante ? "De " + selecionado.solicitante + " · " : ""}
-                    {selecionado.sala || "Sem sala"}
-                    {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade}
+              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  {selecionado.foto && (
+                    <a href={selecionado.foto} target="_blank" rel="noreferrer">
+                      <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}`, flexShrink: 0 }} />
+                    </a>
+                  )}
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
+                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
+                      {selecionado.solicitante ? "De " + selecionado.solicitante + " · " : ""}
+                      {selecionado.sala || "Sem sala"}
+                      {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -2913,6 +2998,8 @@ function Chamados({ state, setState }) {
           )}
         </Panel>
       </div>
+      </>
+      )}
 
       {deleteTarget && (
         <Modal title="Excluir chamado" onClose={() => setDeleteTarget(null)} width={380}>
@@ -2929,6 +3016,65 @@ function Chamados({ state, setState }) {
           </div>
         </Modal>
       )}
+    </div>
+  );
+}
+
+function ChamadosKanban({ chamados, onSelect }) {
+  const colunas = useMemo(() => {
+    const map = {};
+    CHAMADO_STATUS_OPTIONS.forEach((s) => (map[s] = []));
+    chamados.forEach((c) => {
+      if (!map[c.status]) map[c.status] = [];
+      map[c.status].push(c);
+    });
+    return CHAMADO_STATUS_OPTIONS.map((s) => ({ status: s, itens: map[s] || [] }));
+  }, [chamados]);
+
+  return (
+    <div className="grid-3" style={{ display: "grid", gridTemplateColumns: `repeat(${CHAMADO_STATUS_OPTIONS.length}, minmax(0,1fr))`, gap: 14 }}>
+      {colunas.map((col) => (
+        <div key={col.status}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+            <span style={{ width: 8, height: 8, borderRadius: 999, background: CHAMADO_STATUS_COLORS[col.status], flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink }}>{col.status}</span>
+            <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{col.itens.length}</span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 560, overflow: "auto" }}>
+            {col.itens.length === 0 ? (
+              <div style={{ fontSize: 12, color: COLORS.inkSoft, padding: "8px 2px" }}>—</div>
+            ) : (
+              col.itens.map((c) => (
+                <div
+                  key={c.id}
+                  onClick={() => onSelect(c)}
+                  style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 12, cursor: "pointer" }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>{c.assunto}</div>
+                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginBottom: 6 }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    {c.foto ? <img src={c.foto} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover" }} /> : <span />}
+                    <span
+                      style={{
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        color:
+                          c.prioridade === "Alta" ? COLORS.danger : c.prioridade === "Média" ? COLORS.accent : COLORS.inkSoft,
+                        background:
+                          c.prioridade === "Alta" ? COLORS.dangerSoft : c.prioridade === "Média" ? COLORS.accentSoft : "#EEEEEE",
+                      }}
+                    >
+                      {c.prioridade}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -3126,7 +3272,7 @@ function TopBarSolicitante({ nome, onAdminClick, onLogout }) {
 }
 
 function novoChamadoSolicitanteForm() {
-  return { sala: "", categoria: "", prioridade: "Média", texto: "" };
+  return { sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
 }
 
 function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout }) {
@@ -3139,6 +3285,8 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
   const [replyText, setReplyText] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
+  const [fotoBusy, setFotoBusy] = useState(false);
+  const fotoInputRef = useRef(null);
   const scrollRef = useRef(null);
 
   const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
@@ -3147,6 +3295,18 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [selecionado, selecionado && selecionado.mensagens.length]);
+
+  async function handleFoto(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setFotoBusy(true);
+    try {
+      const dataUrl = await resizeImageParaBase64(file, 800, 0.6);
+      setForm((prev) => ({ ...prev, foto: dataUrl }));
+    } catch (err) {}
+    setFotoBusy(false);
+    if (fotoInputRef.current) fotoInputRef.current.value = "";
+  }
 
   async function enviarNovoChamado() {
     const texto = form.texto.trim();
@@ -3161,6 +3321,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
       sala: form.sala,
       categoria: form.categoria,
       prioridade: form.prioridade,
+      foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
       mensagens: [{ autor: "solicitante", texto, data: new Date().toISOString() }],
@@ -3276,6 +3437,46 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
                       style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
                     />
                   </Field>
+                  <div>
+                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>Foto do problema (opcional)</div>
+                    <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
+                    <div style={{ display: "flex", gap: 8 }}>
+                      {form.foto && (
+                        <div style={{ width: 64, height: 64, borderRadius: 8, overflow: "hidden", border: `1px solid ${COLORS.line}`, position: "relative" }}>
+                          <img src={form.foto} alt="Foto anexada" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <button
+                            onClick={() => setForm((prev) => ({ ...prev, foto: "" }))}
+                            style={{ position: "absolute", top: 2, right: 2, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: 4, color: "#fff", cursor: "pointer", padding: 2 }}
+                            aria-label="Remover foto"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
+                        disabled={fotoBusy}
+                        style={{
+                          width: 64,
+                          height: 64,
+                          borderRadius: 8,
+                          border: `1px dashed ${COLORS.lineStrong}`,
+                          background: "#fff",
+                          color: COLORS.inkSoft,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 4,
+                          cursor: "pointer",
+                          fontSize: 10,
+                        }}
+                      >
+                        <Plus size={16} />
+                        {fotoBusy ? "..." : "Adicionar"}
+                      </button>
+                    </div>
+                  </div>
                   {erro && <div style={{ color: COLORS.danger, fontSize: 13 }}>{erro}</div>}
                 </div>
                 <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
@@ -3293,12 +3494,19 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
               <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}` }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
-                  <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
-                    {selecionado.sala || "Sem sala"}
-                    {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade} ·{" "}
-                    <span style={{ color: CHAMADO_STATUS_COLORS[selecionado.status], fontWeight: 600 }}>{selecionado.status}</span>
+                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  {selecionado.foto && (
+                    <a href={selecionado.foto} target="_blank" rel="noreferrer">
+                      <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}`, flexShrink: 0 }} />
+                    </a>
+                  )}
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
+                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
+                      {selecionado.sala || "Sem sala"}
+                      {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade} ·{" "}
+                      <span style={{ color: CHAMADO_STATUS_COLORS[selecionado.status], fontWeight: 600 }}>{selecionado.status}</span>
+                    </div>
                   </div>
                 </div>
                 <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
