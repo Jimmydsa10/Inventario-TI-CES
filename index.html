@@ -224,6 +224,16 @@ async function backendGet(secret) {
   return jsonpRequest(url);
 }
 
+async function backendGetUser(nome, senha) {
+  const url = BACKEND_URL + "?userNome=" + encodeURIComponent(nome) + "&userSenha=" + encodeURIComponent(senha || "");
+  return jsonpRequest(url);
+}
+
+async function backendCreateAccount(nome, senha) {
+  const url = BACKEND_URL + "?acao=criarConta&novoNome=" + encodeURIComponent(nome) + "&novaSenha=" + encodeURIComponent(senha);
+  return jsonpRequest(url);
+}
+
 async function backendPost(action, payload) {
   try {
     await fetch(BACKEND_URL, {
@@ -2849,31 +2859,176 @@ function ErrorScreen({ msg, detail }) {
   );
 }
 
-function TopBarSolicitante({ onAdminClick }) {
+function LoginPublico({ onLoggedIn, onAdminClick }) {
+  const [tab, setTab] = useState("entrar");
+  const [nome, setNome] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmSenha, setConfirmSenha] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [erro, setErro] = useState("");
+
+  async function entrar() {
+    if (!nome.trim() || !senha.trim()) return setErro("Preencha nome e senha.");
+    setBusy(true);
+    setErro("");
+    try {
+      const data = await backendGetUser(nome.trim(), senha);
+      if (!data.ok) throw new Error(data.error || "Erro desconhecido");
+      if (data.isUser) {
+        onLoggedIn({ nome: data.nome, senha }, data.state);
+      } else {
+        setErro(data.error || "Nome ou senha incorretos.");
+      }
+    } catch (e) {
+      setErro("Não foi possível conectar (" + String((e && e.message) || e) + ").");
+    }
+    setBusy(false);
+  }
+
+  async function criarConta() {
+    if (!nome.trim() || !senha.trim()) return setErro("Preencha nome e senha.");
+    if (senha !== confirmSenha) return setErro("As senhas não coincidem.");
+    setBusy(true);
+    setErro("");
+    try {
+      const data = await backendCreateAccount(nome.trim(), senha);
+      if (!data.ok) {
+        setErro(data.error || "Não foi possível criar a conta.");
+        setBusy(false);
+        return;
+      }
+      const login = await backendGetUser(nome.trim(), senha);
+      if (login.ok && login.isUser) {
+        onLoggedIn({ nome: login.nome, senha }, login.state);
+      } else {
+        setTab("entrar");
+        setErro("Conta criada! Agora entre com sua senha.");
+      }
+    } catch (e) {
+      setErro("Não foi possível conectar (" + String((e && e.message) || e) + ").");
+    }
+    setBusy(false);
+  }
+
+  function onSubmit() {
+    if (tab === "entrar") entrar();
+    else criarConta();
+  }
+
+  return (
+    <div style={{ minHeight: 640, background: COLORS.paper, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      <div style={{ width: "100%", maxWidth: 340, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "28px 24px", textAlign: "center" }}>
+        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 64, height: 64, borderRadius: 12, margin: "0 auto 8px" }} />
+        <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>Chamados de TI</div>
+        <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 22 }}>Escola Espírito Santo</div>
+
+        <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3, marginBottom: 18 }}>
+          <button
+            onClick={() => {
+              setTab("entrar");
+              setErro("");
+            }}
+            style={{
+              flex: 1,
+              textAlign: "center",
+              fontSize: 12.5,
+              fontWeight: 600,
+              color: COLORS.ink,
+              background: tab === "entrar" ? "#fff" : "transparent",
+              border: tab === "entrar" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+              borderRadius: 6,
+              padding: "7px 0",
+              cursor: "pointer",
+            }}
+          >
+            Entrar
+          </button>
+          <button
+            onClick={() => {
+              setTab("criar");
+              setErro("");
+            }}
+            style={{
+              flex: 1,
+              textAlign: "center",
+              fontSize: 12.5,
+              fontWeight: tab === "criar" ? 600 : 500,
+              color: tab === "criar" ? COLORS.ink : COLORS.inkSoft,
+              background: tab === "criar" ? "#fff" : "transparent",
+              border: tab === "criar" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+              borderRadius: 6,
+              padding: "7px 0",
+              cursor: "pointer",
+            }}
+          >
+            Criar conta
+          </button>
+        </div>
+
+        <div style={{ textAlign: "left" }}>
+          <Field label="Nome">
+            <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onSubmit()} placeholder="Como podemos te chamar" />
+          </Field>
+          <Field label="Senha">
+            <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onSubmit()} />
+          </Field>
+          {tab === "criar" && (
+            <Field label="Confirmar senha">
+              <TextInput type="password" value={confirmSenha} onChange={(e) => setConfirmSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onSubmit()} />
+            </Field>
+          )}
+        </div>
+
+        {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
+
+        <Button variant="primary" onClick={onSubmit} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+          {busy ? "Aguarde..." : tab === "entrar" ? "Entrar" : "Criar conta"}
+        </Button>
+
+        <button
+          onClick={onAdminClick}
+          style={{ background: "none", border: "none", color: COLORS.inkSoft, fontSize: 12, cursor: "pointer", marginTop: 18, textDecoration: "underline" }}
+        >
+          Sou administrador
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TopBarSolicitante({ nome, onAdminClick, onLogout }) {
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: COLORS.ink, color: "#fff" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <img src={LOGO_DATA_URL} alt="Logo" style={{ width: 30, height: 30, background: "#fff", borderRadius: 6, padding: 2 }} />
         <div>
           <div style={{ fontSize: 13, fontWeight: 700 }}>Chamados de TI</div>
-          <div style={{ fontSize: 11.5, color: "#9AA6B8" }}>Escola Espírito Santo</div>
+          <div style={{ fontSize: 11.5, color: "#9AA6B8" }}>Olá, {nome}</div>
         </div>
       </div>
-      <button
-        onClick={onAdminClick}
-        style={{ background: "none", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 6, color: "#fff", fontSize: 12, padding: "6px 10px", cursor: "pointer" }}
-      >
-        Sou administrador
-      </button>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button
+          onClick={onAdminClick}
+          style={{ background: "none", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 6, color: "#fff", fontSize: 12, padding: "6px 10px", cursor: "pointer" }}
+        >
+          Sou administrador
+        </button>
+        <button
+          onClick={onLogout}
+          style={{ background: "none", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 6, color: "#fff", fontSize: 12, padding: "6px 10px", cursor: "pointer" }}
+        >
+          Sair
+        </button>
+      </div>
     </div>
   );
 }
 
 function novoChamadoSolicitanteForm() {
-  return { nome: "", sala: "", categoria: "", prioridade: "Média", texto: "" };
+  return { sala: "", categoria: "", prioridade: "Média", texto: "" };
 }
 
-function ChamadosSolicitante({ state, setState, onAdminClick }) {
+function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout }) {
   const areas = state.areas || [];
   const categorias = state.categorias || [];
   const chamados = state.chamados || [];
@@ -2894,14 +3049,14 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
 
   async function enviarNovoChamado() {
     const texto = form.texto.trim();
-    const nome = form.nome.trim();
-    if (!texto || !nome) return;
+    if (!texto) return;
     setBusy(true);
     setErro("");
     const chamado = {
       id: uid("CH"),
       assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
-      solicitante: nome,
+      solicitante: userAuth.nome,
+      criadoPor: userAuth.nome,
       sala: form.sala,
       categoria: form.categoria,
       prioridade: form.prioridade,
@@ -2910,7 +3065,7 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
       mensagens: [{ autor: "solicitante", texto, data: new Date().toISOString() }],
     };
     try {
-      const res = await backendPost("novoChamado", { chamado });
+      const res = await backendPost("novoChamado", { chamado, userNome: userAuth.nome, userSenha: userAuth.senha });
       if (!res.ok) throw new Error(res.error || "Erro ao abrir chamado");
       setState((prev) => ({ ...prev, chamados: [...(prev.chamados || []), chamado] }));
       setNovoMode(false);
@@ -2929,7 +3084,7 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
     setErro("");
     const mensagem = { autor: "solicitante", texto, data: new Date().toISOString() };
     try {
-      const res = await backendPost("novaMensagem", { chamadoId: selecionado.id, mensagem });
+      const res = await backendPost("novaMensagem", { chamadoId: selecionado.id, mensagem, userNome: userAuth.nome, userSenha: userAuth.senha });
       if (!res.ok) throw new Error(res.error || "Erro ao enviar mensagem");
       setState((prev) => ({
         ...prev,
@@ -2944,7 +3099,7 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
 
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      <TopBarSolicitante onAdminClick={onAdminClick} />
+      <TopBarSolicitante nome={userAuth.nome} onAdminClick={onAdminClick} onLogout={onLogout} />
       <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
@@ -2986,11 +3141,6 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
                 <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
-                  <div style={{ marginBottom: 14 }}>
-                    <Field label="Seu nome">
-                      <TextInput value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Como podemos te chamar" />
-                    </Field>
-                  </div>
                   <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
@@ -3033,7 +3183,7 @@ function ChamadosSolicitante({ state, setState, onAdminClick }) {
                       Cancelar
                     </Button>
                   )}
-                  <Button variant="primary" icon={Send} onClick={enviarNovoChamado} disabled={busy || !form.nome.trim() || !form.texto.trim()}>
+                  <Button variant="primary" icon={Send} onClick={enviarNovoChamado} disabled={busy || !form.texto.trim()}>
                     {busy ? "Enviando..." : "Abrir chamado"}
                   </Button>
                 </div>
@@ -3355,6 +3505,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
 }
 
 const SECRET_STORAGE_KEY = "inventario-ti-secret";
+const USER_STORAGE_KEY = "inventario-ti-user";
 
 function LoadingScreen() {
   return (
@@ -3367,6 +3518,7 @@ function LoadingScreen() {
 function App() {
   const [secret, setSecret] = useState("");
   const [auth, setAuth] = useState(null); // { isAdmin, nome, permissoes }
+  const [userAuth, setUserAuth] = useState(null); // { nome, senha } — solicitante logado
   const [admins, setAdmins] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -3383,6 +3535,10 @@ function App() {
   function aplicarLoginAdmin(data, senhaUsada) {
     setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas" });
     setAdmins(data.admins || []);
+    setUserAuth(null);
+    try {
+      localStorage.removeItem(USER_STORAGE_KEY);
+    } catch (e) {}
     setState({
       prefixo: "CES",
       categorias: [],
@@ -3400,25 +3556,67 @@ function App() {
     setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
   }
 
+  function aplicarLoginUsuario(userCreds, estadoUsuario) {
+    setAuth({ isAdmin: false });
+    setUserAuth(userCreds);
+    setState(estadoUsuario);
+    try {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
+    } catch (e) {}
+  }
+
+  function logoutUsuario() {
+    try {
+      localStorage.removeItem(USER_STORAGE_KEY);
+    } catch (e) {}
+    setUserAuth(null);
+    setAuth(null);
+    setState(null);
+    setLoaded(false);
+    carregarInicial();
+  }
+
   async function carregarInicial() {
     let savedSecret = "";
+    let savedUser = null;
     try {
       savedSecret = localStorage.getItem(SECRET_STORAGE_KEY) || "";
     } catch (e) {}
     try {
-      const data = await backendGet(savedSecret);
-      if (!data.ok) throw new Error(data.error || "Erro desconhecido");
-      if (savedSecret && data.isAdmin) {
-        aplicarLoginAdmin(data, savedSecret);
-      } else {
-        if (savedSecret) {
-          try {
-            localStorage.removeItem(SECRET_STORAGE_KEY);
-          } catch (e) {}
+      const raw = localStorage.getItem(USER_STORAGE_KEY);
+      if (raw) savedUser = JSON.parse(raw);
+    } catch (e) {}
+
+    try {
+      if (savedSecret) {
+        const data = await backendGet(savedSecret);
+        if (!data.ok) throw new Error(data.error || "Erro desconhecido");
+        if (data.isAdmin) {
+          aplicarLoginAdmin(data, savedSecret);
+          setLoaded(true);
+          return;
         }
-        setAuth({ isAdmin: false });
-        setState(data.state);
+        try {
+          localStorage.removeItem(SECRET_STORAGE_KEY);
+        } catch (e) {}
       }
+
+      if (savedUser && savedUser.nome) {
+        const data = await backendGetUser(savedUser.nome, savedUser.senha || "");
+        if (!data.ok) throw new Error(data.error || "Erro desconhecido");
+        if (data.isUser) {
+          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state);
+          setLoaded(true);
+          return;
+        }
+        try {
+          localStorage.removeItem(USER_STORAGE_KEY);
+        } catch (e) {}
+      }
+
+      setAuth({ isAdmin: false });
+      setUserAuth(null);
+      setState(null);
       setLoaded(true);
     } catch (e) {
       setLoadError("Não foi possível conectar ao servidor do inventário. Veja o detalhe técnico abaixo — tire um print e me mande.");
@@ -3485,47 +3683,59 @@ function App() {
   }
 
   if (!auth.isAdmin) {
-    return (
-      <>
-        <style>{RESPONSIVE_CSS}</style>
-        <ChamadosSolicitante state={state} setState={setState} onAdminClick={() => setLoginOpen(true)} />
-        {loginOpen && (
-          <Modal
-            title="Entrar como administrador"
-            onClose={() => {
+    const adminModal = loginOpen && (
+      <Modal
+        title="Entrar como administrador"
+        onClose={() => {
+          setLoginOpen(false);
+          setLoginError("");
+          setLoginPassword("");
+        }}
+        width={360}
+      >
+        <Field label="Senha de administrador">
+          <TextInput
+            type="password"
+            value={loginPassword}
+            onChange={(e) => setLoginPassword(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
+            autoFocus
+          />
+        </Field>
+        {loginError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{loginError}</div>}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <Button
+            variant="ghost"
+            onClick={() => {
               setLoginOpen(false);
               setLoginError("");
               setLoginPassword("");
             }}
-            width={360}
           >
-            <Field label="Senha de administrador">
-              <TextInput
-                type="password"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
-                autoFocus
-              />
-            </Field>
-            {loginError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{loginError}</div>}
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setLoginOpen(false);
-                  setLoginError("");
-                  setLoginPassword("");
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button variant="primary" icon={Check} onClick={tentarLogin} disabled={loginBusy}>
-                {loginBusy ? "Entrando..." : "Entrar"}
-              </Button>
-            </div>
-          </Modal>
-        )}
+            Cancelar
+          </Button>
+          <Button variant="primary" icon={Check} onClick={tentarLogin} disabled={loginBusy}>
+            {loginBusy ? "Entrando..." : "Entrar"}
+          </Button>
+        </div>
+      </Modal>
+    );
+
+    if (!userAuth) {
+      return (
+        <>
+          <style>{RESPONSIVE_CSS}</style>
+          <LoginPublico onLoggedIn={aplicarLoginUsuario} onAdminClick={() => setLoginOpen(true)} />
+          {adminModal}
+        </>
+      );
+    }
+
+    return (
+      <>
+        <style>{RESPONSIVE_CSS}</style>
+        <ChamadosSolicitante state={state} setState={setState} userAuth={userAuth} onAdminClick={() => setLoginOpen(true)} onLogout={logoutUsuario} />
+        {adminModal}
       </>
     );
   }
