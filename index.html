@@ -2378,7 +2378,7 @@ const DIMENSOES = [
   { key: "responsavel", label: "Por responsável" },
 ];
 
-function Relatorios({ state }) {
+function Relatorios({ state, historico }) {
   const [dimensao, setDimensao] = useState("sala");
   const [valor, setValor] = useState("");
 
@@ -2513,6 +2513,42 @@ function Relatorios({ state }) {
           </div>
         </Panel>
       </div>
+
+      {historico && historico.length > 0 && (
+        <Panel title="Histórico mensal" style={{ marginTop: 16 }}>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                  {["Mês", "Total equip.", "Em uso", "Em manutenção", "Precisa manutenção", "Chamados abertos", "Chamados resolvidos"].map((h) => (
+                    <th key={h} style={{ textAlign: "left", padding: "7px 6px", color: COLORS.inkSoft, fontSize: 11.5 }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {[...historico]
+                  .sort((a, b) => a.mes.localeCompare(b.mes))
+                  .map((h) => (
+                    <tr key={h.mes} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                      <td style={{ padding: "7px 6px", color: COLORS.ink, fontWeight: 600 }}>{h.mes}</td>
+                      <td style={{ padding: "7px 6px", color: COLORS.inkSoft }}>{h.totalEquipamentos}</td>
+                      <td style={{ padding: "7px 6px", color: COLORS.inkSoft }}>{h.emUso}</td>
+                      <td style={{ padding: "7px 6px", color: COLORS.inkSoft }}>{h.emManutencao}</td>
+                      <td style={{ padding: "7px 6px", color: COLORS.inkSoft }}>{h.precisaManutencao}</td>
+                      <td style={{ padding: "7px 6px", color: COLORS.inkSoft }}>{h.chamadosAbertos}</td>
+                      <td style={{ padding: "7px 6px", color: COLORS.inkSoft }}>{h.chamadosResolvidos}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+          <p style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 10, marginBottom: 0 }}>
+            Um retrato novo é guardado automaticamente uma vez por mês, na primeira vez que algo é salvo naquele mês.
+          </p>
+        </Panel>
+      )}
     </div>
   );
 }
@@ -3956,6 +3992,7 @@ function App() {
   const [auth, setAuth] = useState(null); // { isAdmin, nome, permissoes }
   const [userAuth, setUserAuth] = useState(null); // { nome, senha } — solicitante logado
   const [admins, setAdmins] = useState([]);
+  const [historico, setHistorico] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState(null);
@@ -3979,6 +4016,7 @@ function App() {
   function aplicarLoginAdmin(data, senhaUsada) {
     setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas" });
     setAdmins(data.admins || []);
+    setHistorico(data.historico || []);
     setUserAuth(null);
     try {
       localStorage.removeItem(USER_STORAGE_KEY);
@@ -4239,7 +4277,7 @@ function App() {
           {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} />}
           {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} />}
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} />}
-          {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} />}
+          {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
           {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} />}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
