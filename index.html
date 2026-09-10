@@ -75,6 +75,7 @@ const ICON_PATHS = {
   message: "M4 4h16v12H8l-4 4V4z",
   send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
   menu: "M3 6h18M3 12h18M3 18h18",
+  qrcode: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm14 0h2v2h-2zm-4 0h2v2h-2zm4 4h2v2h-2zm-4 0h2v2h-2z",
 };
 
 function Icon({ name, size = 16, ...rest }) {
@@ -109,6 +110,7 @@ const FileSpreadsheet = IconWrap("filesheet");
 const MessageSquare = IconWrap("message");
 const Send = IconWrap("send");
 const Menu = IconWrap("menu");
+const QrCode = IconWrap("qrcode");
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
@@ -1059,6 +1061,13 @@ function Dashboard({ state, setView }) {
     [inv]
   );
 
+  const garantiasVencendo = useMemo(() => {
+    return inv
+      .map((r) => ({ item: r, dias: diasParaVencerGarantia(r.dataCompra, r.vidaUtil) }))
+      .filter((x) => x.dias !== null && x.dias <= 90)
+      .sort((a, b) => a.dias - b.dias);
+  }, [inv]);
+
   const total = inv.length;
   const emUso = inv.filter((r) => r.status === "Em uso").length;
   const emManutencao = inv.filter((r) => r.status === "Em manutenção").length;
@@ -1199,6 +1208,36 @@ function Dashboard({ state, setView }) {
           )}
         </Panel>
       </div>
+
+      {garantiasVencendo.length > 0 && (
+        <Panel title="Garantia/vida útil vencendo" style={{ marginTop: 16 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 260, overflow: "auto" }}>
+            {garantiasVencendo.map(({ item, dias }) => (
+              <div key={item.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: COLORS.paper, borderRadius: 8, padding: "10px 14px" }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    {item.categoria} {item.marca ? "· " + item.marca : ""} — <span style={{ fontFamily: "ui-monospace, monospace", fontWeight: 400 }}>{item.id}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 2 }}>{item.sala || "Sem sala"}</div>
+                </div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    padding: "3px 10px",
+                    borderRadius: 999,
+                    whiteSpace: "nowrap",
+                    color: dias < 0 || dias <= 30 ? COLORS.danger : COLORS.accent,
+                    background: dias < 0 || dias <= 30 ? COLORS.dangerSoft : COLORS.accentSoft,
+                  }}
+                >
+                  {dias < 0 ? `Vencida há ${Math.abs(dias)} dias` : `Vence em ${dias} dias`}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      )}
       </>
       )}
     </div>
@@ -1267,7 +1306,22 @@ function emptyEquipForm() {
     dataCompra: "",
     valor: "",
     vidaUtil: "",
+    historicoManutencao: [],
   };
+}
+
+function diasParaVencerGarantia(dataCompra, vidaUtilAnos) {
+  if (!dataCompra || !vidaUtilAnos) return null;
+  const anos = parseFloat(vidaUtilAnos);
+  if (!anos || isNaN(anos)) return null;
+  const compra = new Date(dataCompra);
+  if (isNaN(compra.getTime())) return null;
+  const vencimento = new Date(compra);
+  vencimento.setFullYear(vencimento.getFullYear() + Math.floor(anos));
+  vencimento.setDate(vencimento.getDate() + Math.round((anos % 1) * 365));
+  const hoje = new Date();
+  const diffMs = vencimento.getTime() - hoje.getTime();
+  return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
 function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
@@ -1381,6 +1435,13 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
       </Field>
       <Field label="Vida útil estimada (anos)">
         <TextInput type="number" value={form.vidaUtil} onChange={(e) => setForm({ ...form, vidaUtil: e.target.value })} placeholder="Opcional" />
+        {(() => {
+          const dias = diasParaVencerGarantia(form.dataCompra, form.vidaUtil);
+          if (dias === null) return null;
+          const cor = dias < 0 ? COLORS.danger : dias <= 30 ? COLORS.danger : dias <= 90 ? COLORS.accent : COLORS.inkSoft;
+          const texto = dias < 0 ? `Vencida há ${Math.abs(dias)} dia(s)` : `Vence em ${dias} dia(s)`;
+          return <div style={{ fontSize: 11.5, color: cor, marginTop: 4 }}>{texto}</div>;
+        })()}
       </Field>
       <div style={{ gridColumn: "1 / -1" }}>
         <Field label="Observações">
@@ -1392,11 +1453,23 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
           />
         </Field>
       </div>
+      {!isNew && form.historicoManutencao && form.historicoManutencao.length > 0 && (
+        <div style={{ gridColumn: "1 / -1" }}>
+          <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 6 }}>Histórico de status</div>
+          <div style={{ border: `1px solid ${COLORS.line}`, borderRadius: 6, maxHeight: 140, overflow: "auto" }}>
+            {[...form.historicoManutencao].reverse().map((h, i) => (
+              <div key={i} style={{ padding: "7px 10px", fontSize: 12, color: COLORS.inkSoft, borderBottom: i === form.historicoManutencao.length - 1 ? "none" : `1px solid ${COLORS.line}` }}>
+                {formatDateTime(h.data)} — {h.de} → <strong style={{ color: COLORS.ink }}>{h.para}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function Inventario({ state, setState }) {
+function Inventario({ state, setState, pendingPatrimonio, onConsumePending }) {
   const [search, setSearch] = useState("");
   const [fCategoria, setFCategoria] = useState("");
   const [fSala, setFSala] = useState("");
@@ -1408,6 +1481,17 @@ function Inventario({ state, setState }) {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [selected, setSelected] = useState(() => new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [qrTarget, setQrTarget] = useState(null);
+
+  useEffect(() => {
+    if (!pendingPatrimonio) return;
+    const item = state.inventario.find((r) => r.id === pendingPatrimonio);
+    if (item) {
+      setModal({ mode: "edit", original: item, form: { historicoManutencao: [], ...item } });
+    }
+    if (onConsumePending) onConsumePending();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingPatrimonio]);
 
   function addCategoria(nome) {
     setState((prev) => (prev.categorias.some((c) => c.toLowerCase() === nome.toLowerCase()) ? prev : { ...prev, categorias: [...prev.categorias, nome] }));
@@ -1473,7 +1557,7 @@ function Inventario({ state, setState }) {
   }
 
   function openEdit(row) {
-    setModal({ mode: "edit", original: row, form: { ...row } });
+    setModal({ mode: "edit", original: row, form: { historicoManutencao: [], ...row } });
     setError("");
   }
 
@@ -1485,12 +1569,24 @@ function Inventario({ state, setState }) {
     const idOwner = modal.mode === "edit" ? modal.original : null;
     const idTaken = state.inventario.some((r) => r.id === f.id && r !== idOwner);
     if (idTaken) return setError("Já existe um equipamento com esse número de patrimônio.");
+
+    let registro = f;
+    if (modal.mode === "edit" && modal.original.status !== f.status) {
+      registro = {
+        ...f,
+        historicoManutencao: [
+          ...(f.historicoManutencao || []),
+          { data: new Date().toISOString(), de: modal.original.status, para: f.status },
+        ],
+      };
+    }
+
     setState((prev) => {
       let inventario;
       if (modal.mode === "new") {
-        inventario = [...prev.inventario, f];
+        inventario = [...prev.inventario, registro];
       } else {
-        inventario = prev.inventario.map((r) => (r === modal.original ? f : r));
+        inventario = prev.inventario.map((r) => (r === modal.original ? registro : r));
       }
       return { ...prev, inventario };
     });
@@ -1660,6 +1756,9 @@ function Inventario({ state, setState }) {
                   </td>
                   <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.responsavel || "—"}</td>
                   <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <button onClick={() => setQrTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="QR Code">
+                      <QrCode size={15} />
+                    </button>
                     <button onClick={() => openEdit(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
                       <Pencil size={15} />
                     </button>
@@ -1747,6 +1846,34 @@ function Inventario({ state, setState }) {
               Excluir {selected.size}
             </Button>
           </div>
+        </Modal>
+      )}
+
+      {qrTarget && (
+        <Modal title="QR Code do equipamento" onClose={() => setQrTarget(null)} width={340}>
+          {(() => {
+            const url = typeof window !== "undefined"
+              ? window.location.origin + window.location.pathname + "?patrimonio=" + encodeURIComponent(qrTarget.id)
+              : "";
+            const qrImg = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(url);
+            return (
+              <div style={{ textAlign: "center" }}>
+                <img src={qrImg} alt={"QR Code " + qrTarget.id} width={220} height={220} style={{ borderRadius: 8, border: `1px solid ${COLORS.line}` }} />
+                <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink, marginTop: 12, fontFamily: "ui-monospace, monospace" }}>{qrTarget.id}</div>
+                <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: 2 }}>
+                  {qrTarget.categoria} {qrTarget.marca ? "· " + qrTarget.marca : ""} — {qrTarget.sala || "Sem sala"}
+                </div>
+                <p style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 10 }}>
+                  Cole esse código no equipamento. Ao escanear com a câmera do celular durante um levantamento, abre direto o cadastro dele aqui no app.
+                </p>
+                <a href={qrImg} target="_blank" rel="noreferrer" style={{ display: "inline-block", marginTop: 6 }}>
+                  <Button variant="accent" icon={Download}>
+                    Baixar QR Code
+                  </Button>
+                </a>
+              </div>
+            );
+          })()}
         </Modal>
       )}
     </div>
@@ -3839,6 +3966,14 @@ function App() {
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingPatrimonio, setPendingPatrimonio] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("patrimonio") || null;
+    } catch (e) {
+      return null;
+    }
+  });
   const saveTimer = useRef(null);
 
   function aplicarLoginAdmin(data, senhaUsada) {
@@ -3862,7 +3997,11 @@ function App() {
       localStorage.setItem(SECRET_STORAGE_KEY, senhaUsada);
     } catch (e) {}
     const allowed = getAllowedSections(data.permissoes || "todas");
-    setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
+    if (pendingPatrimonio && allowed.includes("inventario")) {
+      setView("inventario");
+    } else {
+      setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
+    }
   }
 
   function aplicarLoginUsuario(userCreds, estadoUsuario) {
@@ -4094,7 +4233,9 @@ function App() {
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
           {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} />}
-          {view === "inventario" && allowed.has("inventario") && <Inventario state={state} setState={setState} />}
+          {view === "inventario" && allowed.has("inventario") && (
+            <Inventario state={state} setState={setState} pendingPatrimonio={pendingPatrimonio} onConsumePending={() => setPendingPatrimonio(null)} />
+          )}
           {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} />}
           {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} />}
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} />}
