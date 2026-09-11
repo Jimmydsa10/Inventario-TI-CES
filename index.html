@@ -76,6 +76,7 @@ const ICON_PATHS = {
   send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
   menu: "M3 6h18M3 12h18M3 18h18",
   qrcode: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm14 0h2v2h-2zm-4 0h2v2h-2zm4 4h2v2h-2zm-4 0h2v2h-2z",
+  pin: "M12 17v5m-5-9h10l-1.5-2V5a3.5 3.5 0 00-7 0v6L7 13z",
 };
 
 function Icon({ name, size = 16, ...rest }) {
@@ -111,6 +112,7 @@ const MessageSquare = IconWrap("message");
 const Send = IconWrap("send");
 const Menu = IconWrap("menu");
 const QrCode = IconWrap("qrcode");
+const Pin = IconWrap("pin");
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
@@ -1026,9 +1028,31 @@ function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
 
 // ---------- Dashboard ----------
 
+const DASH_VIEW_STORAGE_KEY = "inventario-ti-dashview";
+
 function Dashboard({ state, setView }) {
   const inv = state.inventario;
-  const [dashView, setDashView] = useState("graficos");
+  const [dashView, setDashView] = useState(() => {
+    try {
+      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
+    } catch (e) {
+      return "graficos";
+    }
+  });
+  const [principal, setPrincipal] = useState(() => {
+    try {
+      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
+    } catch (e) {
+      return "graficos";
+    }
+  });
+
+  function marcarPrincipal(v) {
+    try {
+      localStorage.setItem(DASH_VIEW_STORAGE_KEY, v);
+    } catch (e) {}
+    setPrincipal(v);
+  }
 
   const porStatus = useMemo(() => {
     const map = {};
@@ -1088,13 +1112,13 @@ function Dashboard({ state, setView }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Painel geral</h2>
-        <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3 }}>
+        <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3, alignItems: "center" }}>
           <button
             onClick={() => setDashView("kanban")}
             style={{
               fontSize: 12.5,
               fontWeight: 600,
-              padding: "7px 14px",
+              padding: "7px 10px 7px 14px",
               borderRadius: 6,
               cursor: "pointer",
               color: COLORS.ink,
@@ -1105,11 +1129,21 @@ function Dashboard({ state, setView }) {
             Kanban
           </button>
           <button
+            onClick={(e) => {
+              e.stopPropagation();
+              marcarPrincipal("kanban");
+            }}
+            title={principal === "kanban" ? "Visão principal" : "Deixar Kanban como principal"}
+            style={{ background: "none", border: "none", cursor: "pointer", color: principal === "kanban" ? COLORS.accent : COLORS.inkSoft, padding: "4px 8px 4px 2px" }}
+          >
+            <Pin size={13} fill={principal === "kanban" ? COLORS.accent : "none"} />
+          </button>
+          <button
             onClick={() => setDashView("graficos")}
             style={{
               fontSize: 12.5,
               fontWeight: 600,
-              padding: "7px 14px",
+              padding: "7px 10px 7px 14px",
               borderRadius: 6,
               cursor: "pointer",
               color: COLORS.ink,
@@ -1118,6 +1152,16 @@ function Dashboard({ state, setView }) {
             }}
           >
             Gráficos
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              marcarPrincipal("graficos");
+            }}
+            title={principal === "graficos" ? "Visão principal" : "Deixar Gráficos como principal"}
+            style={{ background: "none", border: "none", cursor: "pointer", color: principal === "graficos" ? COLORS.accent : COLORS.inkSoft, padding: "4px 8px 4px 2px" }}
+          >
+            <Pin size={13} fill={principal === "graficos" ? COLORS.accent : "none"} />
           </button>
         </div>
       </div>
@@ -1132,7 +1176,14 @@ function Dashboard({ state, setView }) {
       </div>
 
       {dashView === "kanban" ? (
-        <EquipamentosKanban inventario={inv} />
+        <>
+          <Panel title="Equipamentos por status" style={{ marginBottom: 16 }}>
+            <EquipamentosKanban inventario={inv} />
+          </Panel>
+          <Panel title="Chamados por status">
+            <ChamadosKanban chamados={state.chamados || []} onSelect={() => setView("chamados")} />
+          </Panel>
+        </>
       ) : (
         <>
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: 16, marginBottom: 16 }}>
