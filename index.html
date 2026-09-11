@@ -2845,8 +2845,21 @@ function Importar({ state, setState }) {
 
 // ---------- Chamados (chat de abertura de chamados) ----------
 
+const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitação de compra"];
+
+function TipoChamadoBadge({ tipo }) {
+  if (!tipo || tipo === "Problema técnico") return null;
+  const cor = tipo === "Solicitação de compra" ? "#2F6F5E" : COLORS.accent;
+  const fundo = tipo === "Solicitação de compra" ? "#E3EEE9" : COLORS.accentSoft;
+  return (
+    <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: cor, background: fundo, whiteSpace: "nowrap" }}>
+      {tipo}
+    </span>
+  );
+}
+
 function novoChamadoForm() {
-  return { sala: "", categoria: "", prioridade: "Média", texto: "" };
+  return { tipo: "Problema técnico", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
 }
 
 function Chamados({ state, setState }) {
@@ -2856,11 +2869,25 @@ function Chamados({ state, setState }) {
   const [replyText, setReplyText] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [viewMode, setViewMode] = useState("lista");
+  const [fotoBusyAdmin, setFotoBusyAdmin] = useState(false);
+  const fotoInputRefAdmin = useRef(null);
   const scrollRef = useRef(null);
 
   const chamados = state.chamados || [];
   const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
   const selecionado = chamados.find((c) => c.id === selectedId) || null;
+
+  async function handleFotoAdmin(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setFotoBusyAdmin(true);
+    try {
+      const dataUrl = await resizeImageParaBase64(file, 800, 0.6);
+      setForm((prev) => ({ ...prev, foto: dataUrl }));
+    } catch (err) {}
+    setFotoBusyAdmin(false);
+    if (fotoInputRefAdmin.current) fotoInputRefAdmin.current.value = "";
+  }
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -2878,9 +2905,11 @@ function Chamados({ state, setState }) {
     const chamado = {
       id: uid("CH"),
       assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
+      tipo: form.tipo,
       sala: form.sala,
       categoria: form.categoria,
       prioridade: form.prioridade,
+      foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
       mensagens: [{ autor: "solicitante", texto, data: new Date().toISOString() }],
@@ -2997,7 +3026,9 @@ function Chamados({ state, setState }) {
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>{c.assunto}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
+                      {c.assunto} {c.tipo && c.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={c.tipo} />}
+                    </div>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -3035,6 +3066,17 @@ function Chamados({ state, setState }) {
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
               <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
+                <div style={{ marginBottom: 14 }}>
+                  <Field label="Tipo de chamado">
+                    <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+                      {TIPO_CHAMADO_OPTIONS.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                </div>
                 <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
                   <Field label="Sala relacionada (opcional)">
                     <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
@@ -3066,7 +3108,7 @@ function Chamados({ state, setState }) {
                     </Select>
                   </Field>
                 </div>
-                <Field label="Descreva o problema">
+                <Field label="Descreva">
                   <textarea
                     value={form.texto}
                     onChange={(e) => setForm({ ...form, texto: e.target.value })}
@@ -3075,6 +3117,46 @@ function Chamados({ state, setState }) {
                     style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
                   />
                 </Field>
+                <div style={{ marginTop: 14 }}>
+                  <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>Foto (opcional)</div>
+                  <input ref={fotoInputRefAdmin} type="file" accept="image/*" onChange={handleFotoAdmin} style={{ display: "none" }} />
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {form.foto && (
+                      <div style={{ width: 64, height: 64, borderRadius: 8, overflow: "hidden", border: `1px solid ${COLORS.line}`, position: "relative" }}>
+                        <img src={form.foto} alt="Foto anexada" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <button
+                          onClick={() => setForm((prev) => ({ ...prev, foto: "" }))}
+                          style={{ position: "absolute", top: 2, right: 2, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: 4, color: "#fff", cursor: "pointer", padding: 2 }}
+                          aria-label="Remover foto"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => fotoInputRefAdmin.current && fotoInputRefAdmin.current.click()}
+                      disabled={fotoBusyAdmin}
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 8,
+                        border: `1px dashed ${COLORS.lineStrong}`,
+                        background: "#fff",
+                        color: COLORS.inkSoft,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 4,
+                        cursor: "pointer",
+                        fontSize: 10,
+                      }}
+                    >
+                      <Plus size={16} />
+                      {fotoBusyAdmin ? "..." : "Adicionar"}
+                    </button>
+                  </div>
+                </div>
               </div>
               <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
                 <Button variant="ghost" onClick={() => setNovoMode(false)}>
@@ -3097,7 +3179,9 @@ function Chamados({ state, setState }) {
                     </a>
                   )}
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
+                      {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
+                    </div>
                     <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
                       {selecionado.solicitante ? "De " + selecionado.solicitante + " · " : ""}
                       {selecionado.sala || "Sem sala"}
@@ -3214,6 +3298,11 @@ function ChamadosKanban({ chamados, onSelect }) {
                   style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 12, cursor: "pointer" }}
                 >
                   <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>{c.assunto}</div>
+                  {c.tipo && c.tipo !== "Problema técnico" && (
+                    <div style={{ marginBottom: 6 }}>
+                      <TipoChamadoBadge tipo={c.tipo} />
+                    </div>
+                  )}
                   <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginBottom: 6 }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     {c.foto ? <img src={c.foto} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover" }} /> : <span />}
@@ -3435,7 +3524,7 @@ function TopBarSolicitante({ nome, onAdminClick, onLogout }) {
 }
 
 function novoChamadoSolicitanteForm() {
-  return { sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+  return { tipo: "Problema técnico", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
 }
 
 function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout }) {
@@ -3481,6 +3570,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
       assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
       solicitante: userAuth.nome,
       criadoPor: userAuth.nome,
+      tipo: form.tipo,
       sala: form.sala,
       categoria: form.categoria,
       prioridade: form.prioridade,
@@ -3548,7 +3638,9 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
                     onClick={() => { setSelectedId(c.id); setNovoMode(false); }}
                     style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer", background: selectedId === c.id ? COLORS.accentSoft : "transparent" }}
                   >
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>{c.assunto}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
+                      {c.assunto} <TipoChamadoBadge tipo={c.tipo} />
+                    </div>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.sala || "Sem sala"}</span>
                       <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: CHAMADO_STATUS_COLORS[c.status], background: CHAMADO_STATUS_BG[c.status] }}>
@@ -3566,6 +3658,17 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
                 <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
+                  <div style={{ marginBottom: 14 }}>
+                    <Field label="Tipo de chamado">
+                      <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+                        {TIPO_CHAMADO_OPTIONS.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                  </div>
                   <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
@@ -3591,17 +3694,23 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
                       </Select>
                     </Field>
                   </div>
-                  <Field label="Descreva o problema">
+                  <Field label={form.tipo === "Problema técnico" ? "Descreva o problema" : "Descreva sua sugestão"}>
                     <textarea
                       value={form.texto}
                       onChange={(e) => setForm({ ...form, texto: e.target.value })}
                       rows={4}
-                      placeholder="Ex: O projetor da sala 108 não liga mais..."
+                      placeholder={
+                        form.tipo === "Problema técnico"
+                          ? "Ex: O projetor da sala 108 não liga mais..."
+                          : form.tipo === "Solicitação de compra"
+                          ? "Ex: Precisamos de mais 2 mouses pra sala 104..."
+                          : "Ex: Seria bom ter um jeito de..."
+                      }
                       style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
                     />
                   </Field>
                   <div>
-                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>Foto do problema (opcional)</div>
+                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>Foto (opcional)</div>
                     <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
                     <div style={{ display: "flex", gap: 8 }}>
                       {form.foto && (
@@ -3664,7 +3773,9 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
                     </a>
                   )}
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink }}>{selecionado.assunto}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
+                      {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
+                    </div>
                     <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
                       {selecionado.sala || "Sem sala"}
                       {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade} ·{" "}
