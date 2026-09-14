@@ -1034,6 +1034,7 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
     NAV_GROUPS.forEach((g) => (init[g.label] = true));
     return init;
   });
+  const [catListOpen, setCatListOpen] = useState(true);
 
   const groups = NAV_GROUPS.map((g) => ({
     label: g.label,
@@ -1093,31 +1094,42 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
                 group.items.map((item) => {
                   const Icon = item.icon;
                   const active = view === item.key;
+                  const temSubCategorias = group.label === "Inventário" && item.key === "inventario" && categorias && categorias.length > 0;
                   return (
                     <React.Fragment key={item.key}>
-                      <button
-                        onClick={() => onNavigate(item.key)}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 10,
-                          width: "100%",
-                          padding: "9px 10px",
-                          marginBottom: 2,
-                          background: active ? "rgba(255,255,255,0.12)" : "transparent",
-                          border: "none",
-                          borderRadius: 6,
-                          color: active ? "#fff" : "#B7C0CF",
-                          fontSize: 13.5,
-                          fontWeight: active ? 600 : 500,
-                          cursor: "pointer",
-                          textAlign: "left",
-                        }}
-                      >
-                        <Icon size={16} />
-                        {item.label}
-                      </button>
-                      {group.label === "Inventário" && item.key === "inventario" && categorias && categorias.length > 0 && (
+                      <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                        <button
+                          onClick={() => onNavigate(item.key)}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            flex: 1,
+                            padding: "9px 10px",
+                            background: active ? "rgba(255,255,255,0.12)" : "transparent",
+                            border: "none",
+                            borderRadius: 6,
+                            color: active ? "#fff" : "#B7C0CF",
+                            fontSize: 13.5,
+                            fontWeight: active ? 600 : 500,
+                            cursor: "pointer",
+                            textAlign: "left",
+                          }}
+                        >
+                          <Icon size={16} />
+                          {item.label}
+                        </button>
+                        {temSubCategorias && (
+                          <button
+                            onClick={() => setCatListOpen((v) => !v)}
+                            title={catListOpen ? "Esconder equipamentos" : "Mostrar equipamentos"}
+                            style={{ background: "none", border: "none", cursor: "pointer", padding: "6px 8px", color: "#7D8AA0", flexShrink: 0 }}
+                          >
+                            <ChevronRight size={13} style={{ transform: catListOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }} />
+                          </button>
+                        )}
+                      </div>
+                      {temSubCategorias && catListOpen && (
                         <div style={{ marginBottom: 4 }}>
                           {categorias.map((cat) => (
                             <button
