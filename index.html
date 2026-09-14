@@ -1256,12 +1256,14 @@ function Dashboard({ state, setView }) {
   const emUso = inv.filter((r) => r.status === "Em uso").length;
   const emManutencao = inv.filter((r) => r.status === "Em manutenção").length;
   const precisaManutencao = inv.filter((r) => r.status === "Precisa de manutenção").length;
+  const descartado = inv.filter((r) => r.status === "Descartado").length;
 
   const kpis = [
     { label: "Total de equipamentos", value: total },
     { label: "Em uso", value: emUso },
     { label: "Em manutenção", value: emManutencao },
     { label: "Precisa de manutenção", value: precisaManutencao },
+    { label: "Descartado", value: descartado },
     { label: "Salas cadastradas", value: state.areas.length },
     { label: "Categorias cadastradas", value: state.categorias.length },
   ];
@@ -1337,11 +1339,11 @@ function Dashboard({ state, setView }) {
 
       {dashView === "kanban" ? (
         <>
-          <Panel title="Equipamentos por status" style={{ marginBottom: 16 }}>
-            <EquipamentosKanban inventario={inv} />
-          </Panel>
-          <Panel title="Chamados por status">
+          <Panel title="Chamados por status" style={{ marginBottom: 16 }}>
             <ChamadosKanban chamados={state.chamados || []} onSelect={() => setView("chamados")} />
+          </Panel>
+          <Panel title="Equipamentos por status">
+            <EquipamentosKanban inventario={inv} />
           </Panel>
         </>
       ) : (
@@ -1477,7 +1479,7 @@ function EquipamentosKanban({ inventario }) {
             <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink }}>{col.status}</span>
             <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{col.itens.length}</span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 520, overflow: "auto" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 150, overflow: "auto" }}>
             {col.itens.length === 0 ? (
               <div style={{ fontSize: 12, color: COLORS.inkSoft, padding: "8px 2px" }}>—</div>
             ) : (
@@ -1496,6 +1498,9 @@ function EquipamentosKanban({ inventario }) {
               <div style={{ fontSize: 11.5, color: COLORS.inkSoft, textAlign: "center", padding: "4px 0" }}>+{col.itens.length - LIMITE} mais</div>
             )}
           </div>
+          {col.itens.length > 3 && (
+            <div style={{ fontSize: 10.5, color: COLORS.inkSoft, textAlign: "center", marginTop: 4 }}>role para ver mais ↓</div>
+          )}
         </div>
       ))}
     </div>
