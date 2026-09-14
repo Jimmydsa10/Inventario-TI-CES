@@ -1026,7 +1026,7 @@ function getAllowedSections(permissoes) {
     .filter(Boolean);
 }
 
-function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
+function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, onLogout, categorias }) {
   const isMaster = isAcessoTotal(permissoes);
   const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
   const [openGroups, setOpenGroups] = useState(() => {
@@ -1065,7 +1065,7 @@ function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
           <div style={{ fontSize: 12, color: "#9AA6B8", marginTop: 2 }}>Escola Espírito Santo</div>
         </div>
       </div>
-      <nav style={{ flex: 1 }}>
+      <nav style={{ flex: 1, overflowY: "auto" }}>
         {groups.map((group) => {
           const isOpen = openGroups[group.label] !== false;
           return (
@@ -1091,35 +1091,63 @@ function Sidebar({ view, onNavigate, mobileOpen, nome, permissoes, onLogout }) {
               </button>
               {isOpen &&
                 group.items.map((item) => {
-              const Icon = item.icon;
-              const active = view === item.key;
-              return (
-                <button
-                  key={item.key}
-                  onClick={() => onNavigate(item.key)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                width: "100%",
-                padding: "9px 10px",
-                marginBottom: 2,
-                background: active ? "rgba(255,255,255,0.12)" : "transparent",
-                border: "none",
-                borderRadius: 6,
-                color: active ? "#fff" : "#B7C0CF",
-                fontSize: 13.5,
-                fontWeight: active ? 600 : 500,
-                cursor: "pointer",
-                textAlign: "left",
-              }}
-            >
-              <Icon size={16} />
-              {item.label}
-            </button>
-              );
-            })}
-          </div>
+                  const Icon = item.icon;
+                  const active = view === item.key;
+                  return (
+                    <React.Fragment key={item.key}>
+                      <button
+                        onClick={() => onNavigate(item.key)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          width: "100%",
+                          padding: "9px 10px",
+                          marginBottom: 2,
+                          background: active ? "rgba(255,255,255,0.12)" : "transparent",
+                          border: "none",
+                          borderRadius: 6,
+                          color: active ? "#fff" : "#B7C0CF",
+                          fontSize: 13.5,
+                          fontWeight: active ? 600 : 500,
+                          cursor: "pointer",
+                          textAlign: "left",
+                        }}
+                      >
+                        <Icon size={16} />
+                        {item.label}
+                      </button>
+                      {group.label === "Inventário" && item.key === "inventario" && categorias && categorias.length > 0 && (
+                        <div style={{ marginBottom: 4 }}>
+                          {categorias.map((cat) => (
+                            <button
+                              key={cat}
+                              onClick={() => onNavigateCategoria(cat)}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                width: "100%",
+                                padding: "6px 10px 6px 26px",
+                                background: "transparent",
+                                border: "none",
+                                borderRadius: 6,
+                                color: "#9AA6B8",
+                                fontSize: 12,
+                                cursor: "pointer",
+                                textAlign: "left",
+                              }}
+                            >
+                              <CategoriaIcon categoria={cat} size={13} color="#9AA6B8" />
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+            </div>
           );
         })}
       </nav>
@@ -1643,7 +1671,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
   );
 }
 
-function Inventario({ state, setState, pendingPatrimonio, onConsumePending }) {
+function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro }) {
   const [search, setSearch] = useState("");
   const [fCategoria, setFCategoria] = useState("");
   const [fSala, setFSala] = useState("");
@@ -1666,6 +1694,14 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending }) {
     if (onConsumePending) onConsumePending();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingPatrimonio]);
+
+  useEffect(() => {
+    if (pendingCategoriaFiltro === null || pendingCategoriaFiltro === undefined) return;
+    setFCategoria(pendingCategoriaFiltro);
+    setPage(1);
+    if (onConsumeCategoriaFiltro) onConsumeCategoriaFiltro();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingCategoriaFiltro]);
 
   function addCategoria(nome) {
     setState((prev) => (prev.categorias.some((c) => c.toLowerCase() === nome.toLowerCase()) ? prev : { ...prev, categorias: [...prev.categorias, nome] }));
@@ -4362,6 +4398,7 @@ function App() {
       return null;
     }
   });
+  const [pendingCategoriaFiltro, setPendingCategoriaFiltro] = useState(null);
   const saveTimer = useRef(null);
 
   function aplicarLoginAdmin(data, senhaUsada) {
@@ -4615,15 +4652,28 @@ function App() {
           nome={auth.nome}
           permissoes={auth.permissoes}
           onLogout={logout}
+          categorias={state.categorias}
           onNavigate={(key) => {
             setView(key);
+            setMobileMenuOpen(false);
+          }}
+          onNavigateCategoria={(cat) => {
+            setPendingCategoriaFiltro(cat);
+            setView("inventario");
             setMobileMenuOpen(false);
           }}
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
           {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} />}
           {view === "inventario" && allowed.has("inventario") && (
-            <Inventario state={state} setState={setState} pendingPatrimonio={pendingPatrimonio} onConsumePending={() => setPendingPatrimonio(null)} />
+            <Inventario
+              state={state}
+              setState={setState}
+              pendingPatrimonio={pendingPatrimonio}
+              onConsumePending={() => setPendingPatrimonio(null)}
+              pendingCategoriaFiltro={pendingCategoriaFiltro}
+              onConsumeCategoriaFiltro={() => setPendingCategoriaFiltro(null)}
+            />
           )}
           {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} />}
           {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} />}
