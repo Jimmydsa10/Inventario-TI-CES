@@ -938,6 +938,59 @@ function EmptyState({ text }) {
   );
 }
 
+const AVATAR_COLORS = ["#2F6F5E", "#C97A2B", "#2B5B8C", "#8C4B2F", "#6B4E9E", "#B23A32", "#4B5768"];
+
+function corAvatar(nome) {
+  const s = String(nome || "?");
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+
+function iniciais(nome) {
+  const partes = String(nome || "?").trim().split(/\s+/);
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
+
+function Avatar({ nome, size = 30 }) {
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: corAvatar(nome),
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: size * 0.38,
+        fontWeight: 700,
+        flexShrink: 0,
+      }}
+    >
+      {iniciais(nome)}
+    </div>
+  );
+}
+
+function tempoDecorrido(iso) {
+  try {
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const min = Math.floor(diffMs / 60000);
+    if (min < 1) return "agora mesmo";
+    if (min < 60) return "há " + min + " min";
+    const h = Math.floor(min / 60);
+    if (h < 24) return "há " + h + "h";
+    const dias = Math.floor(h / 24);
+    return "há " + dias + " dia" + (dias > 1 ? "s" : "");
+  } catch (e) {
+    return "";
+  }
+}
+
 // ---------- Sidebar ----------
 
 const NAV_ITEMS = [
@@ -3280,76 +3333,103 @@ function Chamados({ state, setState }) {
           ) : !selecionado ? (
             <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                  {selecionado.foto && (
-                    <a href={selecionado.foto} target="_blank" rel="noreferrer">
-                      <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}`, flexShrink: 0 }} />
-                    </a>
-                  )}
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
-                      {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
-                    </div>
-                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
-                      {selecionado.solicitante ? "De " + selecionado.solicitante + " · " : ""}
-                      {selecionado.sala || "Sem sala"}
-                      {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade}
-                    </div>
+            <div className="chamado-detail" style={{ display: "flex", height: "100%" }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, borderRight: `1px solid ${COLORS.line}` }}>
+                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
+                    {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
                   </div>
+                  <button
+                    onClick={() => setDeleteTarget(selecionado)}
+                    style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "6px 9px", flexShrink: 0 }}
+                    aria-label="Excluir chamado"
+                    title="Excluir chamado"
+                  >
+                    <Trash2 size={14} />
+                  </button>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <Select value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: 160 }}>
+
+                <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+                  {selecionado.foto && (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <Avatar nome={selecionado.solicitante || "?"} />
+                      <a href={selecionado.foto} target="_blank" rel="noreferrer">
+                        <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 90, height: 90, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
+                      </a>
+                    </div>
+                  )}
+                  {selecionado.mensagens.map((m, i) => {
+                    const abertura = i === 0;
+                    const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+                    const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
+                    const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
+                    return (
+                      <div key={i} style={{ display: "flex", gap: 10 }}>
+                        <Avatar nome={nomeAutor} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div
+                            style={{
+                              padding: "9px 13px",
+                              borderRadius: 10,
+                              borderLeft: `3px solid ${borda}`,
+                              fontSize: 13.5,
+                              background: bg,
+                              color: COLORS.ink,
+                            }}
+                          >
+                            <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
+                              {nomeAutor} {abertura && <span style={{ color: "#2F6F5E" }}>· abriu o chamado</span>}
+                            </div>
+                            <div>{m.texto}</div>
+                          </div>
+                          <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 3, marginLeft: 4 }}>{formatDateTime(m.data)}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+                  <TextInput
+                    value={replyText}
+                    onChange={(e) => setReplyText(e.target.value)}
+                    placeholder="Escrever uma atualização..."
+                    onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                    style={{ flex: 1 }}
+                  />
+                  <Button variant="primary" icon={Send} onClick={enviarResposta}>
+                    Enviar
+                  </Button>
+                </div>
+              </div>
+
+              <div style={{ width: 220, flexShrink: 0, padding: 16, overflow: "auto" }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 12 }}>Propriedades</div>
+                {[
+                  ["Solicitante", selecionado.solicitante || "—"],
+                  ["Sala", selecionado.sala || "—"],
+                  ["Categoria", selecionado.categoria || "—"],
+                  ["Prioridade", selecionado.prioridade],
+                ].map(([label, val]) => (
+                  <div key={label} style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginTop: 2 }}>{val}</div>
+                  </div>
+                ))}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, color: COLORS.inkSoft, marginBottom: 4 }}>Status</div>
+                  <Select value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
                     {CHAMADO_STATUS_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>
                     ))}
                   </Select>
-                  <button
-                    onClick={() => setDeleteTarget(selecionado)}
-                    style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "8px 10px" }}
-                    aria-label="Excluir chamado"
-                    title="Excluir chamado"
-                  >
-                    <Trash2 size={15} />
-                  </button>
                 </div>
-              </div>
-
-              <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
-                {selecionado.mensagens.map((m, i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: m.autor === "ti" ? "flex-end" : "flex-start" }}>
-                    <div
-                      style={{
-                        maxWidth: "70%",
-                        padding: "9px 13px",
-                        borderRadius: 12,
-                        fontSize: 13.5,
-                        background: m.autor === "ti" ? COLORS.ink : "#fff",
-                        color: m.autor === "ti" ? "#fff" : COLORS.ink,
-                        border: m.autor === "ti" ? "none" : `1px solid ${COLORS.line}`,
-                      }}
-                    >
-                      <div>{m.texto}</div>
-                      <div style={{ fontSize: 10.5, marginTop: 4, opacity: 0.65 }}>{formatDateTime(m.data)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
-                <TextInput
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder="Escrever uma atualização..."
-                  onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                  style={{ flex: 1 }}
-                />
-                <Button variant="primary" icon={Send} onClick={enviarResposta}>
-                  Enviar
-                </Button>
+                <div>
+                  <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Aberto</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginTop: 2 }}>{tempoDecorrido(selecionado.criadoEm)}</div>
+                </div>
               </div>
             </div>
           )}
@@ -3875,57 +3955,74 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
             ) : !selecionado ? (
               <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
             ) : (
-              <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", gap: 12, alignItems: "flex-start" }}>
-                  {selecionado.foto && (
-                    <a href={selecionado.foto} target="_blank" rel="noreferrer">
-                      <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 48, height: 48, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}`, flexShrink: 0 }} />
-                    </a>
-                  )}
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
-                      {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
-                    </div>
-                    <div style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 3 }}>
-                      {selecionado.sala || "Sem sala"}
-                      {selecionado.categoria ? " · " + selecionado.categoria : ""} · Prioridade {selecionado.prioridade} ·{" "}
-                      <span style={{ color: CHAMADO_STATUS_COLORS[selecionado.status], fontWeight: 600 }}>{selecionado.status}</span>
-                    </div>
+              <div className="chamado-detail" style={{ display: "flex", height: "100%" }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, borderRight: `1px solid ${COLORS.line}` }}>
+                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
+                    {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
                   </div>
-                </div>
-                <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
-                  {selecionado.mensagens.map((m, i) => (
-                    <div key={i} style={{ display: "flex", justifyContent: m.autor === "ti" ? "flex-start" : "flex-end" }}>
-                      <div
-                        style={{
-                          maxWidth: "70%",
-                          padding: "9px 13px",
-                          borderRadius: 12,
-                          fontSize: 13.5,
-                          background: m.autor === "ti" ? "#fff" : COLORS.ink,
-                          color: m.autor === "ti" ? COLORS.ink : "#fff",
-                          border: m.autor === "ti" ? `1px solid ${COLORS.line}` : "none",
-                        }}
-                      >
-                        <div>{m.texto}</div>
-                        <div style={{ fontSize: 10.5, marginTop: 4, opacity: 0.65 }}>{formatDateTime(m.data)}</div>
+                  <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+                    {selecionado.foto && (
+                      <div style={{ display: "flex", gap: 10 }}>
+                        <Avatar nome={userAuth.nome} />
+                        <a href={selecionado.foto} target="_blank" rel="noreferrer">
+                          <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 90, height: 90, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
+                        </a>
                       </div>
+                    )}
+                    {selecionado.mensagens.map((m, i) => {
+                      const abertura = i === 0;
+                      const nomeAutor = m.autor === "ti" ? "Administrador" : userAuth.nome;
+                      const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
+                      const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
+                      return (
+                        <div key={i} style={{ display: "flex", gap: 10 }}>
+                          <Avatar nome={nomeAutor} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ padding: "9px 13px", borderRadius: 10, borderLeft: `3px solid ${borda}`, fontSize: 13.5, background: bg, color: COLORS.ink }}>
+                              <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
+                                {nomeAutor} {abertura && <span style={{ color: "#2F6F5E" }}>· abriu o chamado</span>}
+                              </div>
+                              <div>{m.texto}</div>
+                            </div>
+                            <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 3, marginLeft: 4 }}>{formatDateTime(m.data)}</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+                    <TextInput
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Escrever uma mensagem..."
+                      onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                      style={{ flex: 1 }}
+                    />
+                    <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy}>
+                      Enviar
+                    </Button>
+                  </div>
+                  {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: "0 14px 10px" }}>{erro}</div>}
+                </div>
+
+                <div style={{ width: 200, flexShrink: 0, padding: 16, overflow: "auto" }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 12 }}>Propriedades</div>
+                  {[
+                    ["Sala", selecionado.sala || "—"],
+                    ["Categoria", selecionado.categoria || "—"],
+                    ["Prioridade", selecionado.prioridade],
+                    ["Status", selecionado.status],
+                  ].map(([label, val]) => (
+                    <div key={label} style={{ marginBottom: 14 }}>
+                      <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: label === "Status" ? CHAMADO_STATUS_COLORS[selecionado.status] : COLORS.ink, marginTop: 2 }}>{val}</div>
                     </div>
                   ))}
+                  <div>
+                    <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Aberto</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginTop: 2 }}>{tempoDecorrido(selecionado.criadoEm)}</div>
+                  </div>
                 </div>
-                <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
-                  <TextInput
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Escrever uma mensagem..."
-                    onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                    style={{ flex: 1 }}
-                  />
-                  <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy}>
-                    Enviar
-                  </Button>
-                </div>
-                {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: "0 14px 10px" }}>{erro}</div>}
               </div>
             )}
           </Panel>
@@ -3972,6 +4069,8 @@ const RESPONSIVE_CSS = `
   .grid-chat { grid-template-columns: 1fr !important; height: auto !important; }
   .grid-chat > div:first-child { height: 220px !important; }
   .grid-chat > div:last-child { height: 480px !important; }
+  .chamado-detail { flex-direction: column !important; }
+  .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
 }
 `;
 
