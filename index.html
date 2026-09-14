@@ -1256,6 +1256,7 @@ function Dashboard({ state, setView }) {
   const emUso = inv.filter((r) => r.status === "Em uso").length;
   const emManutencao = inv.filter((r) => r.status === "Em manutenção").length;
   const precisaManutencao = inv.filter((r) => r.status === "Precisa de manutenção").length;
+  const emEstoque = inv.filter((r) => r.status === "Em estoque").length;
   const descartado = inv.filter((r) => r.status === "Descartado").length;
 
   const kpis = [
@@ -1263,6 +1264,7 @@ function Dashboard({ state, setView }) {
     { label: "Em uso", value: emUso },
     { label: "Em manutenção", value: emManutencao },
     { label: "Precisa de manutenção", value: precisaManutencao },
+    { label: "Em estoque", value: emEstoque },
     { label: "Descartado", value: descartado },
     { label: "Salas cadastradas", value: state.areas.length },
     { label: "Categorias cadastradas", value: state.categorias.length },
