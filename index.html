@@ -1818,6 +1818,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
   function remove(row) {
     setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => r !== row) }));
     setDeleteTarget(null);
+    setModal(null);
   }
 
   const activeFilters = fCategoria || fSala || fStatus || fResp || search;
@@ -1953,7 +1954,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
                     style={{ cursor: "pointer" }}
                   />
                 </th>
-                {["Patrimônio", "Categoria", "Marca / Modelo", "Sala", "Status", "Responsável", ""].map((h) => (
+                {["Patrimônio", "Categoria", "Marca / Modelo", "Sala", "Status", "Responsável"].map((h) => (
                   <th key={h} style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontWeight: 600, fontSize: 12 }}>
                     {h}
                   </th>
@@ -1962,8 +1963,18 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
             </thead>
             <tbody>
               {pageRows.map((r) => (
-                <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}`, background: selected.has(r.id) ? COLORS.accentSoft : "transparent" }}>
-                  <td style={{ padding: "9px 6px" }}>
+                <tr
+                  key={r.id}
+                  onClick={() => openEdit(r)}
+                  style={{ borderBottom: `1px solid ${COLORS.line}`, background: selected.has(r.id) ? COLORS.accentSoft : "transparent", cursor: "pointer" }}
+                  onMouseEnter={(e) => {
+                    if (!selected.has(r.id)) e.currentTarget.style.background = COLORS.paper;
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!selected.has(r.id)) e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <td style={{ padding: "9px 6px" }} onClick={(e) => e.stopPropagation()}>
                     <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} style={{ cursor: "pointer" }} />
                   </td>
                   <td style={{ padding: "9px 6px", fontFamily: "ui-monospace, monospace", fontSize: 12.5, color: COLORS.ink }}>{r.id}</td>
@@ -1982,22 +1993,11 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
                     <StatusPill status={r.status} />
                   </td>
                   <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.responsavel || "—"}</td>
-                  <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
-                    <button onClick={() => setQrTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="QR Code">
-                      <QrCode size={15} />
-                    </button>
-                    <button onClick={() => openEdit(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
-                      <Pencil size={15} />
-                    </button>
-                    <button onClick={() => setDeleteTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
-                      <Trash2 size={15} />
-                    </button>
-                  </td>
                 </tr>
               ))}
               {pageRows.length === 0 && (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={7}>
                     <EmptyState text="Nenhum equipamento encontrado com esses filtros." />
                   </td>
                 </tr>
@@ -2033,13 +2033,27 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
         <Modal title={modal.mode === "new" ? "Novo equipamento" : "Editar equipamento"} onClose={() => setModal(null)} width={620}>
           <EquipForm form={modal.form} setForm={(f) => setModal({ ...modal, form: f })} state={state} isNew={modal.mode === "new"} onAddCategoria={addCategoria} />
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
-            <Button variant="ghost" onClick={() => setModal(null)}>
-              Cancelar
-            </Button>
-            <Button variant="primary" icon={Check} onClick={save}>
-              Salvar
-            </Button>
+          <div style={{ borderTop: `1px solid ${COLORS.line}`, marginTop: 4, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {modal.mode === "edit" ? (
+              <Button variant="danger" icon={Trash2} onClick={() => setDeleteTarget(modal.original)}>
+                Excluir
+              </Button>
+            ) : (
+              <span />
+            )}
+            <div style={{ display: "flex", gap: 8 }}>
+              {modal.mode === "edit" && (
+                <Button variant="ghost" icon={QrCode} onClick={() => setQrTarget(modal.original)}>
+                  Gerar QR Code
+                </Button>
+              )}
+              <Button variant="ghost" onClick={() => setModal(null)}>
+                Cancelar
+              </Button>
+              <Button variant="primary" icon={Check} onClick={save}>
+                Salvar
+              </Button>
+            </div>
           </div>
         </Modal>
       )}
