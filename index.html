@@ -809,6 +809,42 @@ function Button({ variant = "ghost", icon: Icon, children, style, ...rest }) {
   );
 }
 
+const CATEGORIA_ICON_SVGS = {
+  "computador desktop": <><rect x="4" y="4" width="16" height="10" rx="1.5" /><path d="M9 18h6M12 14v4" /></>,
+  "notebook": <><rect x="5" y="4" width="14" height="9" rx="1.5" /><path d="M3 18h18l-1.5-3h-15z" /></>,
+  "mini pc": <><rect x="4" y="7" width="16" height="13" rx="1.5" /><path d="M4 11h16M9 7V5h6v2" /></>,
+  "monitor": <><rect x="4" y="4" width="16" height="11" rx="1.5" /><path d="M9 20h6M12 15v5" /></>,
+  "teclado": <><rect x="3" y="7" width="18" height="10" rx="1.5" /><path d="M6 11h.01M9 11h.01M12 11h.01M15 11h.01M18 11h.01M8 14h8" /></>,
+  "mouse": <><rect x="8" y="3" width="8" height="14" rx="4" /><path d="M12 3v5" /></>,
+  "projetor": <><rect x="3" y="7" width="12" height="9" rx="2" /><circle cx="17" cy="11.5" r="3.5" /></>,
+  "tela-projetor": <><rect x="4" y="4" width="16" height="11" rx="1" /><path d="M12 15v5M8 20h8" /></>,
+  "roteador": <><rect x="3" y="13" width="18" height="7" rx="2" /><path d="M8 13L6 4M16 13l2-9" /><circle cx="12" cy="16.5" r="1" /></>,
+  "nobreak/estabilizador": <><rect x="6" y="3" width="12" height="18" rx="1.5" /><path d="M13 7l-4 6h3l-1 5 5-7h-3z" /></>,
+  "impressora/multifuncional": <><rect x="5" y="9" width="14" height="7" rx="1" /><path d="M7 9V4h10v5M7 16v4h10v-4" /></>,
+  "nvr": <><rect x="4" y="6" width="16" height="12" rx="1.5" /><path d="M4 11h16" /><circle cx="18" cy="14.5" r=".6" fill="currentColor" /></>,
+  "câmera": <><rect x="3" y="7" width="14" height="11" rx="2" /><circle cx="10" cy="12.5" r="3.5" /><path d="M14 9h4l2-2v9l-2-2h-4" /></>,
+  "caixa de som": <><rect x="7" y="3" width="10" height="18" rx="2" /><circle cx="12" cy="8" r="1.4" /><circle cx="12" cy="15" r="3" /></>,
+  "sistema de som": <><rect x="4" y="4" width="7" height="16" rx="1.5" /><rect x="13" y="4" width="7" height="16" rx="1.5" /><circle cx="7.5" cy="9" r="1.2" /><circle cx="16.5" cy="9" r="1.2" /></>,
+  "telefone/ramal": <><rect x="7" y="2" width="10" height="20" rx="2.5" /><path d="M10 18h4" /></>,
+  "fone de ouvido": <><path d="M4 14v-2a8 8 0 0116 0v2" /><rect x="3" y="14" width="4" height="6" rx="1.5" /><rect x="17" y="14" width="4" height="6" rx="1.5" /></>,
+  "webcam": <><circle cx="12" cy="10" r="5" /><path d="M9 20h6M12 15v5" /></>,
+  "rádio": <><rect x="3" y="9" width="18" height="10" rx="2" /><path d="M7 9l1-6M16 3l1 6" /><circle cx="8" cy="14" r="1.6" /></>,
+  "triturador": <><path d="M5 4h14v6H5z" /><path d="M6 10l1.5 10h9L18 10" /></>,
+  "leitor de código": <><path d="M4 5v14M8 5v14M11 5v14M13 5v14M17 5v14M20 5v14" /></>,
+};
+
+const CATEGORIA_ICON_DEFAULT = <><rect x="4" y="7" width="16" height="13" rx="1.5" /><path d="M4 11h16M9 7V5h6v2" /></>;
+
+function CategoriaIcon({ categoria, size = 15, color = "currentColor", style }) {
+  const key = (categoria || "").trim().toLowerCase();
+  const svgInner = CATEGORIA_ICON_SVGS[key] || CATEGORIA_ICON_DEFAULT;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, ...style }}>
+      {svgInner}
+    </svg>
+  );
+}
+
 function StatusPill({ status }) {
   const c = STATUS_COLORS[status] || COLORS.inkSoft;
   const bg = STATUS_BG[status] || "#eee";
@@ -1323,7 +1359,10 @@ function EquipamentosKanban({ inventario }) {
             ) : (
               col.itens.slice(0, LIMITE).map((r) => (
                 <div key={r.id} style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 10 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.ink }}>{r.categoria}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 600, color: COLORS.ink }}>
+                    <CategoriaIcon categoria={r.categoria} color={COLORS.accent} />
+                    {r.categoria}
+                  </div>
                   <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 2 }}>{r.sala || "Sem sala"}</div>
                   <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 2, fontFamily: "ui-monospace, monospace" }}>{r.id}</div>
                 </div>
@@ -1796,7 +1835,12 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending }) {
                     <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} style={{ cursor: "pointer" }} />
                   </td>
                   <td style={{ padding: "9px 6px", fontFamily: "ui-monospace, monospace", fontSize: 12.5, color: COLORS.ink }}>{r.id}</td>
-                  <td style={{ padding: "9px 6px", color: COLORS.ink }}>{r.categoria}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.ink }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                      <CategoriaIcon categoria={r.categoria} color={COLORS.inkSoft} />
+                      {r.categoria}
+                    </div>
+                  </td>
                   <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>
                     {r.marca}
                     {r.modelo ? " · " + r.modelo : ""}
@@ -2015,7 +2059,12 @@ function Categorias({ state, setState }) {
           <tbody>
             {state.categorias.map((c) => (
               <tr key={c} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
-                <td style={{ padding: "9px 6px", color: COLORS.ink }}>{c}</td>
+                <td style={{ padding: "9px 6px", color: COLORS.ink }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <CategoriaIcon categoria={c} color={COLORS.accent} />
+                    {c}
+                  </div>
+                </td>
                 <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[c] || 0}</td>
                 <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                   <button onClick={() => openEdit(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
@@ -2262,7 +2311,12 @@ function Areas({ state, setState }) {
                   {equipDaSala.map((r) => (
                     <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                       <td style={{ padding: "7px 5px", fontFamily: "ui-monospace, monospace", fontSize: 12 }}>{r.id}</td>
-                      <td style={{ padding: "7px 5px" }}>{r.categoria}</td>
+                      <td style={{ padding: "7px 5px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <CategoriaIcon categoria={r.categoria} color={COLORS.inkSoft} size={13} />
+                          {r.categoria}
+                        </div>
+                      </td>
                       <td style={{ padding: "7px 5px", color: COLORS.inkSoft }}>
                         {r.marca}
                         {r.modelo ? " · " + r.modelo : ""}
@@ -2549,7 +2603,12 @@ function Relatorios({ state, historico }) {
                 {linhas.map((r) => (
                   <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                     <td style={{ padding: "6px 5px", fontFamily: "ui-monospace, monospace" }}>{r.id}</td>
-                    <td style={{ padding: "6px 5px" }}>{r.categoria}</td>
+                    <td style={{ padding: "6px 5px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                        <CategoriaIcon categoria={r.categoria} color={COLORS.inkSoft} size={13} />
+                        {r.categoria}
+                      </div>
+                    </td>
                     <td style={{ padding: "6px 5px" }}>{r.marca}</td>
                     <td style={{ padding: "6px 5px" }}>{r.modelo}</td>
                     <td style={{ padding: "6px 5px" }}>{r.sala}</td>
