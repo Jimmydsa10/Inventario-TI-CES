@@ -1238,8 +1238,10 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
 
 const DASH_VIEW_STORAGE_KEY = "inventario-ti-dashview";
 
-function Dashboard({ state, setView }) {
-  const inv = state.inventario;
+function Dashboard({ state, setView, unidadeAtiva }) {
+  const inv = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
+  const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
+  const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
   const [dashView, setDashView] = useState(() => {
     try {
       return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
@@ -1314,8 +1316,8 @@ function Dashboard({ state, setView }) {
     { label: "Precisa de manutenção", value: precisaManutencao },
     { label: "Em estoque", value: emEstoque },
     { label: "Descartado", value: descartado },
-    { label: "Salas cadastradas", value: state.areas.length },
-    { label: "Categorias cadastradas", value: state.categorias.length },
+    { label: "Salas cadastradas", value: areasUnidade.length },
+    { label: "Categorias cadastradas", value: categoriasUnidade.length },
   ];
 
   const pieColors = ["#2F6F5E", "#C97A2B", "#B23A32", "#6B7280", "#9CA3AF"];
@@ -4776,10 +4778,10 @@ function App() {
           }}
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
-          {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} />}
-          {["inventario", "categorias", "areas", "responsaveis"].includes(view) && (
+          {["dashboard", "inventario", "categorias", "areas", "responsaveis"].includes(view) && (
             <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
           )}
+          {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} unidadeAtiva={unidadeAtiva} />}
           {view === "inventario" && allowed.has("inventario") && (
             <Inventario
               state={state}
