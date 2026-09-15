@@ -993,6 +993,53 @@ function tempoDecorrido(iso) {
 
 // ---------- Sidebar ----------
 
+const UNIDADES = [
+  { id: "colegio", nome: "Colégio Espírito Santo" },
+  { id: "maternal", nome: "Maternal" },
+  { id: "bercario", nome: "Berçário" },
+  { id: "madrejosefa", nome: "Madre Josefa" },
+];
+
+function unidadeDe(item) {
+  return (item && item.unidade) || "colegio";
+}
+
+function normalizarCategorias(lista) {
+  return (lista || []).map((c) => (typeof c === "string" ? { nome: c, unidade: "colegio" } : c));
+}
+
+function nomesCategoriasDaUnidade(categorias, unidade) {
+  return (categorias || []).filter((c) => unidadeDe(c) === unidade).map((c) => c.nome);
+}
+
+function UnidadeTabs({ unidade, onChange }) {
+  return (
+    <div style={{ display: "flex", gap: 4, marginBottom: 16, borderBottom: `1px solid ${COLORS.line}`, flexWrap: "wrap" }}>
+      {UNIDADES.map((u) => {
+        const active = unidade === u.id;
+        return (
+          <button
+            key={u.id}
+            onClick={() => onChange(u.id)}
+            style={{
+              padding: "9px 16px",
+              fontSize: 13,
+              fontWeight: active ? 600 : 500,
+              color: active ? COLORS.ink : COLORS.inkSoft,
+              background: "none",
+              border: "none",
+              borderBottom: active ? `2px solid ${COLORS.accent}` : "2px solid transparent",
+              cursor: "pointer",
+            }}
+          >
+            {u.nome}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const NAV_ITEMS = [
   { key: "dashboard", label: "Painel", icon: LayoutDashboard },
   { key: "inventario", label: "Inventário", icon: Boxes },
@@ -1026,7 +1073,7 @@ function getAllowedSections(permissoes) {
     .filter(Boolean);
 }
 
-function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, onLogout, categorias }) {
+function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, onLogout, categorias, unidadeAtiva }) {
   const isMaster = isAcessoTotal(permissoes);
   const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
   const [openGroups, setOpenGroups] = useState(() => {
@@ -1094,7 +1141,8 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
                 group.items.map((item) => {
                   const Icon = item.icon;
                   const active = view === item.key;
-                  const temSubCategorias = group.label === "Inventário" && item.key === "inventario" && categorias && categorias.length > 0;
+                  const categoriasUnidade = group.label === "Inventário" && item.key === "inventario" ? nomesCategoriasDaUnidade(categorias, unidadeAtiva || "colegio") : [];
+                  const temSubCategorias = categoriasUnidade.length > 0;
                   return (
                     <React.Fragment key={item.key}>
                       <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
@@ -1131,7 +1179,7 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
                       </div>
                       {temSubCategorias && catListOpen && (
                         <div style={{ marginBottom: 4 }}>
-                          {categorias.map((cat) => (
+                          {categoriasUnidade.map((cat) => (
                             <button
                               key={cat}
                               onClick={() => onNavigateCategoria(cat)}
@@ -1528,6 +1576,7 @@ function emptyEquipForm() {
     valor: "",
     vidaUtil: "",
     historicoManutencao: [],
+    unidade: "colegio",
   };
 }
 
@@ -1690,7 +1739,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
   );
 }
 
-function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro }) {
+function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro }) {
   const [search, setSearch] = useState("");
   const [fCategoria, setFCategoria] = useState("");
   const [fSala, setFSala] = useState("");
@@ -1723,7 +1772,11 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
   }, [pendingCategoriaFiltro]);
 
   function addCategoria(nome) {
-    setState((prev) => (prev.categorias.some((c) => c.toLowerCase() === nome.toLowerCase()) ? prev : { ...prev, categorias: [...prev.categorias, nome] }));
+    setState((prev) =>
+      prev.categorias.some((c) => c.nome.toLowerCase() === nome.toLowerCase() && unidadeDe(c) === unidadeAtiva)
+        ? prev
+        : { ...prev, categorias: [...prev.categorias, { nome, unidade: unidadeAtiva }] }
+    );
   }
 
   function toggleSelect(id) {
@@ -1754,9 +1807,15 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
     setBulkDeleteOpen(false);
   }
 
+  const inventarioUnidade = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
+  const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
+  const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
+  const responsaveisUnidade = useMemo(() => state.responsaveis.filter((r) => unidadeDe(r) === unidadeAtiva), [state.responsaveis, unidadeAtiva]);
+  const stateUnidade = { ...state, categorias: categoriasUnidade, areas: areasUnidade, responsaveis: responsaveisUnidade };
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return state.inventario.filter((r) => {
+    return inventarioUnidade.filter((r) => {
       if (fCategoria && r.categoria !== fCategoria) return false;
       if (fSala && r.sala !== fSala) return false;
       if (fStatus && r.status !== fStatus) return false;
@@ -1772,7 +1831,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
         (r.responsavel || "").toLowerCase().includes(q)
       );
     });
-  }, [state.inventario, search, fCategoria, fSala, fStatus, fResp]);
+  }, [inventarioUnidade, search, fCategoria, fSala, fStatus, fResp]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageSafe = Math.min(page, totalPages);
@@ -1781,6 +1840,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
   function openNew() {
     const form = emptyEquipForm();
     form.id = nextPatrimonio(state.inventario, state.prefixo);
+    form.unidade = unidadeAtiva;
     setModal({ mode: "new", form });
     setError("");
   }
@@ -1861,7 +1921,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
             }}
           >
             <option value="">Todas categorias</option>
-            {state.categorias.map((c) => (
+            {categoriasUnidade.map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
@@ -1875,7 +1935,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
             }}
           >
             <option value="">Todas salas</option>
-            {state.areas.map((a) => (
+            {areasUnidade.map((a) => (
               <option key={a.id} value={a.nome}>
                 {a.nome}
               </option>
@@ -1903,7 +1963,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
             }}
           >
             <option value="">Todos responsáveis</option>
-            {state.responsaveis.map((r) => (
+            {responsaveisUnidade.map((r) => (
               <option key={r.id} value={r.nome}>
                 {r.nome}
               </option>
@@ -2038,7 +2098,7 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
 
       {modal && (
         <Modal title={modal.mode === "new" ? "Novo equipamento" : "Editar equipamento"} onClose={() => setModal(null)} width={620}>
-          <EquipForm form={modal.form} setForm={(f) => setModal({ ...modal, form: f })} state={state} isNew={modal.mode === "new"} onAddCategoria={addCategoria} />
+          <EquipForm form={modal.form} setForm={(f) => setModal({ ...modal, form: f })} state={stateUnidade} isNew={modal.mode === "new"} onAddCategoria={addCategoria} />
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ borderTop: `1px solid ${COLORS.line}`, marginTop: 4, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             {modal.mode === "edit" ? (
@@ -2130,12 +2190,14 @@ function Inventario({ state, setState, pendingPatrimonio, onConsumePending, pend
 
 // ---------- Categorias ----------
 
-function Categorias({ state, setState }) {
+function Categorias({ state, setState, unidadeAtiva }) {
   const [novo, setNovo] = useState("");
   const [error, setError] = useState("");
   const [removeTarget, setRemoveTarget] = useState(null);
   const [editModal, setEditModal] = useState(null);
   const [editError, setEditError] = useState("");
+
+  const categoriasUnidade = useMemo(() => state.categorias.filter((c) => unidadeDe(c) === unidadeAtiva), [state.categorias, unidadeAtiva]);
 
   const counts = useMemo(() => {
     const map = {};
@@ -2146,34 +2208,35 @@ function Categorias({ state, setState }) {
   function add() {
     const v = novo.trim();
     if (!v) return;
-    if (state.categorias.some((c) => c.toLowerCase() === v.toLowerCase())) {
-      setError("Essa categoria já existe.");
+    if (categoriasUnidade.some((c) => c.nome.toLowerCase() === v.toLowerCase())) {
+      setError("Essa categoria já existe nessa unidade.");
       return;
     }
-    setState((prev) => ({ ...prev, categorias: [...prev.categorias, v] }));
+    setState((prev) => ({ ...prev, categorias: [...prev.categorias, { nome: v, unidade: unidadeAtiva }] }));
     setNovo("");
     setError("");
   }
 
-  function remove(cat) {
-    setState((prev) => ({ ...prev, categorias: prev.categorias.filter((c) => c !== cat) }));
+  function remove(catObj) {
+    setState((prev) => ({ ...prev, categorias: prev.categorias.filter((c) => c !== catObj) }));
     setRemoveTarget(null);
   }
 
-  function openEdit(cat) {
-    setEditModal({ original: cat, nome: cat });
+  function openEdit(catObj) {
+    setEditModal({ original: catObj, nome: catObj.nome });
     setEditError("");
   }
 
   function saveEdit() {
     const novoNome = editModal.nome.trim();
     if (!novoNome) return setEditError("Informe o nome da categoria.");
-    const dup = state.categorias.some((c) => c !== editModal.original && c.toLowerCase() === novoNome.toLowerCase());
-    if (dup) return setEditError("Já existe uma categoria com esse nome.");
+    const dup = categoriasUnidade.some((c) => c !== editModal.original && c.nome.toLowerCase() === novoNome.toLowerCase());
+    if (dup) return setEditError("Já existe uma categoria com esse nome nessa unidade.");
+    const nomeAntigo = editModal.original.nome;
     setState((prev) => ({
       ...prev,
-      categorias: prev.categorias.map((c) => (c === editModal.original ? novoNome : c)),
-      inventario: prev.inventario.map((r) => (r.categoria === editModal.original ? { ...r, categoria: novoNome } : r)),
+      categorias: prev.categorias.map((c) => (c === editModal.original ? { ...c, nome: novoNome } : c)),
+      inventario: prev.inventario.map((r) => (r.categoria === nomeAntigo && unidadeDe(r) === unidadeAtiva ? { ...r, categoria: novoNome } : r)),
     }));
     setEditModal(null);
   }
@@ -2210,15 +2273,15 @@ function Categorias({ state, setState }) {
             </tr>
           </thead>
           <tbody>
-            {state.categorias.map((c) => (
-              <tr key={c} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+            {categoriasUnidade.map((c) => (
+              <tr key={c.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                 <td style={{ padding: "9px 6px", color: COLORS.ink }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <CategoriaIcon categoria={c} color={COLORS.accent} />
-                    {c}
+                    <CategoriaIcon categoria={c.nome} color={COLORS.accent} />
+                    {c.nome}
                   </div>
                 </td>
-                <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[c] || 0}</td>
+                <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[c.nome] || 0}</td>
                 <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                   <button onClick={() => openEdit(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
                     <Pencil size={15} />
@@ -2243,9 +2306,9 @@ function Categorias({ state, setState }) {
               onKeyDown={(e) => e.key === "Enter" && saveEdit()}
             />
           </Field>
-          {counts[editModal.original] > 0 && (
+          {counts[editModal.original.nome] > 0 && (
             <p style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: -6 }}>
-              Isso vai atualizar os {counts[editModal.original]} equipamento(s) que usam essa categoria.
+              Isso vai atualizar os {counts[editModal.original.nome]} equipamento(s) que usam essa categoria.
             </p>
           )}
           {editError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{editError}</div>}
@@ -2262,13 +2325,13 @@ function Categorias({ state, setState }) {
 
       {removeTarget && (
         <Modal title="Excluir categoria" onClose={() => setRemoveTarget(null)} width={380}>
-          {counts[removeTarget] > 0 ? (
+          {counts[removeTarget.nome] > 0 ? (
             <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
-              Essa categoria está em uso por <strong>{counts[removeTarget]}</strong> equipamento(s). Reatribua-os antes de excluí-la, ou a categoria continuará aparecendo nos registros existentes.
+              Essa categoria está em uso por <strong>{counts[removeTarget.nome]}</strong> equipamento(s). Reatribua-os antes de excluí-la, ou a categoria continuará aparecendo nos registros existentes.
             </p>
           ) : (
             <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
-              Tem certeza que deseja excluir a categoria <strong>{removeTarget}</strong>?
+              Tem certeza que deseja excluir a categoria <strong>{removeTarget.nome}</strong>?
             </p>
           )}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
@@ -2288,25 +2351,29 @@ function Categorias({ state, setState }) {
 // ---------- Áreas / Salas ----------
 
 
-function Areas({ state, setState }) {
+function Areas({ state, setState, unidadeAtiva }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
   const [viewing, setViewing] = useState(null);
 
+  const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
+
   const equipDaSala = useMemo(() => {
     if (!viewing) return [];
-    return state.inventario.filter((r) => r.sala === viewing.nome);
-  }, [state.inventario, viewing]);
+    return state.inventario.filter((r) => r.sala === viewing.nome && unidadeDe(r) === unidadeAtiva);
+  }, [state.inventario, viewing, unidadeAtiva]);
 
   const counts = useMemo(() => {
     const map = {};
-    state.inventario.forEach((r) => (map[r.sala] = (map[r.sala] || 0) + 1));
+    state.inventario.forEach((r) => {
+      if (unidadeDe(r) === unidadeAtiva) map[r.sala] = (map[r.sala] || 0) + 1;
+    });
     return map;
-  }, [state.inventario]);
+  }, [state.inventario, unidadeAtiva]);
 
   function openNew() {
-    setModal({ mode: "new", form: { id: uid("AR"), nome: "", tipo: "Sala de aula" } });
+    setModal({ mode: "new", form: { id: uid("AR"), nome: "", tipo: "Sala de aula", unidade: unidadeAtiva } });
     setError("");
   }
   function openEdit(a) {
@@ -2316,8 +2383,8 @@ function Areas({ state, setState }) {
   function save() {
     const f = modal.form;
     if (!f.nome.trim()) return setError("Informe o nome da sala/área.");
-    const dupNome = state.areas.some((a) => a.id !== f.id && a.nome.toLowerCase() === f.nome.trim().toLowerCase());
-    if (dupNome) return setError("Já existe uma sala/área com esse nome.");
+    const dupNome = areasUnidade.some((a) => a.id !== f.id && a.nome.toLowerCase() === f.nome.trim().toLowerCase());
+    if (dupNome) return setError("Já existe uma sala/área com esse nome nessa unidade.");
     setState((prev) => {
       const exists = prev.areas.some((a) => a.id === f.id);
       const areas = exists ? prev.areas.map((a) => (a.id === f.id ? f : a)) : [...prev.areas, f];
@@ -2325,7 +2392,7 @@ function Areas({ state, setState }) {
       if (exists) {
         const old = prev.areas.find((a) => a.id === f.id);
         if (old && old.nome !== f.nome) {
-          inventario = prev.inventario.map((r) => (r.sala === old.nome ? { ...r, sala: f.nome } : r));
+          inventario = prev.inventario.map((r) => (r.sala === old.nome && unidadeDe(r) === unidadeAtiva ? { ...r, sala: f.nome } : r));
         }
       }
       return { ...prev, areas, inventario };
@@ -2357,7 +2424,7 @@ function Areas({ state, setState }) {
             </tr>
           </thead>
           <tbody>
-            {state.areas.map((a) => (
+            {areasUnidade.map((a) => (
               <tr
                 key={a.id}
                 onClick={() => setViewing(a)}
@@ -2497,21 +2564,23 @@ function Areas({ state, setState }) {
 
 // ---------- Responsáveis ----------
 
-function Responsaveis({ state, setState }) {
+function Responsaveis({ state, setState, unidadeAtiva }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
 
+  const responsaveisUnidade = useMemo(() => state.responsaveis.filter((r) => unidadeDe(r) === unidadeAtiva), [state.responsaveis, unidadeAtiva]);
+
   const counts = useMemo(() => {
     const map = {};
     state.inventario.forEach((r) => {
-      if (r.responsavel) map[r.responsavel] = (map[r.responsavel] || 0) + 1;
+      if (r.responsavel && unidadeDe(r) === unidadeAtiva) map[r.responsavel] = (map[r.responsavel] || 0) + 1;
     });
     return map;
-  }, [state.inventario]);
+  }, [state.inventario, unidadeAtiva]);
 
   function openNew() {
-    setModal({ mode: "new", form: { id: uid("RE"), nome: "", cargo: "", contato: "" } });
+    setModal({ mode: "new", form: { id: uid("RE"), nome: "", cargo: "", contato: "", unidade: unidadeAtiva } });
     setError("");
   }
   function openEdit(r) {
@@ -2528,7 +2597,7 @@ function Responsaveis({ state, setState }) {
       if (exists) {
         const old = prev.responsaveis.find((r) => r.id === f.id);
         if (old && old.nome !== f.nome) {
-          inventario = prev.inventario.map((r) => (r.responsavel === old.nome ? { ...r, responsavel: f.nome } : r));
+          inventario = prev.inventario.map((r) => (r.responsavel === old.nome && unidadeDe(r) === unidadeAtiva ? { ...r, responsavel: f.nome } : r));
         }
       }
       return { ...prev, responsaveis, inventario };
@@ -2550,7 +2619,7 @@ function Responsaveis({ state, setState }) {
       </div>
 
       <Panel>
-        {state.responsaveis.length === 0 ? (
+        {responsaveisUnidade.length === 0 ? (
           <EmptyState text="Nenhum responsável cadastrado ainda." />
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
@@ -2564,7 +2633,7 @@ function Responsaveis({ state, setState }) {
               </tr>
             </thead>
             <tbody>
-              {state.responsaveis.map((r) => (
+              {responsaveisUnidade.map((r) => (
                 <tr key={r.id} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                   <td style={{ padding: "9px 6px", color: COLORS.ink }}>{r.nome}</td>
                   <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.cargo}</td>
@@ -2642,7 +2711,7 @@ function Relatorios({ state, historico }) {
 
   const opcoesValor = useMemo(() => {
     if (dimensao === "sala") return state.areas.map((a) => a.nome);
-    if (dimensao === "categoria") return state.categorias;
+    if (dimensao === "categoria") return [...new Set(state.categorias.map((c) => c.nome))];
     if (dimensao === "status") return STATUS_OPTIONS;
     if (dimensao === "responsavel") return state.responsaveis.map((r) => r.nome);
     return [];
@@ -2900,13 +2969,19 @@ function Importar({ state, setState }) {
       });
     }
 
-    const novaCategorias = new Set(modo === "substituir" ? state.categorias : state.categorias);
-    const novaAreas = new Map((modo === "substituir" ? state.areas : state.areas).map((a) => [a.nome, a]));
+    const categoriasBase = modo === "substituir" ? state.categorias.filter((c) => unidadeDe(c) !== "colegio") : state.categorias;
+    const nomesExistentes = new Set(nomesCategoriasDaUnidade(categoriasBase, "colegio"));
+    const novasCategoriasColegio = [];
+    const areasBase = modo === "substituir" ? state.areas.filter((a) => unidadeDe(a) !== "colegio") : state.areas;
+    const novaAreas = new Map(areasBase.filter((a) => unidadeDe(a) === "colegio").map((a) => [a.nome, a]));
     const novos = brutos.map((b) => {
       seqBase += 1;
-      novaCategorias.add(b.categoria);
+      if (!nomesExistentes.has(b.categoria)) {
+        nomesExistentes.add(b.categoria);
+        novasCategoriasColegio.push({ nome: b.categoria, unidade: "colegio" });
+      }
       if (b.sala && !novaAreas.has(b.sala)) {
-        novaAreas.set(b.sala, { id: uid("AR"), nome: b.sala, tipo: "Outro" });
+        novaAreas.set(b.sala, { id: uid("AR"), nome: b.sala, tipo: "Outro", unidade: "colegio" });
       }
       return {
         id: state.prefixo + "-" + String(seqBase).padStart(4, "0"),
@@ -2921,14 +2996,15 @@ function Importar({ state, setState }) {
         dataCompra: "",
         valor: "",
         vidaUtil: "",
+        unidade: "colegio",
       };
     });
 
     setState((prev) => ({
       ...prev,
-      categorias: Array.from(novaCategorias),
-      areas: Array.from(novaAreas.values()),
-      inventario: [...baseInventario, ...novos],
+      categorias: [...categoriasBase, ...novasCategoriasColegio],
+      areas: [...areasBase.filter((a) => unidadeDe(a) !== "colegio"), ...Array.from(novaAreas.values())],
+      inventario: [...(modo === "substituir" ? prev.inventario.filter((r) => unidadeDe(r) !== "colegio") : prev.inventario), ...novos],
     }));
 
     setStatus({
@@ -3354,7 +3430,7 @@ function Chamados({ state, setState }) {
                   <Field label="Categoria relacionada (opcional)">
                     <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
                       <option value="">Nenhuma</option>
-                      {state.categorias.map((c) => (
+                      {[...new Set(state.categorias.map((c) => c.nome))].map((c) => (
                         <option key={c} value={c}>
                           {c}
                         </option>
@@ -3819,7 +3895,7 @@ function novoChamadoSolicitanteForm() {
 
 function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout }) {
   const areas = state.areas || [];
-  const categorias = state.categorias || [];
+  const categorias = [...new Set((state.categorias || []).map((c) => c.nome))];
   const chamados = state.chamados || [];
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(chamados.length === 0);
@@ -4432,6 +4508,7 @@ function App() {
     }
   });
   const [pendingCategoriaFiltro, setPendingCategoriaFiltro] = useState(null);
+  const [unidadeAtiva, setUnidadeAtiva] = useState("colegio");
   const saveTimer = useRef(null);
 
   function aplicarLoginAdmin(data, senhaUsada) {
@@ -4450,6 +4527,7 @@ function App() {
       inventario: [],
       chamados: [],
       ...data.state,
+      categorias: normalizarCategorias((data.state && data.state.categorias) || []),
     });
     setSecret(senhaUsada);
     try {
@@ -4686,6 +4764,7 @@ function App() {
           permissoes={auth.permissoes}
           onLogout={logout}
           categorias={state.categorias}
+          unidadeAtiva={unidadeAtiva}
           onNavigate={(key) => {
             setView(key);
             setMobileMenuOpen(false);
@@ -4698,19 +4777,23 @@ function App() {
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
           {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} />}
+          {["inventario", "categorias", "areas", "responsaveis"].includes(view) && (
+            <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
+          )}
           {view === "inventario" && allowed.has("inventario") && (
             <Inventario
               state={state}
               setState={setState}
+              unidadeAtiva={unidadeAtiva}
               pendingPatrimonio={pendingPatrimonio}
               onConsumePending={() => setPendingPatrimonio(null)}
               pendingCategoriaFiltro={pendingCategoriaFiltro}
               onConsumeCategoriaFiltro={() => setPendingCategoriaFiltro(null)}
             />
           )}
-          {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} />}
-          {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} />}
-          {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} />}
+          {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
+          {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
+          {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
           {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} />}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} />}
