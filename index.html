@@ -692,6 +692,21 @@ function nextPatrimonio(inventario, prefixo) {
   return prefixo + "-" + String(max + 1).padStart(4, "0");
 }
 
+function comparaPatrimonio(a, b) {
+  const pa = String(a || "");
+  const pb = String(b || "");
+  const ma = /^(.*?)(\d+)$/.exec(pa);
+  const mb = /^(.*?)(\d+)$/.exec(pb);
+  if (ma && mb && ma[1] === mb[1]) {
+    return parseInt(ma[2], 10) - parseInt(mb[2], 10);
+  }
+  return pa.localeCompare(pb, "pt-BR", { numeric: true });
+}
+
+function ordenarPorNome(lista, campo) {
+  return [...lista].sort((a, b) => String(a[campo] || "").localeCompare(String(b[campo] || ""), "pt-BR"));
+}
+
 function buildSeedState() {
   return {
     prefixo: "CES",
@@ -1141,7 +1156,7 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
                 group.items.map((item) => {
                   const Icon = item.icon;
                   const active = view === item.key;
-                  const categoriasUnidade = group.label === "Inventário" && item.key === "inventario" ? nomesCategoriasDaUnidade(categorias, unidadeAtiva || "colegio") : [];
+                  const categoriasUnidade = group.label === "Inventário" && item.key === "inventario" ? [...nomesCategoriasDaUnidade(categorias, unidadeAtiva || "colegio")].sort((a, b) => a.localeCompare(b, "pt-BR")) : [];
                   const temSubCategorias = categoriasUnidade.length > 0;
                   return (
                     <React.Fragment key={item.key}>
@@ -1810,9 +1825,9 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   }
 
   const inventarioUnidade = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
-  const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
-  const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
-  const responsaveisUnidade = useMemo(() => state.responsaveis.filter((r) => unidadeDe(r) === unidadeAtiva), [state.responsaveis, unidadeAtiva]);
+  const categoriasUnidade = useMemo(() => [...nomesCategoriasDaUnidade(state.categorias, unidadeAtiva)].sort((a, b) => a.localeCompare(b, "pt-BR")), [state.categorias, unidadeAtiva]);
+  const areasUnidade = useMemo(() => ordenarPorNome(state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), "nome"), [state.areas, unidadeAtiva]);
+  const responsaveisUnidade = useMemo(() => ordenarPorNome(state.responsaveis.filter((r) => unidadeDe(r) === unidadeAtiva), "nome"), [state.responsaveis, unidadeAtiva]);
   const stateUnidade = { ...state, categorias: categoriasUnidade, areas: areasUnidade, responsaveis: responsaveisUnidade };
 
   const filtered = useMemo(() => {
@@ -1837,7 +1852,8 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageSafe = Math.min(page, totalPages);
-  const pageRows = filtered.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
+  const ordenado = useMemo(() => [...filtered].sort((a, b) => comparaPatrimonio(a.id, b.id)), [filtered]);
+  const pageRows = ordenado.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
 
   function openNew() {
     const form = emptyEquipForm();
@@ -2199,7 +2215,7 @@ function Categorias({ state, setState, unidadeAtiva }) {
   const [editModal, setEditModal] = useState(null);
   const [editError, setEditError] = useState("");
 
-  const categoriasUnidade = useMemo(() => state.categorias.filter((c) => unidadeDe(c) === unidadeAtiva), [state.categorias, unidadeAtiva]);
+  const categoriasUnidade = useMemo(() => ordenarPorNome(state.categorias.filter((c) => unidadeDe(c) === unidadeAtiva), "nome"), [state.categorias, unidadeAtiva]);
 
   const counts = useMemo(() => {
     const map = {};
@@ -2361,7 +2377,7 @@ function Areas({ state, setState, unidadeAtiva }) {
   const [error, setError] = useState("");
   const [viewing, setViewing] = useState(null);
 
-  const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
+  const areasUnidade = useMemo(() => ordenarPorNome(state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), "nome"), [state.areas, unidadeAtiva]);
 
   const equipDaSala = useMemo(() => {
     if (!viewing) return [];
@@ -2573,7 +2589,7 @@ function Responsaveis({ state, setState, unidadeAtiva }) {
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
 
-  const responsaveisUnidade = useMemo(() => state.responsaveis.filter((r) => unidadeDe(r) === unidadeAtiva), [state.responsaveis, unidadeAtiva]);
+  const responsaveisUnidade = useMemo(() => ordenarPorNome(state.responsaveis.filter((r) => unidadeDe(r) === unidadeAtiva), "nome"), [state.responsaveis, unidadeAtiva]);
 
   const counts = useMemo(() => {
     const map = {};
