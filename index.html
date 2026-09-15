@@ -1392,7 +1392,7 @@ function Dashboard({ state, setView, unidadeAtiva }) {
       {dashView === "kanban" ? (
         <>
           <Panel title="Chamados por status" style={{ marginBottom: 16 }}>
-            <ChamadosKanban chamados={state.chamados || []} onSelect={() => setView("chamados")} />
+            <ChamadosKanban chamados={(state.chamados || []).filter((c) => unidadeDe(c) === unidadeAtiva)} onSelect={() => setView("chamados")} />
           </Panel>
           <Panel title="Equipamentos por status">
             <EquipamentosKanban inventario={inv} />
@@ -3199,14 +3199,14 @@ function TipoChamadoBadge({ tipo }) {
   );
 }
 
-function novoChamadoForm() {
-  return { tipo: "Problema técnico", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+function novoChamadoForm(unidadeAtiva) {
+  return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
 }
 
-function Chamados({ state, setState }) {
+function Chamados({ state, setState, unidadeAtiva }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
-  const [form, setForm] = useState(novoChamadoForm());
+  const [form, setForm] = useState(novoChamadoForm(unidadeAtiva));
   const [replyText, setReplyText] = useState("");
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [viewMode, setViewMode] = useState("lista");
@@ -3214,7 +3214,7 @@ function Chamados({ state, setState }) {
   const fotoInputRefAdmin = useRef(null);
   const scrollRef = useRef(null);
 
-  const chamados = state.chamados || [];
+  const chamados = useMemo(() => (state.chamados || []).filter((c) => unidadeDe(c) === unidadeAtiva), [state.chamados, unidadeAtiva]);
   const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
   const selecionado = chamados.find((c) => c.id === selectedId) || null;
 
@@ -3237,7 +3237,7 @@ function Chamados({ state, setState }) {
   function abrirNovo() {
     setNovoMode(true);
     setSelectedId(null);
-    setForm(novoChamadoForm());
+    setForm(novoChamadoForm(unidadeAtiva));
   }
 
   function enviarNovoChamado() {
@@ -3247,6 +3247,7 @@ function Chamados({ state, setState }) {
       id: uid("CH"),
       assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
       tipo: form.tipo,
+      unidade: form.unidade || unidadeAtiva,
       sala: form.sala,
       categoria: form.categoria,
       prioridade: form.prioridade,
@@ -3257,7 +3258,7 @@ function Chamados({ state, setState }) {
     };
     setState((prev) => ({ ...prev, chamados: [...(prev.chamados || []), chamado] }));
     setNovoMode(false);
-    setForm(novoChamadoForm());
+    setForm(novoChamadoForm(unidadeAtiva));
     setSelectedId(chamado.id);
   }
 
@@ -3407,12 +3408,21 @@ function Chamados({ state, setState }) {
             <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
               <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
               <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
-                <div style={{ marginBottom: 14 }}>
+                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                   <Field label="Tipo de chamado">
                     <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
                       {TIPO_CHAMADO_OPTIONS.map((t) => (
                         <option key={t} value={t}>
                           {t}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                  <Field label="Unidade">
+                    <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value })}>
+                      {UNIDADES.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.nome}
                         </option>
                       ))}
                     </Select>
@@ -3892,7 +3902,7 @@ function TopBarSolicitante({ nome, onAdminClick, onLogout }) {
 }
 
 function novoChamadoSolicitanteForm() {
-  return { tipo: "Problema técnico", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+  return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
 }
 
 function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout }) {
@@ -3939,6 +3949,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
       solicitante: userAuth.nome,
       criadoPor: userAuth.nome,
       tipo: form.tipo,
+      unidade: form.unidade || "colegio",
       sala: form.sala,
       categoria: form.categoria,
       prioridade: form.prioridade,
@@ -4026,12 +4037,21 @@ function ChamadosSolicitante({ state, setState, userAuth, onAdminClick, onLogout
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
                 <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
-                  <div style={{ marginBottom: 14 }}>
+                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                     <Field label="Tipo de chamado">
                       <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
                         {TIPO_CHAMADO_OPTIONS.map((t) => (
                           <option key={t} value={t}>
                             {t}
+                          </option>
+                        ))}
+                      </Select>
+                    </Field>
+                    <Field label="Unidade">
+                      <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value })}>
+                        {UNIDADES.map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {u.nome}
                           </option>
                         ))}
                       </Select>
@@ -4778,7 +4798,7 @@ function App() {
           }}
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
-          {["dashboard", "inventario", "categorias", "areas", "responsaveis"].includes(view) && (
+          {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados"].includes(view) && (
             <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
           )}
           {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} unidadeAtiva={unidadeAtiva} />}
@@ -4797,7 +4817,7 @@ function App() {
           {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
-          {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} />}
+          {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
