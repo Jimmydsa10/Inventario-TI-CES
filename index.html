@@ -2203,9 +2203,11 @@ function Categorias({ state, setState, unidadeAtiva }) {
 
   const counts = useMemo(() => {
     const map = {};
-    state.inventario.forEach((r) => (map[r.categoria] = (map[r.categoria] || 0) + 1));
+    state.inventario.forEach((r) => {
+      if (unidadeDe(r) === unidadeAtiva) map[r.categoria] = (map[r.categoria] || 0) + 1;
+    });
     return map;
-  }, [state.inventario]);
+  }, [state.inventario, unidadeAtiva]);
 
   function add() {
     const v = novo.trim();
