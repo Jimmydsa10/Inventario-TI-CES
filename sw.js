@@ -1,4 +1,4 @@
-const CACHE_NAME = "inventario-ti-v3";
+const CACHE_NAME = "inventario-ti-v4";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -23,7 +23,12 @@ self.addEventListener("fetch", (event) => {
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
-          if (networkResponse && networkResponse.ok) {
+          // Cross-origin CDN scripts (react, chart.js, xlsx...) come back as
+          // opaque responses (status 0, ok === false) since they're loaded
+          // without CORS, so opaque responses are cached too — otherwise
+          // those libraries would never be cached and get re-downloaded on
+          // every visit.
+          if (networkResponse && (networkResponse.ok || networkResponse.type === "opaque")) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
           }
           return networkResponse;
