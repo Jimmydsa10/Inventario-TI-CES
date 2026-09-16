@@ -151,7 +151,7 @@ function DonutChart({ data, colors }) {
     </div>
   );
 }
-const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzGvIBQli7lFcWTfnJwmtp4cBneZZCuU9IPRqoe3Xt3PQX-my9Olbwadz_-F5pWf0-N/exec";
+const BACKEND_URL = "https://script.google.com/macros/s/AKfycbzQOtf4CxLRGqGrIHtzgHVv2FCtW6wEIpqQTaIszNF6R8bTc9iJA0wpZ-jR9zFbKS5Q/exec";
 
 let __jsonpCounter = 0;
 function jsonpRequest(url) {
