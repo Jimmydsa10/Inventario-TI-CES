@@ -3000,19 +3000,19 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
       });
     }
 
-    const categoriasBase = modo === "substituir" ? state.categorias.filter((c) => unidadeDe(c) !== "colegio") : state.categorias;
-    const nomesExistentes = new Set(nomesCategoriasDaUnidade(categoriasBase, "colegio"));
-    const novasCategoriasColegio = [];
-    const areasBase = modo === "substituir" ? state.areas.filter((a) => unidadeDe(a) !== "colegio") : state.areas;
-    const novaAreas = new Map(areasBase.filter((a) => unidadeDe(a) === "colegio").map((a) => [a.nome, a]));
+    const categoriasBase = modo === "substituir" ? state.categorias.filter((c) => unidadeDe(c) !== unidadeAtiva) : state.categorias;
+    const nomesExistentes = new Set(nomesCategoriasDaUnidade(categoriasBase, unidadeAtiva));
+    const novasCategoriasUnidade = [];
+    const areasBase = modo === "substituir" ? state.areas.filter((a) => unidadeDe(a) !== unidadeAtiva) : state.areas;
+    const novaAreas = new Map(areasBase.filter((a) => unidadeDe(a) === unidadeAtiva).map((a) => [a.nome, a]));
     const novos = brutos.map((b) => {
       seqBase += 1;
       if (!nomesExistentes.has(b.categoria)) {
         nomesExistentes.add(b.categoria);
-        novasCategoriasColegio.push({ nome: b.categoria, unidade: "colegio" });
+        novasCategoriasUnidade.push({ nome: b.categoria, unidade: unidadeAtiva });
       }
       if (b.sala && !novaAreas.has(b.sala)) {
-        novaAreas.set(b.sala, { id: uid("AR"), nome: b.sala, tipo: "Outro", unidade: "colegio" });
+        novaAreas.set(b.sala, { id: uid("AR"), nome: b.sala, tipo: "Outro", unidade: unidadeAtiva });
       }
       return {
         id: state.prefixo + "-" + String(seqBase).padStart(4, "0"),
@@ -3027,36 +3027,36 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
         dataCompra: "",
         valor: "",
         vidaUtil: "",
-        unidade: "colegio",
+        unidade: unidadeAtiva,
       };
     });
 
     setState((prev) => ({
       ...prev,
-      categorias: [...categoriasBase, ...novasCategoriasColegio],
-      areas: [...areasBase.filter((a) => unidadeDe(a) !== "colegio"), ...Array.from(novaAreas.values())],
-      inventario: [...(modo === "substituir" ? prev.inventario.filter((r) => unidadeDe(r) !== "colegio") : prev.inventario), ...novos],
+      categorias: [...categoriasBase, ...novasCategoriasUnidade],
+      areas: [...areasBase.filter((a) => unidadeDe(a) !== unidadeAtiva), ...Array.from(novaAreas.values())],
+      inventario: [...(modo === "substituir" ? prev.inventario.filter((r) => unidadeDe(r) !== unidadeAtiva) : prev.inventario), ...novos],
     }));
 
     setStatus({
       type: "ok",
       msg:
         modo === "substituir"
-          ? `Inventário substituído: ${novos.length} equipamento(s) importado(s), cada um com patrimônio próprio.`
-          : `${novos.length} equipamento(s) adicionado(s) aos já existentes, cada um com patrimônio próprio.`,
+          ? `Inventário de ${nomeUnidade} substituído: ${novos.length} equipamento(s) importado(s), cada um com patrimônio próprio.`
+          : `${novos.length} equipamento(s) adicionado(s) em ${nomeUnidade}, cada um com patrimônio próprio.`,
     });
     setPending(null);
   }
 
   function exportarXlsx() {
     const cols = [
-      ["Nº Patrimônio", "Categoria", "Marca", "Modelo", "Nº de Série", "Sala/Localização", "Status", "Responsável", "Observações", "Data de compra", "Valor de aquisição", "Vida útil (anos)"],
+      ["Nº Patrimônio", "Categoria", "Marca", "Modelo", "Nº de Série", "Sala/Localização", "Status", "Responsável", "Observações", "Data de compra", "Valor de aquisição", "Vida útil (anos)", "Unidade"],
     ];
-    const data = state.inventario.map((r) => [r.id, r.categoria, r.marca, r.modelo, r.serie, r.sala, r.status, r.responsavel, r.observacoes, r.dataCompra, r.valor, r.vidaUtil]);
+    const data = inventarioUnidade.map((r) => [r.id, r.categoria, r.marca, r.modelo, r.serie, r.sala, r.status, r.responsavel, r.observacoes, r.dataCompra, r.valor, r.vidaUtil, nomeUnidade]);
     const ws = XLSX.utils.aoa_to_sheet([...cols, ...data]);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Inventário");
-    XLSX.writeFile(wb, "inventario_ti_atual.xlsx");
+    XLSX.writeFile(wb, `inventario_ti_${unidadeAtiva}.xlsx`);
   }
 
   function exportarCSV() {
@@ -3070,9 +3070,11 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
       { key: "status", label: "Status" },
       { key: "responsavel", label: "Responsável" },
       { key: "observacoes", label: "Observações" },
+      { key: "unidadeNome", label: "Unidade" },
     ];
-    const csv = toCSV(state.inventario, columns);
-    downloadBlob("inventario_ti_atual.csv", new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
+    const linhas = inventarioUnidade.map((r) => ({ ...r, unidadeNome: nomeUnidade }));
+    const csv = toCSV(linhas, columns);
+    downloadBlob(`inventario_ti_${unidadeAtiva}.csv`, new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" }));
   }
 
   return (
@@ -3104,9 +3106,9 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
           )}
         </Panel>
 
-        <Panel title="Exportar inventário atual">
+        <Panel title={`Exportar inventário — ${nomeUnidade}`}>
           <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
-            Baixe todos os {state.inventario.length} equipamentos cadastrados hoje, para backup ou para compartilhar com a direção da escola.
+            Baixe os {inventarioUnidade.length} equipamentos cadastrados em {nomeUnidade}, para backup ou para compartilhar com a direção da escola.
           </p>
           <div style={{ display: "flex", gap: 10 }}>
             <Button variant="accent" icon={Download} onClick={exportarXlsx}>
@@ -3129,9 +3131,9 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
       </Panel>
 
       {pending && (
-        <Modal title="Confirmar importação" onClose={() => setPending(null)} width={460}>
+        <Modal title={`Confirmar importação — ${nomeUnidade}`} onClose={() => setPending(null)} width={460}>
           <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
-            Encontramos <strong>{pending.length}</strong> equipamento(s) nessa planilha. O inventário atual já tem <strong>{state.inventario.length}</strong> equipamento(s) cadastrado(s). O que você quer fazer?
+            Encontramos <strong>{pending.length}</strong> equipamento(s) nessa planilha. A unidade <strong>{nomeUnidade}</strong> já tem <strong>{inventarioUnidade.length}</strong> equipamento(s) cadastrado(s). O que você quer fazer?
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 6 }}>
             <button
@@ -3147,7 +3149,7 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
             >
               <div style={{ fontWeight: 700, color: COLORS.danger, fontSize: 13.5 }}>Substituir tudo</div>
               <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: 2 }}>
-                Apaga os {state.inventario.length} equipamentos atuais e coloca só os {pending.length} desta planilha. Use quando essa planilha é a versão correta e mais atual.
+                Apaga os {inventarioUnidade.length} equipamentos atuais de {nomeUnidade} (só dessa unidade) e coloca só os {pending.length} desta planilha. Use quando essa planilha é a versão correta e mais atual.
               </div>
             </button>
             <button
@@ -3163,7 +3165,7 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
             >
               <div style={{ fontWeight: 700, color: COLORS.ink, fontSize: 13.5 }}>Adicionar aos existentes</div>
               <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: 2 }}>
-                Mantém os {state.inventario.length} equipamentos atuais e soma os {pending.length} desta planilha. Só use se tiver certeza de que não é a mesma planilha já cadastrada — senão os equipamentos ficam duplicados.
+                Mantém os {inventarioUnidade.length} equipamentos atuais de {nomeUnidade} e soma os {pending.length} desta planilha. Só use se tiver certeza de que não é a mesma planilha já cadastrada — senão os equipamentos ficam duplicados.
               </div>
             </button>
           </div>
