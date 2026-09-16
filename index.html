@@ -2907,18 +2907,29 @@ function Relatorios({ state, historico }) {
 
 // ---------- Importar / Exportar ----------
 
-function Importar({ state, setState }) {
+function Importar({ state, setState, unidadeAtiva, secret }) {
   const fileRef = useRef(null);
   const [status, setStatus] = useState(null); // {type: 'ok'|'error', msg}
   const [busy, setBusy] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
   const [clearConfirmText, setClearConfirmText] = useState("");
+  const [clearSenha, setClearSenha] = useState("");
+  const [clearErro, setClearErro] = useState("");
   const [pending, setPending] = useState(null); // array de equipamentos lidos do arquivo, aguardando confirmação
 
+  const nomeUnidade = (UNIDADES.find((u) => u.id === unidadeAtiva) || {}).nome || unidadeAtiva;
+  const inventarioUnidade = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
+
   function clearInventario() {
-    setState((prev) => ({ ...prev, inventario: [] }));
+    if (clearSenha !== secret) {
+      setClearErro("Senha incorreta.");
+      return;
+    }
+    setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => unidadeDe(r) !== unidadeAtiva) }));
     setClearOpen(false);
     setClearConfirmText("");
+    setClearSenha("");
+    setClearErro("");
   }
 
   function handleFile(e) {
@@ -3108,12 +3119,12 @@ function Importar({ state, setState }) {
         </Panel>
       </div>
 
-      <Panel title="Zona de risco" style={{ marginTop: 16, borderColor: COLORS.dangerSoft }}>
+      <Panel title={`Zona de risco — ${nomeUnidade}`} style={{ marginTop: 16, borderColor: COLORS.dangerSoft }}>
         <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
-          Exclui todos os {state.inventario.length} equipamentos cadastrados no inventário — útil para apagar os dados iniciais da planilha, que já estão desatualizados, antes de importar uma planilha nova ou recomeçar o cadastro do zero. As categorias, salas e responsáveis cadastrados não são afetados.
+          Exclui todos os {inventarioUnidade.length} equipamentos cadastrados nessa unidade ({nomeUnidade}) — não afeta as outras unidades. Útil para apagar dados desatualizados antes de importar uma planilha nova ou recomeçar o cadastro do zero. As categorias, salas e responsáveis cadastrados não são afetados.
         </p>
-        <Button variant="danger" icon={Trash2} onClick={() => setClearOpen(true)} disabled={state.inventario.length === 0}>
-          Excluir todos os equipamentos
+        <Button variant="danger" icon={Trash2} onClick={() => setClearOpen(true)} disabled={inventarioUnidade.length === 0}>
+          Excluir equipamentos de {nomeUnidade}
         </Button>
       </Panel>
 
@@ -3166,30 +3177,50 @@ function Importar({ state, setState }) {
 
       {clearOpen && (
         <Modal
-          title="Excluir todos os equipamentos"
+          title={`Excluir equipamentos — ${nomeUnidade}`}
           onClose={() => {
             setClearOpen(false);
             setClearConfirmText("");
+            setClearSenha("");
+            setClearErro("");
           }}
           width={420}
         >
           <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
-            Isso vai excluir permanentemente os <strong>{state.inventario.length}</strong> equipamentos cadastrados no inventário. Essa ação não pode ser desfeita. Se quiser manter um registro, exporte antes usando os botões acima.
+            Isso vai excluir permanentemente os <strong>{inventarioUnidade.length}</strong> equipamentos cadastrados em <strong>{nomeUnidade}</strong>. Essa ação não pode ser desfeita e não afeta as outras unidades. Se quiser manter um registro, exporte antes usando os botões acima.
           </p>
           <Field label='Digite EXCLUIR para confirmar'>
             <TextInput value={clearConfirmText} onChange={(e) => setClearConfirmText(e.target.value)} placeholder="EXCLUIR" />
           </Field>
+          <Field label="Confirme sua senha de administrador">
+            <TextInput
+              type="password"
+              value={clearSenha}
+              onChange={(e) => {
+                setClearSenha(e.target.value);
+                setClearErro("");
+              }}
+            />
+          </Field>
+          {clearErro && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{clearErro}</div>}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
             <Button
               variant="ghost"
               onClick={() => {
                 setClearOpen(false);
                 setClearConfirmText("");
+                setClearSenha("");
+                setClearErro("");
               }}
             >
               Cancelar
             </Button>
-            <Button variant="danger" icon={Trash2} onClick={clearInventario} disabled={clearConfirmText.trim().toUpperCase() !== "EXCLUIR"}>
+            <Button
+              variant="danger"
+              icon={Trash2}
+              onClick={clearInventario}
+              disabled={clearConfirmText.trim().toUpperCase() !== "EXCLUIR" || !clearSenha}
+            >
               Excluir tudo
             </Button>
           </div>
@@ -4816,7 +4847,7 @@ function App() {
           }}
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
-          {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados"].includes(view) && (
+          {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados", "importar"].includes(view) && (
             <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
           )}
           {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} unidadeAtiva={unidadeAtiva} />}
@@ -4836,7 +4867,7 @@ function App() {
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
           {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
-          {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} />}
+          {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
       </div>
