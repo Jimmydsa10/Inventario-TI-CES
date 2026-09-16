@@ -1,0 +1,13 @@
+{
+  "name": "inventario-ti-ces",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Inventário de TI — Escola Espírito Santo",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.7",
+    "@babel/preset-react": "^7.24.7"
+  }
+}
