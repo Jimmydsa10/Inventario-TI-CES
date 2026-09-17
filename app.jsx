@@ -4301,6 +4301,7 @@ const RESPONSIVE_CSS = `
   .grid-chat > div:last-child { height: 480px !important; }
   .chamado-detail { flex-direction: column !important; }
   .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
+  .chamados-dock { display: none !important; }
 }
 `;
 
@@ -4533,6 +4534,117 @@ function LoadingScreen() {
   return (
     <div style={{ padding: 60, textAlign: "center", color: COLORS.inkSoft, fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
       Carregando inventário...
+    </div>
+  );
+}
+
+function ChamadosDock({ state, setState }) {
+  const [texto, setTexto] = useState("");
+  const [abertoId, setAbertoId] = useState(null);
+  const abertos = useMemo(
+    () => (state.chamados || []).filter((c) => c.status === "Aberto" || c.status === "Em andamento"),
+    [state.chamados]
+  );
+  const selecionado = abertos.find((c) => c.id === abertoId) || null;
+
+  function enviarResposta() {
+    const valor = texto.trim();
+    if (!valor || !selecionado) return;
+    setState((prev) => ({
+      ...prev,
+      chamados: prev.chamados.map((c) =>
+        c.id === selecionado.id ? { ...c, mensagens: [...c.mensagens, { autor: "ti", texto: valor, data: new Date().toISOString() }] } : c
+      ),
+    }));
+    setTexto("");
+  }
+
+  if (!selecionado && abertos.length === 0) return null;
+
+  if (selecionado) {
+    return (
+      <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
+        <div style={{ padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 8 }}>
+          <button onClick={() => setAbertoId(null)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex" }} aria-label="Voltar para a lista">
+            <ChevronLeft size={18} />
+          </button>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selecionado.assunto}</div>
+            <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{selecionado.solicitante || "Solicitante"} · {selecionado.sala || "Sem sala"} · {tempoDecorrido(selecionado.criadoEm)}</div>
+          </div>
+        </div>
+        <div style={{ flex: 1, overflow: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12, maxHeight: 420 }}>
+          {selecionado.mensagens.map((m, i) => {
+            const abertura = i === 0;
+            const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+            const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? COLORS.accentSoft : "#fff";
+            const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
+            return (
+              <div key={i} style={{ display: "flex", gap: 9 }}>
+                <Avatar nome={nomeAutor} size={26} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ padding: "9px 12px", borderRadius: 10, borderLeft: `3px solid ${borda}`, fontSize: 13, background: bg, color: COLORS.ink }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
+                      {nomeAutor} {abertura && <span style={{ color: "#2F6F5E" }}>· abriu o chamado</span>}
+                    </div>
+                    <div>{m.texto}</div>
+                  </div>
+                  <div style={{ fontSize: 10, color: COLORS.inkSoft, marginTop: 3, marginLeft: 3 }}>{formatDateTime(m.data)}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ padding: 12, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+          <TextInput
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            placeholder="Responder..."
+            onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+            style={{ flex: 1, minWidth: 0 }}
+          />
+          <Button variant="primary" icon={Send} onClick={enviarResposta}>
+            Enviar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
+      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 13.5, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        Chamados em aberto
+        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: COLORS.accentSoft, color: COLORS.accent }}>{abertos.length}</span>
+      </div>
+      <div style={{ flex: 1, overflow: "auto" }}>
+        {abertos.map((c) => {
+          const ultima = c.mensagens[c.mensagens.length - 1];
+          const naoLido = ultima.autor === "solicitante";
+          return (
+            <div
+              key={c.id}
+              onClick={() => setAbertoId(c.id)}
+              style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer" }}
+            >
+              <Avatar nome={c.solicitante || "?"} size={32} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.solicitante || "Solicitante"}</div>
+                  <div style={{ fontSize: 10.5, color: COLORS.inkSoft, flexShrink: 0 }}>{tempoDecorrido(c.criadoEm)}</div>
+                </div>
+                <div style={{ fontSize: 11.5, color: COLORS.ink, fontWeight: 600, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.assunto}</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 3 }}>
+                  <div style={{ fontSize: 11, color: COLORS.inkSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+                    {ultima.autor === "ti" ? "Você: " : ""}{ultima.texto}
+                  </div>
+                  {naoLido && <span style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS.danger, flexShrink: 0, marginLeft: 6 }} />}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -4853,6 +4965,7 @@ function App() {
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
+        {view !== "chamados" && allowed.has("chamados") && <ChamadosDock state={state} setState={setState} />}
       </div>
     </div>
   );
