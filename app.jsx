@@ -1393,11 +1393,11 @@ function Dashboard({ state, setView, unidadeAtiva }) {
 
       {dashView === "kanban" ? (
         <>
-          <Panel title="Chamados por status" style={{ marginBottom: 16 }}>
-            <ChamadosKanban chamados={(state.chamados || []).filter((c) => unidadeDe(c) === unidadeAtiva)} onSelect={() => setView("chamados")} />
-          </Panel>
-          <Panel title="Equipamentos por status">
+          <Panel title="Equipamentos por status" style={{ marginBottom: 16 }}>
             <EquipamentosKanban inventario={inv} />
+          </Panel>
+          <Panel title="Chamados por status">
+            <ChamadosKanban chamados={(state.chamados || []).filter((c) => unidadeDe(c) === unidadeAtiva)} onSelect={() => setView("chamados")} />
           </Panel>
         </>
       ) : (

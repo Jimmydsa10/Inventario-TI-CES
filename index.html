@@ -5835,17 +5835,17 @@ function Dashboard({
       color: COLORS.ink
     }
   }, k.value)))), dashView === "kanban" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Panel, {
-    title: "Chamados por status",
+    title: "Equipamentos por status",
     style: {
       marginBottom: 16
     }
+  }, /*#__PURE__*/React.createElement(EquipamentosKanban, {
+    inventario: inv
+  })), /*#__PURE__*/React.createElement(Panel, {
+    title: "Chamados por status"
   }, /*#__PURE__*/React.createElement(ChamadosKanban, {
     chamados: (state.chamados || []).filter(c => unidadeDe(c) === unidadeAtiva),
     onSelect: () => setView("chamados")
-  })), /*#__PURE__*/React.createElement(Panel, {
-    title: "Equipamentos por status"
-  }, /*#__PURE__*/React.createElement(EquipamentosKanban, {
-    inventario: inv
   }))) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "grid-2",
     style: {
