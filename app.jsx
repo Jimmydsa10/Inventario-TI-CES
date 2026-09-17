@@ -189,29 +189,50 @@ function jsonpRequest(url) {
   });
 }
 
+// O backend (Google Apps Script) às vezes tem lentidão/instabilidade
+// passageira (comum em implantações novas, enquanto o Google "esquenta" o
+// serviço). Uma nova tentativa automática evita mostrar erro pro usuário
+// por causa de uma falha isolada e momentânea.
+async function jsonpRequestComRetry(url) {
+  try {
+    return await jsonpRequest(url);
+  } catch (e) {
+    await new Promise((r) => setTimeout(r, 1000));
+    return jsonpRequest(url);
+  }
+}
+
 async function backendGet(secret) {
   const url = BACKEND_URL + (secret ? "?secret=" + encodeURIComponent(secret) : "");
-  return jsonpRequest(url);
+  return jsonpRequestComRetry(url);
 }
 
 async function backendGetUser(nome, senha) {
   const url = BACKEND_URL + "?userNome=" + encodeURIComponent(nome) + "&userSenha=" + encodeURIComponent(senha || "");
-  return jsonpRequest(url);
+  return jsonpRequestComRetry(url);
 }
 
 async function backendCreateAccount(nome, senha) {
   const url = BACKEND_URL + "?acao=criarConta&novoNome=" + encodeURIComponent(nome) + "&novaSenha=" + encodeURIComponent(senha);
-  return jsonpRequest(url);
+  return jsonpRequestComRetry(url);
 }
 
 async function backendPost(action, payload) {
-  try {
-    await fetch(BACKEND_URL, {
+  const tentar = () =>
+    fetch(BACKEND_URL, {
       method: "POST",
       mode: "no-cors",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action, ...(payload || {}) }),
     });
+  try {
+    try {
+      await tentar();
+    } catch (e) {
+      // Instabilidade passageira do backend: tenta uma vez mais antes de desistir.
+      await new Promise((r) => setTimeout(r, 1000));
+      await tentar();
+    }
     return { ok: true };
   } catch (e) {
     throw new Error("Falha ao enviar dados para o backend: " + ((e && e.message) || e));
