@@ -306,10 +306,6 @@ async function backendGetUser(nome, senha) {
   const url = BACKEND_URL + "?userNome=" + encodeURIComponent(nome) + "&userSenha=" + encodeURIComponent(senha || "");
   return jsonpRequestComRetry(url);
 }
-async function backendCreateAccount(nome, senha) {
-  const url = BACKEND_URL + "?acao=criarConta&novoNome=" + encodeURIComponent(nome) + "&novaSenha=" + encodeURIComponent(senha);
-  return jsonpRequestComRetry(url);
-}
 async function backendPost(action, payload) {
   const tentar = () => fetch(BACKEND_URL, {
     method: "POST",
@@ -5390,16 +5386,22 @@ const NAV_GROUPS = [{
   keys: ["chamados"]
 }, {
   label: "Administração",
-  keys: ["relatorios", "importar", "administradores"]
+  keys: ["relatorios", "importar", "usuarios", "administradores"]
 }];
 const ADMIN_NAV_ITEM = {
   key: "administradores",
   label: "Administradores",
   icon: Users
 };
+const USUARIOS_NAV_ITEM = {
+  key: "usuarios",
+  label: "Usuários",
+  icon: Users
+};
 const NAV_ITEM_MAP = {
   ...Object.fromEntries(NAV_ITEMS.map(i => [i.key, i])),
-  administradores: ADMIN_NAV_ITEM
+  administradores: ADMIN_NAV_ITEM,
+  usuarios: USUARIOS_NAV_ITEM
 };
 function isAcessoTotal(permissoes) {
   return !permissoes || String(permissoes).trim().toLowerCase() === "todas";
@@ -5429,7 +5431,7 @@ function Sidebar({
   const [catListOpen, setCatListOpen] = useState(true);
   const groups = NAV_GROUPS.map(g => ({
     label: g.label,
-    items: g.keys.filter(k => k === "administradores" ? isMaster : allowed.has(k)).map(k => NAV_ITEM_MAP[k])
+    items: g.keys.filter(k => k === "administradores" || k === "usuarios" ? isMaster : allowed.has(k)).map(k => NAV_ITEM_MAP[k])
   })).filter(g => g.items.length > 0);
   function toggleGroup(label) {
     setOpenGroups(prev => ({
@@ -9621,10 +9623,8 @@ function LoginPublico({
   onLoggedIn,
   onAdminClick
 }) {
-  const [tab, setTab] = useState("entrar");
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
-  const [confirmSenha, setConfirmSenha] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
   async function entrar() {
@@ -9646,36 +9646,6 @@ function LoginPublico({
       setErro("Não foi possível conectar (" + String(e && e.message || e) + ").");
     }
     setBusy(false);
-  }
-  async function criarConta() {
-    if (!nome.trim() || !senha.trim()) return setErro("Preencha nome e senha.");
-    if (senha !== confirmSenha) return setErro("As senhas não coincidem.");
-    setBusy(true);
-    setErro("");
-    try {
-      const data = await backendCreateAccount(nome.trim(), senha);
-      if (!data.ok) {
-        setErro(data.error || "Não foi possível criar a conta.");
-        setBusy(false);
-        return;
-      }
-      const login = await backendGetUser(nome.trim(), senha);
-      if (login.ok && login.isUser) {
-        onLoggedIn({
-          nome: login.nome,
-          senha
-        }, login.state);
-      } else {
-        setTab("entrar");
-        setErro("Conta criada! Agora entre com sua senha.");
-      }
-    } catch (e) {
-      setErro("Não foi possível conectar (" + String(e && e.message || e) + ").");
-    }
-    setBusy(false);
-  }
-  function onSubmit() {
-    if (tab === "entrar") entrar();else criarConta();
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
@@ -9720,48 +9690,6 @@ function LoginPublico({
     }
   }, "Escola Esp\xEDrito Santo"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      background: COLORS.paper,
-      borderRadius: 8,
-      padding: 3,
-      marginBottom: 18
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setTab("entrar");
-      setErro("");
-    },
-    style: {
-      flex: 1,
-      textAlign: "center",
-      fontSize: 12.5,
-      fontWeight: 600,
-      color: COLORS.ink,
-      background: tab === "entrar" ? "#fff" : "transparent",
-      border: tab === "entrar" ? `1px solid ${COLORS.line}` : "1px solid transparent",
-      borderRadius: 6,
-      padding: "7px 0",
-      cursor: "pointer"
-    }
-  }, "Entrar"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => {
-      setTab("criar");
-      setErro("");
-    },
-    style: {
-      flex: 1,
-      textAlign: "center",
-      fontSize: 12.5,
-      fontWeight: tab === "criar" ? 600 : 500,
-      color: tab === "criar" ? COLORS.ink : COLORS.inkSoft,
-      background: tab === "criar" ? "#fff" : "transparent",
-      border: tab === "criar" ? `1px solid ${COLORS.line}` : "1px solid transparent",
-      borderRadius: 6,
-      padding: "7px 0",
-      cursor: "pointer"
-    }
-  }, "Criar conta")), /*#__PURE__*/React.createElement("div", {
-    style: {
       textAlign: "left"
     }
   }, /*#__PURE__*/React.createElement(Field, {
@@ -9769,7 +9697,7 @@ function LoginPublico({
   }, /*#__PURE__*/React.createElement(TextInput, {
     value: nome,
     onChange: e => setNome(e.target.value),
-    onKeyDown: e => e.key === "Enter" && onSubmit(),
+    onKeyDown: e => e.key === "Enter" && entrar(),
     placeholder: "Como podemos te chamar"
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Senha"
@@ -9777,14 +9705,7 @@ function LoginPublico({
     type: "password",
     value: senha,
     onChange: e => setSenha(e.target.value),
-    onKeyDown: e => e.key === "Enter" && onSubmit()
-  })), tab === "criar" && /*#__PURE__*/React.createElement(Field, {
-    label: "Confirmar senha"
-  }, /*#__PURE__*/React.createElement(TextInput, {
-    type: "password",
-    value: confirmSenha,
-    onChange: e => setConfirmSenha(e.target.value),
-    onKeyDown: e => e.key === "Enter" && onSubmit()
+    onKeyDown: e => e.key === "Enter" && entrar()
   }))), erro && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
@@ -9794,14 +9715,14 @@ function LoginPublico({
     }
   }, erro), /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
-    onClick: onSubmit,
+    onClick: entrar,
     disabled: busy,
     style: {
       width: "100%",
       justifyContent: "center",
       marginTop: 4
     }
-  }, busy ? "Aguarde..." : tab === "entrar" ? "Entrar" : "Criar conta"), /*#__PURE__*/React.createElement("button", {
+  }, busy ? "Aguarde..." : "Entrar"), /*#__PURE__*/React.createElement("button", {
     onClick: onAdminClick,
     style: {
       background: "none",
@@ -10889,6 +10810,264 @@ function Administradores({
     onClick: () => remove(removeTarget)
   }, "Excluir"))));
 }
+function emptyUsuarioForm() {
+  return {
+    nome: "",
+    senha: ""
+  };
+}
+function Usuarios({
+  solicitantes,
+  secret,
+  onSolicitantesChanged
+}) {
+  const [lista, setLista] = useState(solicitantes || []);
+  const [modal, setModal] = useState(null); // { mode: 'new'|'edit', original, form }
+  const [error, setError] = useState("");
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null);
+  useEffect(() => {
+    setLista(solicitantes || []);
+  }, [solicitantes]);
+  function openNew() {
+    setModal({
+      mode: "new",
+      form: emptyUsuarioForm()
+    });
+    setError("");
+  }
+  function openEdit(u) {
+    setModal({
+      mode: "edit",
+      original: u,
+      form: {
+        nome: u.nome,
+        senha: ""
+      }
+    });
+    setError("");
+  }
+  async function persistir(novaLista) {
+    setBusy(true);
+    setStatus(null);
+    try {
+      await backendPost("salvarSolicitantes", {
+        secret,
+        solicitantes: novaLista
+      });
+      setLista(novaLista);
+      onSolicitantesChanged(novaLista);
+      setStatus({
+        type: "ok",
+        msg: "Salvo com sucesso."
+      });
+    } catch (e) {
+      setStatus({
+        type: "error",
+        msg: "Não foi possível salvar. Tente novamente."
+      });
+    }
+    setBusy(false);
+  }
+  function save() {
+    const f = modal.form;
+    const nome = f.nome.trim();
+    if (!nome) return setError("Informe o nome.");
+    if (modal.mode === "new" && !f.senha.trim()) return setError("Defina uma senha.");
+    const dupNome = lista.some(u => u !== modal.original && u.nome.toLowerCase() === nome.toLowerCase());
+    if (dupNome) return setError("Já existe um usuário com esse nome.");
+    const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
+    const novoUsuario = {
+      nome,
+      senha: senhaFinal
+    };
+    let novaLista;
+    if (modal.mode === "new") {
+      novaLista = [...lista, novoUsuario];
+    } else {
+      novaLista = lista.map(u => u === modal.original ? novoUsuario : u);
+    }
+    setModal(null);
+    persistir(novaLista);
+  }
+  function remove(u) {
+    const novaLista = lista.filter(x => x !== u);
+    setRemoveTarget(null);
+    persistir(novaLista);
+  }
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      margin: 0,
+      fontSize: 20,
+      fontWeight: 700,
+      color: COLORS.ink
+    }
+  }, "Usu\xE1rios"), /*#__PURE__*/React.createElement(Button, {
+    variant: "primary",
+    icon: Plus,
+    onClick: openNew
+  }, "Novo usu\xE1rio")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13.5,
+      color: COLORS.inkSoft,
+      marginTop: 0,
+      marginBottom: 16
+    }
+  }, "Cadastro livre est\xE1 desativado \u2014 s\xF3 um administrador pode criar acesso pra quem vai abrir chamados. Cada usu\xE1rio entra com o nome e a senha cadastrados aqui."), status && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14,
+      padding: "10px 12px",
+      borderRadius: 6,
+      fontSize: 13,
+      background: status.type === "ok" ? "#E3EEE9" : COLORS.dangerSoft,
+      color: status.type === "ok" ? "#1F4D40" : COLORS.danger
+    }
+  }, status.msg), /*#__PURE__*/React.createElement(Panel, null, lista.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
+    text: "Nenhum usu\xE1rio cadastrado ainda."
+  }) : /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13.5
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      borderBottom: `1px solid ${COLORS.lineStrong}`
+    }
+  }, /*#__PURE__*/React.createElement("th", {
+    style: {
+      textAlign: "left",
+      padding: "8px 6px",
+      color: COLORS.inkSoft,
+      fontSize: 12
+    }
+  }, "Nome"), /*#__PURE__*/React.createElement("th", {
+    style: {
+      padding: "8px 6px"
+    }
+  }))), /*#__PURE__*/React.createElement("tbody", null, lista.map(u => /*#__PURE__*/React.createElement("tr", {
+    key: u.nome,
+    style: {
+      borderBottom: `1px solid ${COLORS.line}`
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px",
+      color: COLORS.ink,
+      fontWeight: 600
+    }
+  }, u.nome), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px",
+      textAlign: "right",
+      whiteSpace: "nowrap"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => openEdit(u),
+    style: {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: COLORS.inkSoft,
+      padding: 4
+    },
+    "aria-label": "Editar"
+  }, /*#__PURE__*/React.createElement(Pencil, {
+    size: 15
+  })), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setRemoveTarget(u),
+    style: {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: COLORS.danger,
+      padding: 4
+    },
+    "aria-label": "Excluir"
+  }, /*#__PURE__*/React.createElement(Trash2, {
+    size: 15
+  })))))))), modal && /*#__PURE__*/React.createElement(Modal, {
+    title: modal.mode === "new" ? "Novo usuário" : "Editar usuário",
+    onClose: () => setModal(null),
+    width: 400
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Nome"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    value: modal.form.nome,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        nome: e.target.value
+      }
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: modal.mode === "new" ? "Senha" : "Nova senha (deixe em branco para manter a atual)"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    type: "text",
+    value: modal.form.senha,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        senha: e.target.value
+      }
+    }),
+    placeholder: modal.mode === "new" ? "" : "••••••••"
+  })), error && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: COLORS.danger,
+      fontSize: 13,
+      marginBottom: 10
+    }
+  }, error), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 8,
+      marginTop: 6
+    }
+  }, /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    onClick: () => setModal(null)
+  }, "Cancelar"), /*#__PURE__*/React.createElement(Button, {
+    variant: "primary",
+    icon: Check,
+    onClick: save,
+    disabled: busy
+  }, "Salvar"))), removeTarget && /*#__PURE__*/React.createElement(Modal, {
+    title: "Excluir usu\xE1rio",
+    onClose: () => setRemoveTarget(null),
+    width: 380
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 14,
+      color: COLORS.ink,
+      marginTop: 0
+    }
+  }, "Tem certeza que deseja excluir o usu\xE1rio ", /*#__PURE__*/React.createElement("strong", null, removeTarget.nome), "? Ele n\xE3o vai mais conseguir entrar com essa senha."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "flex-end",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    onClick: () => setRemoveTarget(null)
+  }, "Cancelar"), /*#__PURE__*/React.createElement(Button, {
+    variant: "danger",
+    icon: Trash2,
+    onClick: () => remove(removeTarget)
+  }, "Excluir"))));
+}
 const SECRET_STORAGE_KEY = "inventario-ti-secret";
 const USER_STORAGE_KEY = "inventario-ti-user";
 function LoadingScreen() {
@@ -11177,6 +11356,7 @@ function App() {
   const [auth, setAuth] = useState(null); // { isAdmin, nome, permissoes }
   const [userAuth, setUserAuth] = useState(null); // { nome, senha } — solicitante logado
   const [admins, setAdmins] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [historico, setHistorico] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -11206,6 +11386,7 @@ function App() {
       permissoes: data.permissoes || "todas"
     });
     setAdmins(data.admins || []);
+    setUsuarios(data.solicitantes || []);
     setHistorico(data.historico || []);
     setUserAuth(null);
     try {
@@ -11423,6 +11604,7 @@ function App() {
     relatorios: "Relatórios",
     chamados: "Chamados",
     importar: "Importar/Exportar",
+    usuarios: "Usuários",
     administradores: "Administradores"
   };
   const isMaster = isAcessoTotal(auth.permissoes);
@@ -11534,6 +11716,10 @@ function App() {
     setState: setState,
     unidadeAtiva: unidadeAtiva,
     secret: secret
+  }), view === "usuarios" && isMaster && /*#__PURE__*/React.createElement(Usuarios, {
+    solicitantes: usuarios,
+    secret: secret,
+    onSolicitantesChanged: setUsuarios
   }), view === "administradores" && isMaster && /*#__PURE__*/React.createElement(Administradores, {
     admins: admins,
     secret: secret,

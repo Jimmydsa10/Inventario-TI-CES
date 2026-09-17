@@ -212,11 +212,6 @@ async function backendGetUser(nome, senha) {
   return jsonpRequestComRetry(url);
 }
 
-async function backendCreateAccount(nome, senha) {
-  const url = BACKEND_URL + "?acao=criarConta&novoNome=" + encodeURIComponent(nome) + "&novaSenha=" + encodeURIComponent(senha);
-  return jsonpRequestComRetry(url);
-}
-
 async function backendPost(action, payload) {
   const tentar = () =>
     fetch(BACKEND_URL, {
@@ -1057,11 +1052,16 @@ const NAV_GROUPS = [
   { label: "Painel", keys: ["dashboard"] },
   { label: "Inventário", keys: ["inventario", "categorias", "areas", "responsaveis"] },
   { label: "Chamados", keys: ["chamados"] },
-  { label: "Administração", keys: ["relatorios", "importar", "administradores"] },
+  { label: "Administração", keys: ["relatorios", "importar", "usuarios", "administradores"] },
 ];
 
 const ADMIN_NAV_ITEM = { key: "administradores", label: "Administradores", icon: Users };
-const NAV_ITEM_MAP = { ...Object.fromEntries(NAV_ITEMS.map((i) => [i.key, i])), administradores: ADMIN_NAV_ITEM };
+const USUARIOS_NAV_ITEM = { key: "usuarios", label: "Usuários", icon: Users };
+const NAV_ITEM_MAP = {
+  ...Object.fromEntries(NAV_ITEMS.map((i) => [i.key, i])),
+  administradores: ADMIN_NAV_ITEM,
+  usuarios: USUARIOS_NAV_ITEM,
+};
 
 function isAcessoTotal(permissoes) {
   return !permissoes || String(permissoes).trim().toLowerCase() === "todas";
@@ -1087,7 +1087,7 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
 
   const groups = NAV_GROUPS.map((g) => ({
     label: g.label,
-    items: g.keys.filter((k) => (k === "administradores" ? isMaster : allowed.has(k))).map((k) => NAV_ITEM_MAP[k]),
+    items: g.keys.filter((k) => (k === "administradores" || k === "usuarios" ? isMaster : allowed.has(k))).map((k) => NAV_ITEM_MAP[k]),
   })).filter((g) => g.items.length > 0);
 
   function toggleGroup(label) {
@@ -3775,10 +3775,8 @@ function ErrorScreen({ msg, detail }) {
 }
 
 function LoginPublico({ onLoggedIn, onAdminClick }) {
-  const [tab, setTab] = useState("entrar");
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
-  const [confirmSenha, setConfirmSenha] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
 
@@ -3800,36 +3798,6 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
     setBusy(false);
   }
 
-  async function criarConta() {
-    if (!nome.trim() || !senha.trim()) return setErro("Preencha nome e senha.");
-    if (senha !== confirmSenha) return setErro("As senhas não coincidem.");
-    setBusy(true);
-    setErro("");
-    try {
-      const data = await backendCreateAccount(nome.trim(), senha);
-      if (!data.ok) {
-        setErro(data.error || "Não foi possível criar a conta.");
-        setBusy(false);
-        return;
-      }
-      const login = await backendGetUser(nome.trim(), senha);
-      if (login.ok && login.isUser) {
-        onLoggedIn({ nome: login.nome, senha }, login.state);
-      } else {
-        setTab("entrar");
-        setErro("Conta criada! Agora entre com sua senha.");
-      }
-    } catch (e) {
-      setErro("Não foi possível conectar (" + String((e && e.message) || e) + ").");
-    }
-    setBusy(false);
-  }
-
-  function onSubmit() {
-    if (tab === "entrar") entrar();
-    else criarConta();
-  }
-
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: 340, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "28px 24px", textAlign: "center" }}>
@@ -3837,67 +3805,19 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
         <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>Chamados de TI</div>
         <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 22 }}>Escola Espírito Santo</div>
 
-        <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3, marginBottom: 18 }}>
-          <button
-            onClick={() => {
-              setTab("entrar");
-              setErro("");
-            }}
-            style={{
-              flex: 1,
-              textAlign: "center",
-              fontSize: 12.5,
-              fontWeight: 600,
-              color: COLORS.ink,
-              background: tab === "entrar" ? "#fff" : "transparent",
-              border: tab === "entrar" ? `1px solid ${COLORS.line}` : "1px solid transparent",
-              borderRadius: 6,
-              padding: "7px 0",
-              cursor: "pointer",
-            }}
-          >
-            Entrar
-          </button>
-          <button
-            onClick={() => {
-              setTab("criar");
-              setErro("");
-            }}
-            style={{
-              flex: 1,
-              textAlign: "center",
-              fontSize: 12.5,
-              fontWeight: tab === "criar" ? 600 : 500,
-              color: tab === "criar" ? COLORS.ink : COLORS.inkSoft,
-              background: tab === "criar" ? "#fff" : "transparent",
-              border: tab === "criar" ? `1px solid ${COLORS.line}` : "1px solid transparent",
-              borderRadius: 6,
-              padding: "7px 0",
-              cursor: "pointer",
-            }}
-          >
-            Criar conta
-          </button>
-        </div>
-
         <div style={{ textAlign: "left" }}>
           <Field label="Nome">
-            <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onSubmit()} placeholder="Como podemos te chamar" />
+            <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
           </Field>
           <Field label="Senha">
-            <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onSubmit()} />
+            <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
           </Field>
-          {tab === "criar" && (
-            <Field label="Confirmar senha">
-              <TextInput type="password" value={confirmSenha} onChange={(e) => setConfirmSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onSubmit()} />
-            </Field>
-          )}
         </div>
 
         {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
 
-        <Button variant="primary" onClick={onSubmit} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
-          {busy ? "Aguarde..." : tab === "entrar" ? "Entrar" : "Criar conta"}
+        <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+          {busy ? "Aguarde..." : "Entrar"}
         </Button>
 
         <button
@@ -4527,6 +4447,169 @@ function Administradores({ admins, secret, onAdminsChanged }) {
   );
 }
 
+function emptyUsuarioForm() {
+  return { nome: "", senha: "" };
+}
+
+function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
+  const [lista, setLista] = useState(solicitantes || []);
+  const [modal, setModal] = useState(null); // { mode: 'new'|'edit', original, form }
+  const [error, setError] = useState("");
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    setLista(solicitantes || []);
+  }, [solicitantes]);
+
+  function openNew() {
+    setModal({ mode: "new", form: emptyUsuarioForm() });
+    setError("");
+  }
+
+  function openEdit(u) {
+    setModal({ mode: "edit", original: u, form: { nome: u.nome, senha: "" } });
+    setError("");
+  }
+
+  async function persistir(novaLista) {
+    setBusy(true);
+    setStatus(null);
+    try {
+      await backendPost("salvarSolicitantes", { secret, solicitantes: novaLista });
+      setLista(novaLista);
+      onSolicitantesChanged(novaLista);
+      setStatus({ type: "ok", msg: "Salvo com sucesso." });
+    } catch (e) {
+      setStatus({ type: "error", msg: "Não foi possível salvar. Tente novamente." });
+    }
+    setBusy(false);
+  }
+
+  function save() {
+    const f = modal.form;
+    const nome = f.nome.trim();
+    if (!nome) return setError("Informe o nome.");
+    if (modal.mode === "new" && !f.senha.trim()) return setError("Defina uma senha.");
+    const dupNome = lista.some((u) => u !== modal.original && u.nome.toLowerCase() === nome.toLowerCase());
+    if (dupNome) return setError("Já existe um usuário com esse nome.");
+
+    const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
+    const novoUsuario = { nome, senha: senhaFinal };
+    let novaLista;
+    if (modal.mode === "new") {
+      novaLista = [...lista, novoUsuario];
+    } else {
+      novaLista = lista.map((u) => (u === modal.original ? novoUsuario : u));
+    }
+    setModal(null);
+    persistir(novaLista);
+  }
+
+  function remove(u) {
+    const novaLista = lista.filter((x) => x !== u);
+    setRemoveTarget(null);
+    persistir(novaLista);
+  }
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Usuários</h2>
+        <Button variant="primary" icon={Plus} onClick={openNew}>
+          Novo usuário
+        </Button>
+      </div>
+
+      <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0, marginBottom: 16 }}>
+        Cadastro livre está desativado — só um administrador pode criar acesso pra quem vai abrir chamados. Cada usuário entra com o nome e a senha cadastrados aqui.
+      </p>
+
+      {status && (
+        <div
+          style={{
+            marginBottom: 14,
+            padding: "10px 12px",
+            borderRadius: 6,
+            fontSize: 13,
+            background: status.type === "ok" ? "#E3EEE9" : COLORS.dangerSoft,
+            color: status.type === "ok" ? "#1F4D40" : COLORS.danger,
+          }}
+        >
+          {status.msg}
+        </div>
+      )}
+
+      <Panel>
+        {lista.length === 0 ? (
+          <EmptyState text="Nenhum usuário cadastrado ainda." />
+        ) : (
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+                <th style={{ padding: "8px 6px" }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {lista.map((u) => (
+                <tr key={u.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                  <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{u.nome}</td>
+                  <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <button onClick={() => openEdit(u)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                      <Pencil size={15} />
+                    </button>
+                    <button onClick={() => setRemoveTarget(u)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                      <Trash2 size={15} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Panel>
+
+      {modal && (
+        <Modal title={modal.mode === "new" ? "Novo usuário" : "Editar usuário"} onClose={() => setModal(null)} width={400}>
+          <Field label="Nome">
+            <TextInput value={modal.form.nome} onChange={(e) => setModal({ ...modal, form: { ...modal.form, nome: e.target.value } })} />
+          </Field>
+          <Field label={modal.mode === "new" ? "Senha" : "Nova senha (deixe em branco para manter a atual)"}>
+            <TextInput type="text" value={modal.form.senha} onChange={(e) => setModal({ ...modal, form: { ...modal.form, senha: e.target.value } })} placeholder={modal.mode === "new" ? "" : "••••••••"} />
+          </Field>
+          {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
+            <Button variant="ghost" onClick={() => setModal(null)}>
+              Cancelar
+            </Button>
+            <Button variant="primary" icon={Check} onClick={save} disabled={busy}>
+              Salvar
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {removeTarget && (
+        <Modal title="Excluir usuário" onClose={() => setRemoveTarget(null)} width={380}>
+          <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
+            Tem certeza que deseja excluir o usuário <strong>{removeTarget.nome}</strong>? Ele não vai mais conseguir entrar com essa senha.
+          </p>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+            <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
+              Cancelar
+            </Button>
+            <Button variant="danger" icon={Trash2} onClick={() => remove(removeTarget)}>
+              Excluir
+            </Button>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
 const SECRET_STORAGE_KEY = "inventario-ti-secret";
 const USER_STORAGE_KEY = "inventario-ti-user";
 
@@ -4654,6 +4737,7 @@ function App() {
   const [auth, setAuth] = useState(null); // { isAdmin, nome, permissoes }
   const [userAuth, setUserAuth] = useState(null); // { nome, senha } — solicitante logado
   const [admins, setAdmins] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
   const [historico, setHistorico] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -4680,6 +4764,7 @@ function App() {
   function aplicarLoginAdmin(data, senhaUsada) {
     setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas" });
     setAdmins(data.admins || []);
+    setUsuarios(data.solicitantes || []);
     setHistorico(data.historico || []);
     setUserAuth(null);
     try {
@@ -4900,6 +4985,7 @@ function App() {
     relatorios: "Relatórios",
     chamados: "Chamados",
     importar: "Importar/Exportar",
+    usuarios: "Usuários",
     administradores: "Administradores",
   };
 
@@ -4963,6 +5049,7 @@ function App() {
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
           {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} />}
+          {view === "usuarios" && isMaster && <Usuarios solicitantes={usuarios} secret={secret} onSolicitantesChanged={setUsuarios} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
         {view !== "chamados" && allowed.has("chamados") && <ChamadosDock state={state} setState={setState} />}
