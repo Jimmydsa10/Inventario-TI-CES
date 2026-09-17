@@ -1,4 +1,4 @@
-const CACHE_NAME = "inventario-ti-v4";
+const CACHE_NAME = "inventario-ti-v5";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -19,6 +19,13 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  // O backend (Google Apps Script) serve dados dinâmicos (login, inventário,
+  // chamados) — nunca deve ser cacheado. Se ficasse em cache, uma resposta
+  // antiga (inclusive de erro) continuaria sendo servida para sempre, mesmo
+  // depois do backend ser corrigido ou os dados mudarem.
+  if (new URL(event.request.url).hostname === "script.google.com") return;
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
