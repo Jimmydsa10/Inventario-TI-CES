@@ -342,7 +342,7 @@ const SEED_INVENTORY = [{
   id: "CES-0001",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chorme book",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 103",
   status: "Em uso",
@@ -433,7 +433,7 @@ const SEED_INVENTORY = [{
   id: "CES-0008",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 104",
   status: "Em uso",
@@ -589,7 +589,7 @@ const SEED_INVENTORY = [{
   id: "CES-0020",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 105",
   status: "Em uso",
@@ -654,7 +654,7 @@ const SEED_INVENTORY = [{
   id: "CES-0025",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 106",
   status: "Em uso",
@@ -784,7 +784,7 @@ const SEED_INVENTORY = [{
   id: "CES-0035",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 107",
   status: "Em uso",
@@ -914,7 +914,7 @@ const SEED_INVENTORY = [{
   id: "CES-0045",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 108",
   status: "Em uso",
@@ -1005,7 +1005,7 @@ const SEED_INVENTORY = [{
   id: "CES-0052",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 201",
   status: "Em uso",
@@ -1096,7 +1096,7 @@ const SEED_INVENTORY = [{
   id: "CES-0059",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 202",
   status: "Em uso",
@@ -1226,7 +1226,7 @@ const SEED_INVENTORY = [{
   id: "CES-0069",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 203",
   status: "Em uso",
@@ -1356,7 +1356,7 @@ const SEED_INVENTORY = [{
   id: "CES-0079",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 204",
   status: "Em uso",
@@ -1486,7 +1486,7 @@ const SEED_INVENTORY = [{
   id: "CES-0089",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 205",
   status: "Em uso",
@@ -1577,7 +1577,7 @@ const SEED_INVENTORY = [{
   id: "CES-0096",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 206",
   status: "Em uso",
@@ -1668,7 +1668,7 @@ const SEED_INVENTORY = [{
   id: "CES-0103",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 207",
   status: "Em uso",
@@ -1798,7 +1798,7 @@ const SEED_INVENTORY = [{
   id: "CES-0113",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 208",
   status: "Em uso",
@@ -1928,7 +1928,7 @@ const SEED_INVENTORY = [{
   id: "CES-0123",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 209",
   status: "Em uso",
@@ -2019,7 +2019,7 @@ const SEED_INVENTORY = [{
   id: "CES-0130",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 210",
   status: "Em uso",
@@ -2110,7 +2110,7 @@ const SEED_INVENTORY = [{
   id: "CES-0137",
   categoria: "Computador desktop",
   marca: "Dell",
-  modelo: "chormebokk",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 211",
   status: "Em uso",
@@ -2240,7 +2240,7 @@ const SEED_INVENTORY = [{
   id: "CES-0147",
   categoria: "Notebook",
   marca: "Lenovo",
-  modelo: "chormebook",
+  modelo: "Chromebook",
   serie: "",
   sala: "Sala 212",
   status: "Em uso",
@@ -9812,11 +9812,10 @@ function LoginPublico({
       marginTop: 18,
       textDecoration: "underline"
     }
-  }, "Sou administrador")));
+  }, "Login")));
 }
 function TopBarSolicitante({
   nome,
-  onAdminClick,
   onLogout
 }) {
   return /*#__PURE__*/React.createElement("div", {
@@ -9861,17 +9860,6 @@ function TopBarSolicitante({
       gap: 8
     }
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: onAdminClick,
-    style: {
-      background: "none",
-      border: `1px solid rgba(255,255,255,0.3)`,
-      borderRadius: 6,
-      color: "#fff",
-      fontSize: 12,
-      padding: "6px 10px",
-      cursor: "pointer"
-    }
-  }, "Sou administrador"), /*#__PURE__*/React.createElement("button", {
     onClick: onLogout,
     style: {
       background: "none",
@@ -9899,7 +9887,6 @@ function ChamadosSolicitante({
   state,
   setState,
   userAuth,
-  onAdminClick,
   onLogout
 }) {
   const areas = state.areas || [];
@@ -10015,7 +10002,6 @@ function ChamadosSolicitante({
     }
   }, /*#__PURE__*/React.createElement(TopBarSolicitante, {
     nome: userAuth.nome,
-    onAdminClick: onAdminClick,
     onLogout: onLogout
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -11153,7 +11139,6 @@ function App() {
       state: state,
       setState: setState,
       userAuth: userAuth,
-      onAdminClick: () => setLoginOpen(true),
       onLogout: logoutUsuario
     }), adminModal);
   }
