@@ -10532,6 +10532,7 @@ const RESPONSIVE_CSS = `
   .grid-chat > div:last-child { height: 480px !important; }
   .chamado-detail { flex-direction: column !important; }
   .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
+  .chamados-dock { display: none !important; }
 }
 `;
 
@@ -10900,6 +10901,277 @@ function LoadingScreen() {
     }
   }, "Carregando invent\xE1rio...");
 }
+function ChamadosDock({
+  state,
+  setState
+}) {
+  const [texto, setTexto] = useState("");
+  const [abertoId, setAbertoId] = useState(null);
+  const abertos = useMemo(() => (state.chamados || []).filter(c => c.status === "Aberto" || c.status === "Em andamento"), [state.chamados]);
+  const selecionado = abertos.find(c => c.id === abertoId) || null;
+  function enviarResposta() {
+    const valor = texto.trim();
+    if (!valor || !selecionado) return;
+    setState(prev => ({
+      ...prev,
+      chamados: prev.chamados.map(c => c.id === selecionado.id ? {
+        ...c,
+        mensagens: [...c.mensagens, {
+          autor: "ti",
+          texto: valor,
+          data: new Date().toISOString()
+        }]
+      } : c)
+    }));
+    setTexto("");
+  }
+  if (!selecionado && abertos.length === 0) return null;
+  if (selecionado) {
+    return /*#__PURE__*/React.createElement("div", {
+      className: "chamados-dock",
+      style: {
+        width: 320,
+        flexShrink: 0,
+        background: "#fff",
+        borderLeft: `1px solid ${COLORS.line}`,
+        display: "flex",
+        flexDirection: "column",
+        boxShadow: "-4px 0 16px rgba(22,35,61,0.06)"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: "12px 16px",
+        borderBottom: `1px solid ${COLORS.line}`,
+        display: "flex",
+        alignItems: "center",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: () => setAbertoId(null),
+      style: {
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        color: COLORS.inkSoft,
+        padding: 2,
+        display: "flex"
+      },
+      "aria-label": "Voltar para a lista"
+    }, /*#__PURE__*/React.createElement(ChevronLeft, {
+      size: 18
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 13.5,
+        fontWeight: 700,
+        color: COLORS.ink,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      }
+    }, selecionado.assunto), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: COLORS.inkSoft
+      }
+    }, selecionado.solicitante || "Solicitante", " \xB7 ", selecionado.sala || "Sem sala", " \xB7 ", tempoDecorrido(selecionado.criadoEm)))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        overflow: "auto",
+        padding: 16,
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
+        maxHeight: 420
+      }
+    }, selecionado.mensagens.map((m, i) => {
+      const abertura = i === 0;
+      const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+      const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? COLORS.accentSoft : "#fff";
+      const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
+      return /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: {
+          display: "flex",
+          gap: 9
+        }
+      }, /*#__PURE__*/React.createElement(Avatar, {
+        nome: nomeAutor,
+        size: 26
+      }), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          padding: "9px 12px",
+          borderRadius: 10,
+          borderLeft: `3px solid ${borda}`,
+          fontSize: 13,
+          background: bg,
+          color: COLORS.ink
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10.5,
+          fontWeight: 700,
+          color: COLORS.inkSoft,
+          marginBottom: 3
+        }
+      }, nomeAutor, " ", abertura && /*#__PURE__*/React.createElement("span", {
+        style: {
+          color: "#2F6F5E"
+        }
+      }, "\xB7 abriu o chamado")), /*#__PURE__*/React.createElement("div", null, m.texto)), /*#__PURE__*/React.createElement("div", {
+        style: {
+          fontSize: 10,
+          color: COLORS.inkSoft,
+          marginTop: 3,
+          marginLeft: 3
+        }
+      }, formatDateTime(m.data))));
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        padding: 12,
+        borderTop: `1px solid ${COLORS.line}`,
+        display: "flex",
+        gap: 8
+      }
+    }, /*#__PURE__*/React.createElement(TextInput, {
+      value: texto,
+      onChange: e => setTexto(e.target.value),
+      placeholder: "Responder...",
+      onKeyDown: e => e.key === "Enter" && enviarResposta(),
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }), /*#__PURE__*/React.createElement(Button, {
+      variant: "primary",
+      icon: Send,
+      onClick: enviarResposta
+    }, "Enviar")));
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "chamados-dock",
+    style: {
+      width: 320,
+      flexShrink: 0,
+      background: "#fff",
+      borderLeft: `1px solid ${COLORS.line}`,
+      display: "flex",
+      flexDirection: "column",
+      boxShadow: "-4px 0 16px rgba(22,35,61,0.06)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 16px",
+      borderBottom: `1px solid ${COLORS.line}`,
+      fontSize: 13.5,
+      fontWeight: 700,
+      color: COLORS.ink,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, "Chamados em aberto", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "2px 8px",
+      borderRadius: 999,
+      background: COLORS.accentSoft,
+      color: COLORS.accent
+    }
+  }, abertos.length)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflow: "auto"
+    }
+  }, abertos.map(c => {
+    const ultima = c.mensagens[c.mensagens.length - 1];
+    const naoLido = ultima.autor === "solicitante";
+    return /*#__PURE__*/React.createElement("div", {
+      key: c.id,
+      onClick: () => setAbertoId(c.id),
+      style: {
+        display: "flex",
+        gap: 10,
+        padding: "12px 16px",
+        borderBottom: `1px solid ${COLORS.line}`,
+        cursor: "pointer"
+      }
+    }, /*#__PURE__*/React.createElement(Avatar, {
+      nome: c.solicitante || "?",
+      size: 32
+    }), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        minWidth: 0
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12.5,
+        fontWeight: 700,
+        color: COLORS.ink,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      }
+    }, c.solicitante || "Solicitante"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 10.5,
+        color: COLORS.inkSoft,
+        flexShrink: 0
+      }
+    }, tempoDecorrido(c.criadoEm))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11.5,
+        color: COLORS.ink,
+        fontWeight: 600,
+        marginTop: 1,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap"
+      }
+    }, c.assunto), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 3
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: COLORS.inkSoft,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+        flex: 1
+      }
+    }, ultima.autor === "ti" ? "Você: " : "", ultima.texto), naoLido && /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        background: COLORS.danger,
+        flexShrink: 0,
+        marginLeft: 6
+      }
+    }))));
+  })));
+}
 function App() {
   const [secret, setSecret] = useState("");
   const [auth, setAuth] = useState(null); // { isAdmin, nome, permissoes }
@@ -11266,7 +11538,10 @@ function App() {
     admins: admins,
     secret: secret,
     onAdminsChanged: setAdmins
-  }))));
+  })), view !== "chamados" && allowed.has("chamados") && /*#__PURE__*/React.createElement(ChamadosDock, {
+    state: state,
+    setState: setState
+  })));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
 </script>
