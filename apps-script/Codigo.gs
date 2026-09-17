@@ -72,14 +72,16 @@ function findSolicitante(nome) {
   return null;
 }
 
-function criarSolicitante(nome, senha) {
-  nome = String(nome || '').trim();
-  senha = String(senha || '').trim();
-  if (!nome || !senha) return { ok: false, error: 'Preencha nome e senha.' };
-  if (findSolicitante(nome)) return { ok: false, error: 'Esse nome já está cadastrado. Escolha outro, ou entre com a senha existente.' };
+function saveSolicitantes(list) {
   const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha']);
-  sh.appendRow([nome, senha]);
-  return { ok: true, nome: nome };
+  const lastRow = sh.getLastRow();
+  if (lastRow >= 2) {
+    sh.getRange(2, 1, lastRow - 1, 2).clearContent();
+  }
+  const rows = (list || []).map(function (s) { return [s.nome, s.senha]; });
+  if (rows.length > 0) {
+    sh.getRange(2, 1, rows.length, 2).setValues(rows);
+  }
 }
 
 function checkSolicitanteLogin(nome, senha) {
@@ -268,48 +270,45 @@ function doGet(e) {
   const callback = p.callback || '';
   let payload;
 
-  if (p.acao === 'criarConta') {
-    payload = criarSolicitante(p.novoNome, p.novaSenha);
-  } else {
-    const secret = p.secret || '';
-    const userNome = p.userNome || '';
-    const userSenha = p.userSenha || '';
+  const secret = p.secret || '';
+  const userNome = p.userNome || '';
+  const userSenha = p.userSenha || '';
 
-    const admins = secret ? getAdmins() : null;
-    const admin = findAdminBySecret(secret, admins);
+  const admins = secret ? getAdmins() : null;
+  const admin = findAdminBySecret(secret, admins);
 
-    if (admin) {
-      const isMaster = admin.permissoes === 'todas';
+  if (admin) {
+    const isMaster = admin.permissoes === 'todas';
+    const state = readState();
+    payload = {
+      ok: true,
+      isAdmin: true,
+      nome: admin.nome,
+      permissoes: admin.permissoes,
+      state: state,
+      admins: isMaster ? admins.map(function (a) { return { nome: a.nome, permissoes: a.permissoes }; }) : [],
+      solicitantes: isMaster ? getSolicitantes() : [],
+      historico: getHistoricoMensal()
+    };
+  } else if (userNome) {
+    if (checkSolicitanteLogin(userNome, userSenha)) {
       const state = readState();
+      const alvo = userNome.trim().toLowerCase();
+      const meusChamados = (state.chamados || []).filter(function (c) {
+        return (c.criadoPor || '').trim().toLowerCase() === alvo;
+      });
       payload = {
         ok: true,
-        isAdmin: true,
-        nome: admin.nome,
-        permissoes: admin.permissoes,
-        state: state,
-        admins: isMaster ? admins.map(function (a) { return { nome: a.nome, permissoes: a.permissoes }; }) : [],
-        historico: getHistoricoMensal()
+        isAdmin: false,
+        isUser: true,
+        nome: userNome,
+        state: { areas: state.areas || [], categorias: state.categorias || [], chamados: meusChamados }
       };
-    } else if (userNome) {
-      if (checkSolicitanteLogin(userNome, userSenha)) {
-        const state = readState();
-        const alvo = userNome.trim().toLowerCase();
-        const meusChamados = (state.chamados || []).filter(function (c) {
-          return (c.criadoPor || '').trim().toLowerCase() === alvo;
-        });
-        payload = {
-          ok: true,
-          isAdmin: false,
-          isUser: true,
-          nome: userNome,
-          state: { areas: state.areas || [], categorias: state.categorias || [], chamados: meusChamados }
-        };
-      } else {
-        payload = { ok: true, isAdmin: false, isUser: false, error: 'Nome ou senha incorretos.' };
-      }
     } else {
-      payload = { ok: true, isAdmin: false, isUser: false, state: { areas: [], categorias: [], chamados: [] } };
+      payload = { ok: true, isAdmin: false, isUser: false, error: 'Nome ou senha incorretos.' };
     }
+  } else {
+    payload = { ok: true, isAdmin: false, isUser: false, state: { areas: [], categorias: [], chamados: [] } };
   }
 
   if (callback) {
@@ -338,6 +337,11 @@ function doPost(e) {
 
   if (isMaster && body.action === 'salvarAdmins') {
     saveAdmins(body.admins || []);
+    return jsonOut({ ok: true });
+  }
+
+  if (isMaster && body.action === 'salvarSolicitantes') {
+    saveSolicitantes(body.solicitantes || []);
     return jsonOut({ ok: true });
   }
 
