@@ -84,7 +84,8 @@ const ICON_PATHS = {
   send: "M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z",
   menu: "M3 6h18M3 12h18M3 18h18",
   qrcode: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm14 0h2v2h-2zm-4 0h2v2h-2zm4 4h2v2h-2zm-4 0h2v2h-2z",
-  pin: "M12 17v5m-5-9h10l-1.5-2V5a3.5 3.5 0 00-7 0v6L7 13z"
+  pin: "M12 17v5m-5-9h10l-1.5-2V5a3.5 3.5 0 00-7 0v6L7 13z",
+  clock: "M12 21a9 9 0 100-18 9 9 0 000 18zm0-14v5l3.5 2"
 };
 function Icon({
   name,
@@ -131,6 +132,7 @@ const Send = IconWrap("send");
 const Menu = IconWrap("menu");
 const QrCode = IconWrap("qrcode");
 const Pin = IconWrap("pin");
+const Clock = IconWrap("clock");
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
@@ -5634,26 +5636,72 @@ function Sidebar({
 // ---------- Dashboard ----------
 
 const DASH_VIEW_STORAGE_KEY = "inventario-ti-dashview";
+function StatTile({
+  icon: Icon,
+  value,
+  label,
+  accent
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: COLORS.surface,
+      border: `1px solid ${COLORS.line}`,
+      borderRadius: 8,
+      padding: "14px 16px",
+      display: "flex",
+      alignItems: "center",
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 36,
+      height: 36,
+      borderRadius: 8,
+      background: accent ? COLORS.accentSoft : COLORS.paper,
+      color: accent ? COLORS.accent : COLORS.inkSoft,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement(Icon, {
+    size: 18
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 700,
+      color: accent ? COLORS.accent : COLORS.ink,
+      lineHeight: 1
+    }
+  }, value), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      color: COLORS.inkSoft,
+      marginTop: 3
+    }
+  }, label)));
+}
 function Dashboard({
   state,
   setView,
-  unidadeAtiva
+  unidadeAtiva,
+  onAbrirChamado
 }) {
   const inv = useMemo(() => state.inventario.filter(r => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter(a => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
   const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
   const [dashView, setDashView] = useState(() => {
     try {
-      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
+      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "geral";
     } catch (e) {
-      return "graficos";
+      return "geral";
     }
   });
   const [principal, setPrincipal] = useState(() => {
     try {
-      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
+      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "geral";
     } catch (e) {
-      return "graficos";
+      return "geral";
     }
   });
   function marcarPrincipal(v) {
@@ -5703,6 +5751,21 @@ function Dashboard({
   const precisaManutencao = inv.filter(r => r.status === "Precisa de manutenção").length;
   const emEstoque = inv.filter(r => r.status === "Em estoque").length;
   const descartado = inv.filter(r => r.status === "Descartado").length;
+  const emUsoPct = total > 0 ? Math.round(emUso / total * 100) : 0;
+  const statusGradient = useMemo(() => {
+    if (total === 0) return COLORS.line;
+    let acc = 0;
+    const stops = porStatus.map(s => {
+      const pct = s.value / total * 100;
+      const start = acc;
+      acc += pct;
+      return `${STATUS_COLORS[s.name]} ${start}% ${acc}%`;
+    });
+    return `conic-gradient(${stops.join(", ")})`;
+  }, [porStatus, total]);
+  const chamadosAbertos = useMemo(() => {
+    return (state.chamados || []).filter(c => unidadeDe(c) === unidadeAtiva && (c.status === "Aberto" || c.status === "Em andamento")).sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+  }, [state.chamados, unidadeAtiva]);
   const kpis = [{
     label: "Total de equipamentos",
     value: total
@@ -5754,6 +5817,34 @@ function Dashboard({
       alignItems: "center"
     }
   }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => setDashView("geral"),
+    style: {
+      fontSize: 12.5,
+      fontWeight: 600,
+      padding: "7px 10px 7px 14px",
+      borderRadius: 6,
+      cursor: "pointer",
+      color: COLORS.ink,
+      background: dashView === "geral" ? "#fff" : "transparent",
+      border: dashView === "geral" ? `1px solid ${COLORS.line}` : "1px solid transparent"
+    }
+  }, "Vis\xE3o geral"), /*#__PURE__*/React.createElement("button", {
+    onClick: e => {
+      e.stopPropagation();
+      marcarPrincipal("geral");
+    },
+    title: principal === "geral" ? "Visão principal" : "Deixar Visão geral como principal",
+    style: {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: principal === "geral" ? COLORS.accent : COLORS.inkSoft,
+      padding: "4px 8px 4px 2px"
+    }
+  }, /*#__PURE__*/React.createElement(Pin, {
+    size: 13,
+    fill: principal === "geral" ? COLORS.accent : "none"
+  })), /*#__PURE__*/React.createElement("button", {
     onClick: () => setDashView("kanban"),
     style: {
       fontSize: 12.5,
@@ -5809,7 +5900,7 @@ function Dashboard({
   }, /*#__PURE__*/React.createElement(Pin, {
     size: 13,
     fill: principal === "graficos" ? COLORS.accent : "none"
-  })))), /*#__PURE__*/React.createElement("div", {
+  })))), dashView !== "geral" && /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
@@ -5836,7 +5927,415 @@ function Dashboard({
       fontWeight: 700,
       color: COLORS.ink
     }
-  }, k.value)))), dashView === "kanban" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Panel, {
+  }, k.value)))), dashView === "geral" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "grid-3",
+    style: {
+      display: "grid",
+      gridTemplateColumns: "minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr)",
+      gap: 16,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement(Panel, {
+    title: "Sa\xFAde do parque",
+    action: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: COLORS.inkSoft
+      }
+    }, total, " equipamentos")
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 88,
+      height: 88,
+      borderRadius: "50%",
+      flexShrink: 0,
+      background: statusGradient,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 60,
+      height: 60,
+      borderRadius: "50%",
+      background: "#fff",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 700,
+      color: COLORS.ink,
+      lineHeight: 1
+    }
+  }, emUsoPct, "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 8.5,
+      color: COLORS.inkSoft,
+      marginTop: 2
+    }
+  }, "em uso"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 7,
+      flex: 1,
+      minWidth: 0
+    }
+  }, porStatus.map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.name,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      fontSize: 12,
+      color: COLORS.inkSoft
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 2,
+      background: STATUS_COLORS[s.name],
+      display: "inline-block",
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, s.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      color: COLORS.ink
+    }
+  }, s.value)))))), /*#__PURE__*/React.createElement(Panel, {
+    style: {
+      borderLeft: `3px solid ${COLORS.danger}`
+    },
+    title: /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 7
+      }
+    }, /*#__PURE__*/React.createElement(TriangleAlert, {
+      size: 15,
+      style: {
+        color: COLORS.danger
+      }
+    }), "Precisam de aten\xE7\xE3o"),
+    action: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: COLORS.danger
+      }
+    }, precisamAtencao.length)
+  }, precisamAtencao.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
+    text: "Nenhum equipamento precisa de aten\xE7\xE3o no momento."
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      marginBottom: 10
+    }
+  }, precisamAtencao.slice(0, 3).map(r => /*#__PURE__*/React.createElement("div", {
+    key: r.id,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+      background: STATUS_BG[r.status],
+      borderRadius: 7,
+      padding: "7px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: COLORS.ink,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, r.id, " \xB7 ", r.categoria), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: COLORS.inkSoft
+    }
+  }, r.sala || "Sem sala")), /*#__PURE__*/React.createElement(StatusPill, {
+    status: r.status
+  })))), /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    onClick: () => setView("inventario")
+  }, "Ver todos")), /*#__PURE__*/React.createElement(Panel, {
+    style: {
+      borderLeft: `3px solid ${COLORS.accent}`
+    },
+    title: /*#__PURE__*/React.createElement("span", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 7
+      }
+    }, /*#__PURE__*/React.createElement(MessageSquare, {
+      size: 15,
+      style: {
+        color: COLORS.accent
+      }
+    }), "Chamados abertos"),
+    action: /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: COLORS.accent
+      }
+    }, chamadosAbertos.length)
+  }, chamadosAbertos.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
+    text: "Nenhum chamado em aberto."
+  }) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      marginBottom: 10
+    }
+  }, chamadosAbertos.slice(0, 3).map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.id,
+    onClick: () => onAbrirChamado(c.id),
+    title: "Responder no chat",
+    style: {
+      background: COLORS.accentSoft,
+      borderRadius: 7,
+      padding: "7px 10px",
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 600,
+      color: COLORS.ink,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, c.assunto), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: COLORS.inkSoft,
+      marginTop: 1
+    }
+  }, c.solicitante || "Solicitante", " \xB7 ", c.sala || "Sem sala", " \xB7 ", tempoDecorrido(c.criadoEm))))), /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    onClick: () => setView("chamados")
+  }, "Ver todos"))), /*#__PURE__*/React.createElement("div", {
+    className: "grid-4",
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+      gap: 16,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement(StatTile, {
+    icon: Boxes,
+    value: emEstoque,
+    label: "Em estoque"
+  }), /*#__PURE__*/React.createElement(StatTile, {
+    icon: DoorOpen,
+    value: areasUnidade.length,
+    label: "Salas cadastradas"
+  }), /*#__PURE__*/React.createElement(StatTile, {
+    icon: Tag,
+    value: categoriasUnidade.length,
+    label: "Categorias cadastradas"
+  }), /*#__PURE__*/React.createElement(StatTile, {
+    icon: Clock,
+    value: garantiasVencendo.length,
+    label: "Garantias vencendo em 90 dias",
+    accent: true
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "grid-2",
+    style: {
+      display: "grid",
+      gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)",
+      gap: 16,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement(Panel, {
+    title: "Equipamentos por categoria"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 9
+    }
+  }, porCategoria.map(c => /*#__PURE__*/React.createElement("div", {
+    key: c.name,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 110,
+      flexShrink: 0,
+      fontSize: 12,
+      color: COLORS.inkSoft,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, c.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      background: COLORS.paper,
+      borderRadius: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${porCategoria[0] && porCategoria[0].value ? c.value / porCategoria[0].value * 100 : 0}%`,
+      height: 14,
+      background: COLORS.accent,
+      borderRadius: 4
+    }
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 28,
+      textAlign: "right",
+      fontSize: 12,
+      fontWeight: 700,
+      color: COLORS.ink
+    }
+  }, c.value))))), /*#__PURE__*/React.createElement(Panel, {
+    title: "Top salas com mais equipamentos"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }
+  }, porSala.slice(0, 5).map((s, i) => /*#__PURE__*/React.createElement("div", {
+    key: s.name,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 20,
+      height: 20,
+      borderRadius: "50%",
+      background: i === 0 ? COLORS.accentSoft : COLORS.paper,
+      color: i === 0 ? COLORS.accent : COLORS.inkSoft,
+      fontSize: 11,
+      fontWeight: 700,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0
+    }
+  }, i + 1), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      fontSize: 12,
+      marginBottom: 3
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: COLORS.ink,
+      fontWeight: 600,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, s.name), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: COLORS.ink,
+      fontWeight: 700,
+      flexShrink: 0
+    }
+  }, s.value)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: COLORS.paper,
+      borderRadius: 3
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${porSala[0] && porSala[0].value ? s.value / porSala[0].value * 100 : 0}%`,
+      height: 6,
+      background: "#2F6F5E",
+      borderRadius: 3
+    }
+  })))))))), garantiasVencendo.length > 0 && /*#__PURE__*/React.createElement(Panel, {
+    title: "Garantia/vida \xFAtil vencendo"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "grid-4",
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+      gap: 10
+    }
+  }, garantiasVencendo.slice(0, 8).map(({
+    item,
+    dias
+  }) => /*#__PURE__*/React.createElement("div", {
+    key: item.id,
+    style: {
+      background: dias < 0 || dias <= 30 ? COLORS.dangerSoft : COLORS.accentSoft,
+      borderRadius: 8,
+      padding: "10px 12px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      fontWeight: 600,
+      color: COLORS.ink,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, item.categoria, " ", item.marca ? "· " + item.marca : "", " \u2014 ", item.id), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: COLORS.inkSoft,
+      marginTop: 2
+    }
+  }, item.sala || "Sem sala"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10.5,
+      fontWeight: 700,
+      marginTop: 4,
+      color: dias < 0 || dias <= 30 ? COLORS.danger : COLORS.accent
+    }
+  }, dias < 0 ? `Vencida há ${Math.abs(dias)} dias` : `Vence em ${dias} dias`)))))) : dashView === "kanban" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Panel, {
     title: "Equipamentos por status",
     style: {
       marginBottom: 16
@@ -10447,7 +10946,7 @@ const RESPONSIVE_CSS = `
     position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 55;
   }
   .app-main { width: 100%; padding: 16px !important; padding-top: 8px !important; }
-  .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr !important; }
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr !important; }
   .grid-chat { grid-template-columns: 1fr !important; height: auto !important; }
   .grid-chat > div:first-child { height: 220px !important; }
   .grid-chat > div:last-child { height: 480px !important; }
@@ -11082,10 +11581,11 @@ function LoadingScreen() {
 }
 function ChamadosDock({
   state,
-  setState
+  setState,
+  abertoId,
+  onAbrirChange
 }) {
   const [texto, setTexto] = useState("");
-  const [abertoId, setAbertoId] = useState(null);
   const abertos = useMemo(() => (state.chamados || []).filter(c => c.status === "Aberto" || c.status === "Em andamento"), [state.chamados]);
   const selecionado = abertos.find(c => c.id === abertoId) || null;
   function enviarResposta() {
@@ -11126,7 +11626,7 @@ function ChamadosDock({
         gap: 8
       }
     }, /*#__PURE__*/React.createElement("button", {
-      onClick: () => setAbertoId(null),
+      onClick: () => onAbrirChange(null),
       style: {
         background: "none",
         border: "none",
@@ -11276,7 +11776,7 @@ function ChamadosDock({
     const naoLido = ultima.autor === "solicitante";
     return /*#__PURE__*/React.createElement("div", {
       key: c.id,
-      onClick: () => setAbertoId(c.id),
+      onClick: () => onAbrirChange(c.id),
       style: {
         display: "flex",
         gap: 10,
@@ -11363,6 +11863,7 @@ function App() {
   const [loadError, setLoadError] = useState(null);
   const [loadErrorDetail, setLoadErrorDetail] = useState(null);
   const [view, setView] = useState("dashboard");
+  const [chamadoAbertoId, setChamadoAbertoId] = useState(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -11683,7 +12184,8 @@ function App() {
   }), view === "dashboard" && allowed.has("dashboard") && /*#__PURE__*/React.createElement(Dashboard, {
     state: state,
     setView: setView,
-    unidadeAtiva: unidadeAtiva
+    unidadeAtiva: unidadeAtiva,
+    onAbrirChamado: setChamadoAbertoId
   }), view === "inventario" && allowed.has("inventario") && /*#__PURE__*/React.createElement(Inventario, {
     state: state,
     setState: setState,
@@ -11726,7 +12228,9 @@ function App() {
     onAdminsChanged: setAdmins
   })), view !== "chamados" && allowed.has("chamados") && /*#__PURE__*/React.createElement(ChamadosDock, {
     state: state,
-    setState: setState
+    setState: setState,
+    abertoId: chamadoAbertoId,
+    onAbrirChange: setChamadoAbertoId
   })));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));

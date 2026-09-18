@@ -43,6 +43,7 @@ const ICON_PATHS = {
   menu: "M3 6h18M3 12h18M3 18h18",
   qrcode: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm14 0h2v2h-2zm-4 0h2v2h-2zm4 4h2v2h-2zm-4 0h2v2h-2z",
   pin: "M12 17v5m-5-9h10l-1.5-2V5a3.5 3.5 0 00-7 0v6L7 13z",
+  clock: "M12 21a9 9 0 100-18 9 9 0 000 18zm0-14v5l3.5 2",
 };
 
 function Icon({ name, size = 16, ...rest }) {
@@ -79,6 +80,7 @@ const Send = IconWrap("send");
 const Menu = IconWrap("menu");
 const QrCode = IconWrap("qrcode");
 const Pin = IconWrap("pin");
+const Clock = IconWrap("clock");
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
@@ -1240,22 +1242,48 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
 
 const DASH_VIEW_STORAGE_KEY = "inventario-ti-dashview";
 
-function Dashboard({ state, setView, unidadeAtiva }) {
+function StatTile({ icon: Icon, value, label, accent }) {
+  return (
+    <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+      <div
+        style={{
+          width: 36,
+          height: 36,
+          borderRadius: 8,
+          background: accent ? COLORS.accentSoft : COLORS.paper,
+          color: accent ? COLORS.accent : COLORS.inkSoft,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={18} />
+      </div>
+      <div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: accent ? COLORS.accent : COLORS.ink, lineHeight: 1 }}>{value}</div>
+        <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 3 }}>{label}</div>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
   const inv = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
   const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
   const [dashView, setDashView] = useState(() => {
     try {
-      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
+      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "geral";
     } catch (e) {
-      return "graficos";
+      return "geral";
     }
   });
   const [principal, setPrincipal] = useState(() => {
     try {
-      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "graficos";
+      return localStorage.getItem(DASH_VIEW_STORAGE_KEY) || "geral";
     } catch (e) {
-      return "graficos";
+      return "geral";
     }
   });
 
@@ -1311,6 +1339,26 @@ function Dashboard({ state, setView, unidadeAtiva }) {
   const emEstoque = inv.filter((r) => r.status === "Em estoque").length;
   const descartado = inv.filter((r) => r.status === "Descartado").length;
 
+  const emUsoPct = total > 0 ? Math.round((emUso / total) * 100) : 0;
+
+  const statusGradient = useMemo(() => {
+    if (total === 0) return COLORS.line;
+    let acc = 0;
+    const stops = porStatus.map((s) => {
+      const pct = (s.value / total) * 100;
+      const start = acc;
+      acc += pct;
+      return `${STATUS_COLORS[s.name]} ${start}% ${acc}%`;
+    });
+    return `conic-gradient(${stops.join(", ")})`;
+  }, [porStatus, total]);
+
+  const chamadosAbertos = useMemo(() => {
+    return (state.chamados || [])
+      .filter((c) => unidadeDe(c) === unidadeAtiva && (c.status === "Aberto" || c.status === "Em andamento"))
+      .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+  }, [state.chamados, unidadeAtiva]);
+
   const kpis = [
     { label: "Total de equipamentos", value: total },
     { label: "Em uso", value: emUso },
@@ -1329,6 +1377,31 @@ function Dashboard({ state, setView, unidadeAtiva }) {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Painel geral</h2>
         <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3, alignItems: "center" }}>
+          <button
+            onClick={() => setDashView("geral")}
+            style={{
+              fontSize: 12.5,
+              fontWeight: 600,
+              padding: "7px 10px 7px 14px",
+              borderRadius: 6,
+              cursor: "pointer",
+              color: COLORS.ink,
+              background: dashView === "geral" ? "#fff" : "transparent",
+              border: dashView === "geral" ? `1px solid ${COLORS.line}` : "1px solid transparent",
+            }}
+          >
+            Visão geral
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              marcarPrincipal("geral");
+            }}
+            title={principal === "geral" ? "Visão principal" : "Deixar Visão geral como principal"}
+            style={{ background: "none", border: "none", cursor: "pointer", color: principal === "geral" ? COLORS.accent : COLORS.inkSoft, padding: "4px 8px 4px 2px" }}
+          >
+            <Pin size={13} fill={principal === "geral" ? COLORS.accent : "none"} />
+          </button>
           <button
             onClick={() => setDashView("kanban")}
             style={{
@@ -1382,16 +1455,184 @@ function Dashboard({ state, setView, unidadeAtiva }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
-        {kpis.map((k) => (
-          <div key={k.label} style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "14px 16px" }}>
-            <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 6 }}>{k.label}</div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.ink }}>{k.value}</div>
-          </div>
-        ))}
-      </div>
+      {dashView !== "geral" && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
+          {kpis.map((k) => (
+            <div key={k.label} style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "14px 16px" }}>
+              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 6 }}>{k.label}</div>
+              <div style={{ fontSize: 24, fontWeight: 700, color: COLORS.ink }}>{k.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {dashView === "kanban" ? (
+      {dashView === "geral" ? (
+        <>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
+            <Panel title="Saúde do parque" action={<span style={{ fontSize: 11, color: COLORS.inkSoft }}>{total} equipamentos</span>}>
+              <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                <div style={{ width: 88, height: 88, borderRadius: "50%", flexShrink: 0, background: statusGradient, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, lineHeight: 1 }}>{emUsoPct}%</div>
+                    <div style={{ fontSize: 8.5, color: COLORS.inkSoft, marginTop: 2 }}>em uso</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: 1, minWidth: 0 }}>
+                  {porStatus.map((s) => (
+                    <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: COLORS.inkSoft }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 2, background: STATUS_COLORS[s.name], display: "inline-block", flexShrink: 0 }} />
+                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                      <span style={{ fontWeight: 700, color: COLORS.ink }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Panel>
+
+            <Panel
+              style={{ borderLeft: `3px solid ${COLORS.danger}` }}
+              title={
+                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <TriangleAlert size={15} style={{ color: COLORS.danger }} />
+                  Precisam de atenção
+                </span>
+              }
+              action={<span style={{ fontSize: 20, fontWeight: 700, color: COLORS.danger }}>{precisamAtencao.length}</span>}
+            >
+              {precisamAtencao.length === 0 ? (
+                <EmptyState text="Nenhum equipamento precisa de atenção no momento." />
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+                  {precisamAtencao.slice(0, 3).map((r) => (
+                    <div key={r.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, background: STATUS_BG[r.status], borderRadius: 7, padding: "7px 10px" }}>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {r.id} · {r.categoria}
+                        </div>
+                        <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{r.sala || "Sem sala"}</div>
+                      </div>
+                      <StatusPill status={r.status} />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Button variant="ghost" onClick={() => setView("inventario")}>
+                Ver todos
+              </Button>
+            </Panel>
+
+            <Panel
+              style={{ borderLeft: `3px solid ${COLORS.accent}` }}
+              title={
+                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
+                  <MessageSquare size={15} style={{ color: COLORS.accent }} />
+                  Chamados abertos
+                </span>
+              }
+              action={<span style={{ fontSize: 20, fontWeight: 700, color: COLORS.accent }}>{chamadosAbertos.length}</span>}
+            >
+              {chamadosAbertos.length === 0 ? (
+                <EmptyState text="Nenhum chamado em aberto." />
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
+                  {chamadosAbertos.slice(0, 3).map((c) => (
+                    <div
+                      key={c.id}
+                      onClick={() => onAbrirChamado(c.id)}
+                      title="Responder no chat"
+                      style={{ background: COLORS.accentSoft, borderRadius: 7, padding: "7px 10px", cursor: "pointer" }}
+                    >
+                      <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.assunto}</div>
+                      <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 1 }}>
+                        {c.solicitante || "Solicitante"} · {c.sala || "Sem sala"} · {tempoDecorrido(c.criadoEm)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Button variant="ghost" onClick={() => setView("chamados")}>
+                Ver todos
+              </Button>
+            </Panel>
+          </div>
+
+          <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 16 }}>
+            <StatTile icon={Boxes} value={emEstoque} label="Em estoque" />
+            <StatTile icon={DoorOpen} value={areasUnidade.length} label="Salas cadastradas" />
+            <StatTile icon={Tag} value={categoriasUnidade.length} label="Categorias cadastradas" />
+            <StatTile icon={Clock} value={garantiasVencendo.length} label="Garantias vencendo em 90 dias" accent />
+          </div>
+
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
+            <Panel title="Equipamentos por categoria">
+              <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                {porCategoria.map((c) => (
+                  <div key={c.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ width: 110, flexShrink: 0, fontSize: 12, color: COLORS.inkSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.name}</span>
+                    <div style={{ flex: 1, background: COLORS.paper, borderRadius: 4 }}>
+                      <div style={{ width: `${porCategoria[0] && porCategoria[0].value ? (c.value / porCategoria[0].value) * 100 : 0}%`, height: 14, background: COLORS.accent, borderRadius: 4 }} />
+                    </div>
+                    <span style={{ width: 28, textAlign: "right", fontSize: 12, fontWeight: 700, color: COLORS.ink }}>{c.value}</span>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+
+            <Panel title="Top salas com mais equipamentos">
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {porSala.slice(0, 5).map((s, i) => (
+                  <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: "50%",
+                        background: i === 0 ? COLORS.accentSoft : COLORS.paper,
+                        color: i === 0 ? COLORS.accent : COLORS.inkSoft,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {i + 1}
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
+                        <span style={{ color: COLORS.ink, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                        <span style={{ color: COLORS.ink, fontWeight: 700, flexShrink: 0 }}>{s.value}</span>
+                      </div>
+                      <div style={{ background: COLORS.paper, borderRadius: 3 }}>
+                        <div style={{ width: `${porSala[0] && porSala[0].value ? (s.value / porSala[0].value) * 100 : 0}%`, height: 6, background: "#2F6F5E", borderRadius: 3 }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </div>
+
+          {garantiasVencendo.length > 0 && (
+            <Panel title="Garantia/vida útil vencendo">
+              <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10 }}>
+                {garantiasVencendo.slice(0, 8).map(({ item, dias }) => (
+                  <div key={item.id} style={{ background: dias < 0 || dias <= 30 ? COLORS.dangerSoft : COLORS.accentSoft, borderRadius: 8, padding: "10px 12px" }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {item.categoria} {item.marca ? "· " + item.marca : ""} — {item.id}
+                    </div>
+                    <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 2 }}>{item.sala || "Sem sala"}</div>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, marginTop: 4, color: dias < 0 || dias <= 30 ? COLORS.danger : COLORS.accent }}>
+                      {dias < 0 ? `Vencida há ${Math.abs(dias)} dias` : `Vence em ${dias} dias`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          )}
+        </>
+      ) : dashView === "kanban" ? (
         <>
           <Panel title="Equipamentos por status" style={{ marginBottom: 16 }}>
             <EquipamentosKanban inventario={inv} />
@@ -4215,7 +4456,7 @@ const RESPONSIVE_CSS = `
     position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 55;
   }
   .app-main { width: 100%; padding: 16px !important; padding-top: 8px !important; }
-  .grid-2, .grid-3, .grid-5 { grid-template-columns: 1fr !important; }
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr !important; }
   .grid-chat { grid-template-columns: 1fr !important; height: auto !important; }
   .grid-chat > div:first-child { height: 220px !important; }
   .grid-chat > div:last-child { height: 480px !important; }
@@ -4621,9 +4862,8 @@ function LoadingScreen() {
   );
 }
 
-function ChamadosDock({ state, setState }) {
+function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
   const [texto, setTexto] = useState("");
-  const [abertoId, setAbertoId] = useState(null);
   const abertos = useMemo(
     () => (state.chamados || []).filter((c) => c.status === "Aberto" || c.status === "Em andamento"),
     [state.chamados]
@@ -4648,7 +4888,7 @@ function ChamadosDock({ state, setState }) {
     return (
       <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
         <div style={{ padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => setAbertoId(null)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex" }} aria-label="Voltar para a lista">
+          <button onClick={() => onAbrirChange(null)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex" }} aria-label="Voltar para a lista">
             <ChevronLeft size={18} />
           </button>
           <div style={{ minWidth: 0 }}>
@@ -4707,7 +4947,7 @@ function ChamadosDock({ state, setState }) {
           return (
             <div
               key={c.id}
-              onClick={() => setAbertoId(c.id)}
+              onClick={() => onAbrirChange(c.id)}
               style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer" }}
             >
               <Avatar nome={c.solicitante || "?"} size={32} />
@@ -4744,6 +4984,7 @@ function App() {
   const [loadError, setLoadError] = useState(null);
   const [loadErrorDetail, setLoadErrorDetail] = useState(null);
   const [view, setView] = useState("dashboard");
+  const [chamadoAbertoId, setChamadoAbertoId] = useState(null);
   const [loginOpen, setLoginOpen] = useState(false);
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
@@ -5031,7 +5272,9 @@ function App() {
           {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados", "importar"].includes(view) && (
             <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
           )}
-          {view === "dashboard" && allowed.has("dashboard") && <Dashboard state={state} setView={setView} unidadeAtiva={unidadeAtiva} />}
+          {view === "dashboard" && allowed.has("dashboard") && (
+            <Dashboard state={state} setView={setView} unidadeAtiva={unidadeAtiva} onAbrirChamado={setChamadoAbertoId} />
+          )}
           {view === "inventario" && allowed.has("inventario") && (
             <Inventario
               state={state}
@@ -5052,7 +5295,9 @@ function App() {
           {view === "usuarios" && isMaster && <Usuarios solicitantes={usuarios} secret={secret} onSolicitantesChanged={setUsuarios} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
-        {view !== "chamados" && allowed.has("chamados") && <ChamadosDock state={state} setState={setState} />}
+        {view !== "chamados" && allowed.has("chamados") && (
+          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} />
+        )}
       </div>
     </div>
   );
