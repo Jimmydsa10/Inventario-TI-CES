@@ -4862,13 +4862,32 @@ function LoadingScreen() {
   );
 }
 
+const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
+
 function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
   const [texto, setTexto] = useState("");
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(DOCK_COLLAPSED_STORAGE_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  });
   const abertos = useMemo(
     () => (state.chamados || []).filter((c) => c.status === "Aberto" || c.status === "Em andamento"),
     [state.chamados]
   );
   const selecionado = abertos.find((c) => c.id === abertoId) || null;
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(DOCK_COLLAPSED_STORAGE_KEY, next ? "1" : "0");
+      } catch (e) {}
+      return next;
+    });
+  }
 
   function enviarResposta() {
     const valor = texto.trim();
@@ -4884,6 +4903,60 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
 
   if (!selecionado && abertos.length === 0) return null;
 
+  if (collapsed) {
+    return (
+      <div
+        style={{
+          width: 56,
+          flexShrink: 0,
+          background: "#fff",
+          borderLeft: `1px solid ${COLORS.line}`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "16px 0",
+          gap: 16,
+          boxShadow: "-4px 0 16px rgba(22,35,61,0.06)",
+        }}
+      >
+        <button
+          onClick={toggleCollapsed}
+          title="Expandir chamados"
+          aria-label="Expandir chamados"
+          style={{ background: "none", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.inkSoft, padding: 6, display: "flex" }}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <div style={{ position: "relative", display: "flex" }}>
+          <MessageSquare size={20} style={{ color: COLORS.inkSoft }} />
+          {abertos.length > 0 && (
+            <span
+              style={{
+                position: "absolute",
+                top: -7,
+                right: -9,
+                fontSize: 10,
+                fontWeight: 700,
+                minWidth: 15,
+                height: 15,
+                borderRadius: 999,
+                background: COLORS.accent,
+                color: "#fff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0 3px",
+              }}
+            >
+              {abertos.length}
+            </span>
+          )}
+        </div>
+        <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: 11, fontWeight: 600, color: COLORS.inkSoft, letterSpacing: 0.2 }}>Chamados</div>
+      </div>
+    );
+  }
+
   if (selecionado) {
     return (
       <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
@@ -4891,10 +4964,18 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
           <button onClick={() => onAbrirChange(null)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex" }} aria-label="Voltar para a lista">
             <ChevronLeft size={18} />
           </button>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selecionado.assunto}</div>
             <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{selecionado.solicitante || "Solicitante"} · {selecionado.sala || "Sem sala"} · {tempoDecorrido(selecionado.criadoEm)}</div>
           </div>
+          <button
+            onClick={toggleCollapsed}
+            title="Recolher chamados"
+            aria-label="Recolher chamados"
+            style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex", flexShrink: 0 }}
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
         <div style={{ flex: 1, overflow: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12, maxHeight: 420 }}>
           {selecionado.mensagens.map((m, i) => {
@@ -4936,9 +5017,17 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
 
   return (
     <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
-      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 13.5, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        Chamados em aberto
+      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 13.5, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ flex: 1 }}>Chamados em aberto</span>
         <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: COLORS.accentSoft, color: COLORS.accent }}>{abertos.length}</span>
+        <button
+          onClick={toggleCollapsed}
+          title="Recolher chamados"
+          aria-label="Recolher chamados"
+          style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex", flexShrink: 0 }}
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
       <div style={{ flex: 1, overflow: "auto" }}>
         {abertos.map((c) => {
