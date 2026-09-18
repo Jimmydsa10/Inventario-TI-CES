@@ -11579,6 +11579,7 @@ function LoadingScreen() {
     }
   }, "Carregando invent\xE1rio...");
 }
+const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
 function ChamadosDock({
   state,
   setState,
@@ -11586,8 +11587,24 @@ function ChamadosDock({
   onAbrirChange
 }) {
   const [texto, setTexto] = useState("");
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(DOCK_COLLAPSED_STORAGE_KEY) === "1";
+    } catch (e) {
+      return false;
+    }
+  });
   const abertos = useMemo(() => (state.chamados || []).filter(c => c.status === "Aberto" || c.status === "Em andamento"), [state.chamados]);
   const selecionado = abertos.find(c => c.id === abertoId) || null;
+  function toggleCollapsed() {
+    setCollapsed(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem(DOCK_COLLAPSED_STORAGE_KEY, next ? "1" : "0");
+      } catch (e) {}
+      return next;
+    });
+  }
   function enviarResposta() {
     const valor = texto.trim();
     if (!valor || !selecionado) return;
@@ -11605,6 +11622,73 @@ function ChamadosDock({
     setTexto("");
   }
   if (!selecionado && abertos.length === 0) return null;
+  if (collapsed) {
+    return /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 56,
+        flexShrink: 0,
+        background: "#fff",
+        borderLeft: `1px solid ${COLORS.line}`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "16px 0",
+        gap: 16,
+        boxShadow: "-4px 0 16px rgba(22,35,61,0.06)"
+      }
+    }, /*#__PURE__*/React.createElement("button", {
+      onClick: toggleCollapsed,
+      title: "Expandir chamados",
+      "aria-label": "Expandir chamados",
+      style: {
+        background: "none",
+        border: `1px solid ${COLORS.lineStrong}`,
+        borderRadius: 6,
+        cursor: "pointer",
+        color: COLORS.inkSoft,
+        padding: 6,
+        display: "flex"
+      }
+    }, /*#__PURE__*/React.createElement(ChevronLeft, {
+      size: 16
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        position: "relative",
+        display: "flex"
+      }
+    }, /*#__PURE__*/React.createElement(MessageSquare, {
+      size: 20,
+      style: {
+        color: COLORS.inkSoft
+      }
+    }), abertos.length > 0 && /*#__PURE__*/React.createElement("span", {
+      style: {
+        position: "absolute",
+        top: -7,
+        right: -9,
+        fontSize: 10,
+        fontWeight: 700,
+        minWidth: 15,
+        height: 15,
+        borderRadius: 999,
+        background: COLORS.accent,
+        color: "#fff",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0 3px"
+      }
+    }, abertos.length)), /*#__PURE__*/React.createElement("div", {
+      style: {
+        writingMode: "vertical-rl",
+        transform: "rotate(180deg)",
+        fontSize: 11,
+        fontWeight: 600,
+        color: COLORS.inkSoft,
+        letterSpacing: 0.2
+      }
+    }, "Chamados"));
+  }
   if (selecionado) {
     return /*#__PURE__*/React.createElement("div", {
       className: "chamados-dock",
@@ -11640,7 +11724,8 @@ function ChamadosDock({
       size: 18
     })), /*#__PURE__*/React.createElement("div", {
       style: {
-        minWidth: 0
+        minWidth: 0,
+        flex: 1
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -11656,7 +11741,22 @@ function ChamadosDock({
         fontSize: 11,
         color: COLORS.inkSoft
       }
-    }, selecionado.solicitante || "Solicitante", " \xB7 ", selecionado.sala || "Sem sala", " \xB7 ", tempoDecorrido(selecionado.criadoEm)))), /*#__PURE__*/React.createElement("div", {
+    }, selecionado.solicitante || "Solicitante", " \xB7 ", selecionado.sala || "Sem sala", " \xB7 ", tempoDecorrido(selecionado.criadoEm))), /*#__PURE__*/React.createElement("button", {
+      onClick: toggleCollapsed,
+      title: "Recolher chamados",
+      "aria-label": "Recolher chamados",
+      style: {
+        background: "none",
+        border: "none",
+        cursor: "pointer",
+        color: COLORS.inkSoft,
+        padding: 2,
+        display: "flex",
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement(ChevronRight, {
+      size: 18
+    }))), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
         overflow: "auto",
@@ -11755,9 +11855,13 @@ function ChamadosDock({
       color: COLORS.ink,
       display: "flex",
       alignItems: "center",
-      justifyContent: "space-between"
+      gap: 8
     }
-  }, "Chamados em aberto", /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1
+    }
+  }, "Chamados em aberto"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
       fontWeight: 700,
@@ -11766,7 +11870,22 @@ function ChamadosDock({
       background: COLORS.accentSoft,
       color: COLORS.accent
     }
-  }, abertos.length)), /*#__PURE__*/React.createElement("div", {
+  }, abertos.length), /*#__PURE__*/React.createElement("button", {
+    onClick: toggleCollapsed,
+    title: "Recolher chamados",
+    "aria-label": "Recolher chamados",
+    style: {
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      color: COLORS.inkSoft,
+      padding: 2,
+      display: "flex",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement(ChevronRight, {
+    size: 18
+  }))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       overflow: "auto"
