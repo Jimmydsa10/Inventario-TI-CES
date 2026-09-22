@@ -272,6 +272,40 @@ function jsonOut(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
+// Cada chave do estado corresponde a uma seção do app (a mesma dividida
+// pelas permissões de admin restrito, tipo "chamados" ou "inventario").
+const ESTADO_CAMPO_PARA_SECAO = {
+  categorias: 'categorias',
+  areas: 'areas',
+  responsaveis: 'responsaveis',
+  inventario: 'inventario',
+  chamados: 'chamados',
+};
+
+// Antes: salvarTudo só checava "é um admin válido" — um admin com acesso
+// restrito (ex: só "chamados") tecnicamente conseguia sobrescrever
+// categorias, salas, inventário etc., já que o autosave manda o estado
+// inteiro de uma vez e nada limitava quais partes ele podia de fato mudar.
+// Agora, pra um admin não-master, cada seção do estado só é aceita do jeito
+// que o cliente mandou se a permissão dele cobrir aquela seção; o resto
+// mantém o valor que já estava salvo (a mudança é ignorada, não rejeitada
+// por inteiro, pra não quebrar o autosave de quem só mexeu no que pode).
+function filtrarEstadoPorPermissao(novoEstado, isMaster, permissoes) {
+  if (isMaster) return novoEstado;
+  const permitido = String(permissoes || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
+  const atual = readState();
+  const resultado = {};
+  for (const chave in novoEstado) {
+    const secao = ESTADO_CAMPO_PARA_SECAO[chave];
+    if (secao && permitido.indexOf(secao) !== -1) {
+      resultado[chave] = novoEstado[chave];
+    } else if (Object.prototype.hasOwnProperty.call(atual, chave)) {
+      resultado[chave] = atual[chave];
+    }
+  }
+  return resultado;
+}
+
 // Antes: sempre chamava readState() e getAdmins(), mesmo quando o resultado
 // não era usado (sem login, senha errada, ou pra montar a lista de admins
 // que já tinha sido lida). Agora só lê a planilha quando o valor é
@@ -341,8 +375,9 @@ function doPost(e) {
   const isMaster = admin && admin.permissoes === 'todas';
 
   if (isAdmin && body.action === 'salvarTudo') {
-    writeState(body.state);
-    registrarSnapshotMensal(body.state);
+    const estadoFiltrado = filtrarEstadoPorPermissao(body.state, isMaster, admin.permissoes);
+    writeState(estadoFiltrado);
+    registrarSnapshotMensal(estadoFiltrado);
     return jsonOut({ ok: true });
   }
 
