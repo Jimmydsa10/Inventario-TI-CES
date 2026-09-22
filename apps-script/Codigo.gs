@@ -16,16 +16,20 @@ function getOrCreateSheet(name, header) {
 
 // ---------- Administradores ----------
 
+// Coluna "editar" (4ª): só importa pra admin restrito (permissoes != 'todas').
+// true = pode adicionar/editar/excluir nas seções liberadas pra ele; false
+// (ou em branco, inclusive linhas antigas de antes dessa coluna existir) =
+// só visualiza, sem poder mudar nada — ver filtrarEstadoPorPermissao.
 function getAdmins() {
-  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes']);
+  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar']);
   const data = sh.getDataRange().getValues();
   const rows = data.slice(1).filter(function (r) { return r[0] || r[1]; });
   if (rows.length === 0) {
-    sh.appendRow(['Administrador', 'mude-esta-senha-123', 'todas']);
-    return [{ nome: 'Administrador', senha: 'mude-esta-senha-123', permissoes: 'todas' }];
+    sh.appendRow(['Administrador', 'mude-esta-senha-123', 'todas', true]);
+    return [{ nome: 'Administrador', senha: 'mude-esta-senha-123', permissoes: 'todas', editar: true }];
   }
   return rows.map(function (r) {
-    return { nome: String(r[0] || ''), senha: String(r[1] || ''), permissoes: String(r[2] || 'todas') };
+    return { nome: String(r[0] || ''), senha: String(r[1] || ''), permissoes: String(r[2] || 'todas'), editar: r[3] === true };
   });
 }
 
@@ -41,14 +45,14 @@ function findAdminBySecret(secret, adminsList) {
 }
 
 function saveAdmins(list) {
-  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes']);
+  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 3).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 4).clearContent();
   }
-  const rows = list.map(function (a) { return [a.nome, a.senha, a.permissoes]; });
+  const rows = list.map(function (a) { return [a.nome, a.senha, a.permissoes, !!a.editar]; });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 3).setValues(rows);
+    sh.getRange(2, 1, rows.length, 4).setValues(rows);
   }
 }
 
@@ -287,12 +291,16 @@ const ESTADO_CAMPO_PARA_SECAO = {
 // categorias, salas, inventário etc., já que o autosave manda o estado
 // inteiro de uma vez e nada limitava quais partes ele podia de fato mudar.
 // Agora, pra um admin não-master, cada seção do estado só é aceita do jeito
-// que o cliente mandou se a permissão dele cobrir aquela seção; o resto
-// mantém o valor que já estava salvo (a mudança é ignorada, não rejeitada
-// por inteiro, pra não quebrar o autosave de quem só mexeu no que pode).
-function filtrarEstadoPorPermissao(novoEstado, isMaster, permissoes) {
+// que o cliente mandou se a permissão dele cobrir aquela seção E ele tiver
+// "editar" marcado; o resto mantém o valor que já estava salvo (a mudança é
+// ignorada, não rejeitada por inteiro, pra não quebrar o autosave de quem só
+// mexeu no que pode). Um admin restrito sem "editar" (só visualização) não
+// consegue mudar seção nenhuma por aqui — vira, na prática, um no-op.
+function filtrarEstadoPorPermissao(novoEstado, admin) {
+  const isMaster = admin && admin.permissoes === 'todas';
   if (isMaster) return novoEstado;
-  const permitido = String(permissoes || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
+  const podeEditar = !!(admin && admin.editar);
+  const permitido = podeEditar ? String(admin.permissoes || '').split(',').map(function (s) { return s.trim().toLowerCase(); }) : [];
   const atual = readState();
   const resultado = {};
   for (const chave in novoEstado) {
@@ -330,8 +338,9 @@ function doGet(e) {
       isAdmin: true,
       nome: admin.nome,
       permissoes: admin.permissoes,
+      editar: !!admin.editar,
       state: state,
-      admins: isMaster ? admins.map(function (a) { return { nome: a.nome, permissoes: a.permissoes }; }) : [],
+      admins: isMaster ? admins.map(function (a) { return { nome: a.nome, permissoes: a.permissoes, editar: !!a.editar }; }) : [],
       solicitantes: isMaster ? getSolicitantes() : [],
       historico: getHistoricoMensal()
     };
@@ -373,9 +382,13 @@ function doPost(e) {
   const admin = findAdminBySecret(body.secret);
   const isAdmin = !!admin;
   const isMaster = admin && admin.permissoes === 'todas';
+  // Admin com acesso restrito e "editar" desmarcado só pode visualizar — não
+  // conta como alguém que pode escrever em novoChamado/novaMensagem, mesmo
+  // sendo um admin válido.
+  const adminPodeEscrever = isAdmin && (isMaster || admin.editar);
 
   if (isAdmin && body.action === 'salvarTudo') {
-    const estadoFiltrado = filtrarEstadoPorPermissao(body.state, isMaster, admin.permissoes);
+    const estadoFiltrado = filtrarEstadoPorPermissao(body.state, admin);
     writeState(estadoFiltrado);
     registrarSnapshotMensal(estadoFiltrado);
     return jsonOut({ ok: true });
@@ -399,7 +412,7 @@ function doPost(e) {
   // jeito que o cliente mandou.
   if (body.action === 'novoChamado') {
     const solicitante = authenticateSolicitante(body.userNome, body.userSenha);
-    if (!isAdmin && !solicitante) {
+    if (!adminPodeEscrever && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
     const state = readState();
@@ -416,7 +429,7 @@ function doPost(e) {
 
   if (body.action === 'novaMensagem') {
     const solicitante = authenticateSolicitante(body.userNome, body.userSenha);
-    if (!isAdmin && !solicitante) {
+    if (!adminPodeEscrever && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
     const state = readState();
@@ -425,14 +438,14 @@ function doPost(e) {
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
-    if (solicitante && !isAdmin) {
+    if (solicitante && !adminPodeEscrever) {
       const dono = String(chamado.criadoPor || chamado.solicitante || '').trim().toLowerCase();
       if (dono !== solicitante.nome.trim().toLowerCase()) {
         return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
       }
     }
     const mensagem = body.mensagem || {};
-    mensagem.autor = isAdmin ? 'ti' : 'solicitante';
+    mensagem.autor = adminPodeEscrever ? 'ti' : 'solicitante';
     chamado.mensagens.push(mensagem);
     writeState(state);
     return jsonOut({ ok: true });

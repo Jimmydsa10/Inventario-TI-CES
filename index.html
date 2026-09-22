@@ -5419,6 +5419,7 @@ function Sidebar({
   mobileOpen,
   nome,
   permissoes,
+  podeEditar,
   onLogout,
   categorias,
   unidadeAtiva
@@ -5618,7 +5619,7 @@ function Sidebar({
       color: "#9AA6B8",
       marginBottom: 10
     }
-  }, isMaster ? "Acesso total" : "Acesso restrito"), /*#__PURE__*/React.createElement("button", {
+  }, isMaster ? "Acesso total" : podeEditar ? "Acesso restrito · pode editar" : "Acesso restrito · só visualização"), /*#__PURE__*/React.createElement("button", {
     onClick: onLogout,
     style: {
       width: "100%",
@@ -6709,7 +6710,8 @@ function EquipForm({
   setForm,
   state,
   isNew,
-  onAddCategoria
+  onAddCategoria,
+  podeEditar = true
 }) {
   const [novaCategoria, setNovaCategoria] = useState(false);
   const [novaCategoriaTexto, setNovaCategoriaTexto] = useState("");
@@ -6735,7 +6737,7 @@ function EquipForm({
     label: "N\xBA de patrim\xF4nio"
   }, /*#__PURE__*/React.createElement(TextInput, {
     value: form.id,
-    disabled: isNew,
+    disabled: isNew || !podeEditar,
     onChange: e => setForm({
       ...form,
       id: e.target.value
@@ -6753,6 +6755,7 @@ function EquipForm({
     }
   }, /*#__PURE__*/React.createElement(Select, {
     value: form.categoria,
+    disabled: !podeEditar,
     onChange: e => setForm({
       ...form,
       categoria: e.target.value
@@ -6765,7 +6768,7 @@ function EquipForm({
   }, "Selecione"), state.categorias.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c))), /*#__PURE__*/React.createElement("button", {
+  }, c))), podeEditar && /*#__PURE__*/React.createElement("button", {
     type: "button",
     onClick: () => setNovaCategoria(true),
     title: "Adicionar nova categoria",
@@ -6839,6 +6842,7 @@ function EquipForm({
   })))), /*#__PURE__*/React.createElement(Field, {
     label: "Marca"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     value: form.marca,
     onChange: e => setForm({
       ...form,
@@ -6848,6 +6852,7 @@ function EquipForm({
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Modelo"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     value: form.modelo,
     onChange: e => setForm({
       ...form,
@@ -6857,6 +6862,7 @@ function EquipForm({
   })), /*#__PURE__*/React.createElement(Field, {
     label: "N\xBA de s\xE9rie"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     value: form.serie,
     onChange: e => setForm({
       ...form,
@@ -6882,6 +6888,7 @@ function EquipForm({
   }, "Especifica\xE7\xF5es t\xE9cnicas")), /*#__PURE__*/React.createElement(Field, {
     label: "Sistema operacional"
   }, /*#__PURE__*/React.createElement(Select, {
+    disabled: !podeEditar,
     value: form.sistemaOperacional,
     onChange: e => setForm({
       ...form,
@@ -6904,6 +6911,7 @@ function EquipForm({
   }, "N\xE3o se aplica"))), /*#__PURE__*/React.createElement(Field, {
     label: "Mem\xF3ria RAM (GB)"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     type: "number",
     value: form.memoriaRam,
     onChange: e => setForm({
@@ -6914,6 +6922,7 @@ function EquipForm({
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Tipo de armazenamento"
   }, /*#__PURE__*/React.createElement(Select, {
+    disabled: !podeEditar,
     value: form.tipoArmazenamento,
     onChange: e => setForm({
       ...form,
@@ -6932,6 +6941,7 @@ function EquipForm({
   }, "N\xE3o se aplica"))), /*#__PURE__*/React.createElement(Field, {
     label: "Capacidade (GB)"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     type: "number",
     value: form.capacidadeArmazenamento,
     onChange: e => setForm({
@@ -6948,6 +6958,7 @@ function EquipForm({
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Sala/Localiza\xE7\xE3o"
   }, /*#__PURE__*/React.createElement(Select, {
+    disabled: !podeEditar,
     value: form.sala,
     onChange: e => setForm({
       ...form,
@@ -6961,6 +6972,7 @@ function EquipForm({
   }, a.nome)))), /*#__PURE__*/React.createElement(Field, {
     label: "Status"
   }, /*#__PURE__*/React.createElement(Select, {
+    disabled: !podeEditar,
     value: form.status,
     onChange: e => setForm({
       ...form,
@@ -6972,6 +6984,7 @@ function EquipForm({
   }, s)))), /*#__PURE__*/React.createElement(Field, {
     label: "Respons\xE1vel"
   }, /*#__PURE__*/React.createElement(Select, {
+    disabled: !podeEditar,
     value: form.responsavel,
     onChange: e => setForm({
       ...form,
@@ -6985,6 +6998,7 @@ function EquipForm({
   }, r.nome)))), /*#__PURE__*/React.createElement(Field, {
     label: "Data de compra"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     type: "date",
     value: form.dataCompra,
     onChange: e => setForm({
@@ -6994,6 +7008,7 @@ function EquipForm({
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Valor de aquisi\xE7\xE3o (R$)"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     type: "number",
     step: "0.01",
     value: form.valor,
@@ -7005,6 +7020,7 @@ function EquipForm({
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Vida \xFAtil estimada (anos)"
   }, /*#__PURE__*/React.createElement(TextInput, {
+    disabled: !podeEditar,
     type: "number",
     value: form.vidaUtil,
     onChange: e => setForm({
@@ -7031,6 +7047,7 @@ function EquipForm({
   }, /*#__PURE__*/React.createElement(Field, {
     label: "Observa\xE7\xF5es"
   }, /*#__PURE__*/React.createElement("textarea", {
+    disabled: !podeEditar,
     value: form.observacoes,
     onChange: e => setForm({
       ...form,
@@ -7080,7 +7097,8 @@ function Inventario({
   pendingPatrimonio,
   onConsumePending,
   pendingCategoriaFiltro,
-  onConsumeCategoriaFiltro
+  onConsumeCategoriaFiltro,
+  podeEditar = true
 }) {
   const [search, setSearch] = useState("");
   const [fCategoria, setFCategoria] = useState("");
@@ -7146,6 +7164,7 @@ function Inventario({
     });
   }
   function bulkDelete() {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       inventario: prev.inventario.filter(r => !selected.has(r.id))
@@ -7179,6 +7198,7 @@ function Inventario({
   const ordenado = useMemo(() => [...filtered].sort((a, b) => comparaPatrimonio(a.id, b.id)), [filtered]);
   const pageRows = ordenado.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
   function openNew() {
+    if (!podeEditar) return;
     const form = emptyEquipForm();
     form.id = nextPatrimonio(state.inventario, state.prefixo);
     form.unidade = unidadeAtiva;
@@ -7200,6 +7220,7 @@ function Inventario({
     setError("");
   }
   function save() {
+    if (!podeEditar) return;
     const f = modal.form;
     if (!f.id.trim()) return setError("Informe o número de patrimônio.");
     if (!f.categoria) return setError("Selecione uma categoria.");
@@ -7233,6 +7254,7 @@ function Inventario({
     setModal(null);
   }
   function remove(row) {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       inventario: prev.inventario.filter(r => r !== row)
@@ -7255,7 +7277,7 @@ function Inventario({
       fontWeight: 700,
       color: COLORS.ink
     }
-  }, "Invent\xE1rio"), /*#__PURE__*/React.createElement(Button, {
+  }, "Invent\xE1rio"), podeEditar && /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Plus,
     onClick: openNew
@@ -7392,7 +7414,7 @@ function Inventario({
       cursor: "pointer",
       padding: 0
     }
-  }, "Limpar"), /*#__PURE__*/React.createElement(Button, {
+  }, "Limpar"), podeEditar && /*#__PURE__*/React.createElement(Button, {
     variant: "danger",
     icon: Trash2,
     onClick: () => setBulkDeleteOpen(true)
@@ -7539,7 +7561,7 @@ function Inventario({
   }, /*#__PURE__*/React.createElement(ChevronRight, {
     size: 18
   })))), modal && /*#__PURE__*/React.createElement(Modal, {
-    title: modal.mode === "new" ? "Novo equipamento" : "Editar equipamento",
+    title: modal.mode === "new" ? "Novo equipamento" : podeEditar ? "Editar equipamento" : "Equipamento",
     onClose: () => setModal(null),
     width: 620
   }, /*#__PURE__*/React.createElement(EquipForm, {
@@ -7550,7 +7572,8 @@ function Inventario({
     }),
     state: stateUnidade,
     isNew: modal.mode === "new",
-    onAddCategoria: addCategoria
+    onAddCategoria: addCategoria,
+    podeEditar: podeEditar
   }), error && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
@@ -7566,7 +7589,7 @@ function Inventario({
       justifyContent: "space-between",
       alignItems: "center"
     }
-  }, modal.mode === "edit" ? /*#__PURE__*/React.createElement(Button, {
+  }, modal.mode === "edit" && podeEditar ? /*#__PURE__*/React.createElement(Button, {
     variant: "danger",
     icon: Trash2,
     onClick: () => setDeleteTarget(modal.original)
@@ -7582,7 +7605,7 @@ function Inventario({
   }, "Gerar QR Code"), /*#__PURE__*/React.createElement(Button, {
     variant: "ghost",
     onClick: () => setModal(null)
-  }, "Cancelar"), /*#__PURE__*/React.createElement(Button, {
+  }, podeEditar ? "Cancelar" : "Fechar"), podeEditar && /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Check,
     onClick: save
@@ -7696,7 +7719,8 @@ function Inventario({
 function Categorias({
   state,
   setState,
-  unidadeAtiva
+  unidadeAtiva,
+  podeEditar = true
 }) {
   const [novo, setNovo] = useState("");
   const [error, setError] = useState("");
@@ -7712,6 +7736,7 @@ function Categorias({
     return map;
   }, [state.inventario, unidadeAtiva]);
   function add() {
+    if (!podeEditar) return;
     const v = novo.trim();
     if (!v) return;
     if (categoriasUnidade.some(c => c.nome.toLowerCase() === v.toLowerCase())) {
@@ -7729,6 +7754,7 @@ function Categorias({
     setError("");
   }
   function remove(catObj) {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       categorias: prev.categorias.filter(c => c !== catObj)
@@ -7736,6 +7762,7 @@ function Categorias({
     setRemoveTarget(null);
   }
   function openEdit(catObj) {
+    if (!podeEditar) return;
     setEditModal({
       original: catObj,
       nome: catObj.nome
@@ -7743,6 +7770,7 @@ function Categorias({
     setEditError("");
   }
   function saveEdit() {
+    if (!podeEditar) return;
     const novoNome = editModal.nome.trim();
     if (!novoNome) return setEditError("Informe o nome da categoria.");
     const dup = categoriasUnidade.some(c => c !== editModal.original && c.nome.toLowerCase() === novoNome.toLowerCase());
@@ -7768,7 +7796,7 @@ function Categorias({
       fontWeight: 700,
       color: COLORS.ink
     }
-  }, "Categorias de equipamento"), /*#__PURE__*/React.createElement(Panel, {
+  }, "Categorias de equipamento"), podeEditar && /*#__PURE__*/React.createElement(Panel, {
     style: {
       marginBottom: 14
     }
@@ -7854,7 +7882,7 @@ function Categorias({
       textAlign: "right",
       whiteSpace: "nowrap"
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, podeEditar && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     onClick: () => openEdit(c),
     style: {
       background: "none",
@@ -7878,7 +7906,7 @@ function Categorias({
     "aria-label": "Excluir"
   }, /*#__PURE__*/React.createElement(Trash2, {
     size: 15
-  })))))))), editModal && /*#__PURE__*/React.createElement(Modal, {
+  }))))))))), editModal && /*#__PURE__*/React.createElement(Modal, {
     title: "Editar categoria",
     onClose: () => setEditModal(null),
     width: 380
@@ -7955,7 +7983,8 @@ function Categorias({
 function Areas({
   state,
   setState,
-  unidadeAtiva
+  unidadeAtiva,
+  podeEditar = true
 }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
@@ -7974,6 +8003,7 @@ function Areas({
     return map;
   }, [state.inventario, unidadeAtiva]);
   function openNew() {
+    if (!podeEditar) return;
     setModal({
       mode: "new",
       form: {
@@ -7986,6 +8016,7 @@ function Areas({
     setError("");
   }
   function openEdit(a) {
+    if (!podeEditar) return;
     setModal({
       mode: "edit",
       form: {
@@ -7995,6 +8026,7 @@ function Areas({
     setError("");
   }
   function save() {
+    if (!podeEditar) return;
     const f = modal.form;
     if (!f.nome.trim()) return setError("Informe o nome da sala/área.");
     const dupNome = areasUnidade.some(a => a.id !== f.id && a.nome.toLowerCase() === f.nome.trim().toLowerCase());
@@ -8021,6 +8053,7 @@ function Areas({
     setModal(null);
   }
   function remove(a) {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       areas: prev.areas.filter(x => x.id !== a.id)
@@ -8041,7 +8074,7 @@ function Areas({
       fontWeight: 700,
       color: COLORS.ink
     }
-  }, "Salas e \xE1reas"), /*#__PURE__*/React.createElement(Button, {
+  }, "Salas e \xE1reas"), podeEditar && /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Plus,
     onClick: openNew
@@ -8112,7 +8145,7 @@ function Areas({
       textAlign: "right",
       whiteSpace: "nowrap"
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, podeEditar && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       openEdit(a);
@@ -8142,7 +8175,7 @@ function Areas({
     "aria-label": "Excluir"
   }, /*#__PURE__*/React.createElement(Trash2, {
     size: 15
-  })))))))), modal && /*#__PURE__*/React.createElement(Modal, {
+  }))))))))), modal && /*#__PURE__*/React.createElement(Modal, {
     title: modal.mode === "new" ? "Nova sala/área" : "Editar sala/área",
     onClose: () => setModal(null)
   }, /*#__PURE__*/React.createElement(Field, {
@@ -8310,7 +8343,8 @@ function Areas({
 function Responsaveis({
   state,
   setState,
-  unidadeAtiva
+  unidadeAtiva,
+  podeEditar = true
 }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
@@ -8324,6 +8358,7 @@ function Responsaveis({
     return map;
   }, [state.inventario, unidadeAtiva]);
   function openNew() {
+    if (!podeEditar) return;
     setModal({
       mode: "new",
       form: {
@@ -8337,6 +8372,7 @@ function Responsaveis({
     setError("");
   }
   function openEdit(r) {
+    if (!podeEditar) return;
     setModal({
       mode: "edit",
       form: {
@@ -8346,6 +8382,7 @@ function Responsaveis({
     setError("");
   }
   function save() {
+    if (!podeEditar) return;
     const f = modal.form;
     if (!f.nome.trim()) return setError("Informe o nome do responsável.");
     setState(prev => {
@@ -8370,6 +8407,7 @@ function Responsaveis({
     setModal(null);
   }
   function remove(r) {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       responsaveis: prev.responsaveis.filter(x => x.id !== r.id)
@@ -8390,7 +8428,7 @@ function Responsaveis({
       fontWeight: 700,
       color: COLORS.ink
     }
-  }, "Respons\xE1veis"), /*#__PURE__*/React.createElement(Button, {
+  }, "Respons\xE1veis"), podeEditar && /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Plus,
     onClick: openNew
@@ -8470,7 +8508,7 @@ function Responsaveis({
       textAlign: "right",
       whiteSpace: "nowrap"
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, podeEditar && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     onClick: () => openEdit(r),
     style: {
       background: "none",
@@ -8494,7 +8532,7 @@ function Responsaveis({
     "aria-label": "Excluir"
   }, /*#__PURE__*/React.createElement(Trash2, {
     size: 15
-  })))))))), modal && /*#__PURE__*/React.createElement(Modal, {
+  }))))))))), modal && /*#__PURE__*/React.createElement(Modal, {
     title: modal.mode === "new" ? "Novo responsável" : "Editar responsável",
     onClose: () => setModal(null)
   }, /*#__PURE__*/React.createElement(Field, {
@@ -8902,7 +8940,8 @@ function Importar({
   state,
   setState,
   unidadeAtiva,
-  secret
+  secret,
+  podeEditar = true
 }) {
   const fileRef = useRef(null);
   const [status, setStatus] = useState(null); // {type: 'ok'|'error', msg}
@@ -8916,6 +8955,7 @@ function Importar({
   const nomeUnidade = (UNIDADES.find(u => u.id === unidadeAtiva) || {}).nome || unidadeAtiva;
   const inventarioUnidade = useMemo(() => state.inventario.filter(r => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   function clearInventario() {
+    if (!podeEditar) return;
     if (clearSenha !== secret) {
       setClearErro("Senha incorreta.");
       return;
@@ -8930,6 +8970,7 @@ function Importar({
     setClearErro("");
   }
   function handleFile(e) {
+    if (!podeEditar) return;
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     setBusy(true);
@@ -8993,6 +9034,7 @@ function Importar({
     reader.readAsArrayBuffer(file);
   }
   function confirmarImportacao(modo) {
+    if (!podeEditar) return;
     const brutos = pending;
     if (!brutos) return;
     const baseInventario = modo === "substituir" ? [] : state.inventario;
@@ -9124,7 +9166,7 @@ function Importar({
       color: COLORS.inkSoft,
       marginTop: 0
     }
-  }, "Envie um arquivo no formato da planilha original: colunas Categoria, Marca, Modelo, N\xBA de S\xE9rie, Sala/Localiza\xE7\xE3o, Status, Respons\xE1vel e Observa\xE7\xF5es. Depois de ler o arquivo, voc\xEA escolhe se quer substituir tudo ou adicionar aos equipamentos j\xE1 existentes \u2014 assim d\xE1 pra evitar duplicar equipamentos ao reimportar a mesma planilha."), /*#__PURE__*/React.createElement("input", {
+  }, "Envie um arquivo no formato da planilha original: colunas Categoria, Marca, Modelo, N\xBA de S\xE9rie, Sala/Localiza\xE7\xE3o, Status, Respons\xE1vel e Observa\xE7\xF5es. Depois de ler o arquivo, voc\xEA escolhe se quer substituir tudo ou adicionar aos equipamentos j\xE1 existentes \u2014 assim d\xE1 pra evitar duplicar equipamentos ao reimportar a mesma planilha."), podeEditar ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("input", {
     ref: fileRef,
     type: "file",
     accept: ".xlsx,.xls",
@@ -9137,7 +9179,13 @@ function Importar({
     icon: FileSpreadsheet,
     onClick: () => fileRef.current && fileRef.current.click(),
     disabled: busy
-  }, busy ? "Importando..." : "Selecionar arquivo .xlsx"), status && /*#__PURE__*/React.createElement("div", {
+  }, busy ? "Importando..." : "Selecionar arquivo .xlsx")) : /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12.5,
+      color: COLORS.inkSoft,
+      fontStyle: "italic"
+    }
+  }, "Voc\xEA s\xF3 tem permiss\xE3o pra visualizar, n\xE3o pra importar."), status && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14,
       padding: "10px 12px",
@@ -9167,7 +9215,7 @@ function Importar({
     variant: "ghost",
     icon: Download,
     onClick: exportarCSV
-  }, "Baixar .csv")))), /*#__PURE__*/React.createElement(Panel, {
+  }, "Baixar .csv")))), podeEditar && /*#__PURE__*/React.createElement(Panel, {
     title: `Zona de risco — ${nomeUnidade}`,
     style: {
       marginTop: 16,
@@ -9350,7 +9398,8 @@ function novoChamadoForm(unidadeAtiva) {
 function Chamados({
   state,
   setState,
-  unidadeAtiva
+  unidadeAtiva,
+  podeEditar = true
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
@@ -9382,11 +9431,13 @@ function Chamados({
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [selecionado, selecionado && selecionado.mensagens.length]);
   function abrirNovo() {
+    if (!podeEditar) return;
     setNovoMode(true);
     setSelectedId(null);
     setForm(novoChamadoForm(unidadeAtiva));
   }
   function enviarNovoChamado() {
+    if (!podeEditar) return;
     const texto = form.texto.trim();
     if (!texto) return;
     const chamado = {
@@ -9415,6 +9466,7 @@ function Chamados({
     setSelectedId(chamado.id);
   }
   function enviarResposta() {
+    if (!podeEditar) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
     setState(prev => ({
@@ -9431,6 +9483,7 @@ function Chamados({
     setReplyText("");
   }
   function mudarStatus(status) {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       chamados: prev.chamados.map(c => c.id === selecionado.id ? {
@@ -9440,6 +9493,7 @@ function Chamados({
     }));
   }
   function excluirChamado(chamado) {
+    if (!podeEditar) return;
     setState(prev => ({
       ...prev,
       chamados: prev.chamados.filter(c => c.id !== chamado.id)
@@ -9500,7 +9554,7 @@ function Chamados({
       background: viewMode === "quadro" ? "#fff" : "transparent",
       border: viewMode === "quadro" ? `1px solid ${COLORS.line}` : "1px solid transparent"
     }
-  }, "Quadro")), /*#__PURE__*/React.createElement(Button, {
+  }, "Quadro")), podeEditar && /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Plus,
     onClick: abrirNovo
@@ -9570,7 +9624,7 @@ function Chamados({
     }
   }, c.assunto, " ", c.tipo && c.tipo !== "Problema técnico" && /*#__PURE__*/React.createElement(TipoChamadoBadge, {
     tipo: c.tipo
-  })), /*#__PURE__*/React.createElement("button", {
+  })), podeEditar && /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       setDeleteTarget(c);
@@ -9853,7 +9907,7 @@ function Chamados({
     }
   }, selecionado.assunto, " ", /*#__PURE__*/React.createElement(TipoChamadoBadge, {
     tipo: selecionado.tipo
-  })), /*#__PURE__*/React.createElement("button", {
+  })), podeEditar && /*#__PURE__*/React.createElement("button", {
     onClick: () => setDeleteTarget(selecionado),
     style: {
       background: "#fff",
@@ -9945,7 +9999,7 @@ function Chamados({
         marginLeft: 4
       }
     }, formatDateTime(m.data))));
-  })), /*#__PURE__*/React.createElement("div", {
+  })), podeEditar && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 14,
       borderTop: `1px solid ${COLORS.line}`,
@@ -10008,6 +10062,7 @@ function Chamados({
       marginBottom: 4
     }
   }, "Status"), /*#__PURE__*/React.createElement(Select, {
+    disabled: !podeEditar,
     value: selecionado.status,
     onChange: e => mudarStatus(e.target.value),
     style: {
@@ -10242,6 +10297,7 @@ function LoginPublico({
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
+      position: "relative",
       minHeight: 640,
       background: COLORS.paper,
       display: "flex",
@@ -10315,18 +10371,25 @@ function LoginPublico({
       justifyContent: "center",
       marginTop: 4
     }
-  }, busy ? "Aguarde..." : "Entrar"), /*#__PURE__*/React.createElement("button", {
+  }, busy ? "Aguarde..." : "Entrar")), /*#__PURE__*/React.createElement("button", {
     onClick: onAdminClick,
+    title: "Acesso administrativo",
+    "aria-label": "Acesso administrativo",
     style: {
+      position: "absolute",
+      right: 14,
+      bottom: 10,
       background: "none",
       border: "none",
-      color: COLORS.inkSoft,
-      fontSize: 12,
+      color: COLORS.line,
+      fontSize: 10,
       cursor: "pointer",
-      marginTop: 18,
-      textDecoration: "underline"
-    }
-  }, "Login")));
+      padding: 4,
+      opacity: 0.7
+    },
+    onMouseEnter: e => e.currentTarget.style.color = COLORS.inkSoft,
+    onMouseLeave: e => e.currentTarget.style.color = COLORS.line
+  }, "\u2699"));
 }
 function TopBarSolicitante({
   nome,
@@ -11067,7 +11130,8 @@ function emptyAdminForm() {
     nome: "",
     senha: "",
     acessoTotal: true,
-    secoes: {}
+    secoes: {},
+    editar: false
   };
 }
 function Administradores({
@@ -11103,7 +11167,8 @@ function Administradores({
         nome: a.nome,
         senha: "",
         acessoTotal: isAcessoTotal(a.permissoes),
-        secoes
+        secoes,
+        editar: !!a.editar
       }
     });
     setError("");
@@ -11144,7 +11209,8 @@ function Administradores({
     const novoAdmin = {
       nome,
       senha: senhaFinal,
-      permissoes
+      permissoes,
+      editar: f.acessoTotal || !!f.editar
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -11185,7 +11251,7 @@ function Administradores({
       marginTop: 0,
       marginBottom: 16
     }
-  }, "Cada administrador entra com seu pr\xF3prio nome e senha, e s\xF3 v\xEA no menu as se\xE7\xF5es que voc\xEA marcar para ele. Quem tiver \"acesso total\" tamb\xE9m pode gerenciar outros administradores."), status && /*#__PURE__*/React.createElement("div", {
+  }, "Cada administrador entra com seu pr\xF3prio nome e senha, e s\xF3 v\xEA no menu as se\xE7\xF5es que voc\xEA marcar para ele. Por padr\xE3o, um administrador restrito s\xF3 visualiza essas se\xE7\xF5es \u2014 marque \"Pode editar\" pra ele conseguir adicionar, alterar ou excluir. Quem tiver \"acesso total\" v\xEA e edita tudo, e tamb\xE9m pode gerenciar outros administradores."), status && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14,
       padding: "10px 12px",
@@ -11238,7 +11304,17 @@ function Administradores({
       padding: "9px 6px",
       color: COLORS.inkSoft
     }
-  }, isAcessoTotal(a.permissoes) ? "Acesso total" : a.permissoes.split(",").map(k => SECTION_LABELS[k.trim()] || k.trim()).join(", ")), /*#__PURE__*/React.createElement("td", {
+  }, isAcessoTotal(a.permissoes) ? "Acesso total" : /*#__PURE__*/React.createElement(React.Fragment, null, a.permissoes.split(",").map(k => SECTION_LABELS[k.trim()] || k.trim()).join(", "), /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 8,
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "1px 7px",
+      borderRadius: 999,
+      color: a.editar ? COLORS.accent : COLORS.inkSoft,
+      background: a.editar ? COLORS.accentSoft : COLORS.paper
+    }
+  }, a.editar ? "pode editar" : "só visualiza"))), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "9px 6px",
       textAlign: "right",
@@ -11357,7 +11433,37 @@ function Administradores({
         }
       }
     })
-  }), item.label)))), error && /*#__PURE__*/React.createElement("div", {
+  }), item.label))), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 12,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!modal.form.editar,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        editar: e.target.checked
+      }
+    })
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13.5,
+      color: COLORS.ink
+    }
+  }, "Pode editar (adicionar, alterar, excluir) nessas se\xE7\xF5es")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: COLORS.inkSoft,
+      marginTop: 4,
+      marginBottom: 0
+    }
+  }, modal.form.editar ? "Esse administrador pode alterar o que estiver nas seções marcadas acima." : "Desmarcado: esse administrador só visualiza as seções marcadas acima, sem poder adicionar, editar ou excluir nada.")), error && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
       fontSize: 13,
@@ -11678,7 +11784,8 @@ function ChamadosDock({
   state,
   setState,
   abertoId,
-  onAbrirChange
+  onAbrirChange,
+  podeEditar = true
 }) {
   const [texto, setTexto] = useState("");
   const [collapsed, setCollapsed] = useState(() => {
@@ -11700,6 +11807,7 @@ function ChamadosDock({
     });
   }
   function enviarResposta() {
+    if (!podeEditar) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
     setState(prev => ({
@@ -11907,7 +12015,7 @@ function ChamadosDock({
           marginLeft: 3
         }
       }, formatDateTime(m.data))));
-    })), /*#__PURE__*/React.createElement("div", {
+    })), podeEditar && /*#__PURE__*/React.createElement("div", {
       style: {
         padding: 12,
         borderTop: `1px solid ${COLORS.line}`,
@@ -12097,7 +12205,8 @@ function App() {
     setAuth({
       isAdmin: true,
       nome: data.nome || "Administrador",
-      permissoes: data.permissoes || "todas"
+      permissoes: data.permissoes || "todas",
+      editar: !!data.editar
     });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
@@ -12323,6 +12432,7 @@ function App() {
   };
   const isMaster = isAcessoTotal(auth.permissoes);
   const allowed = new Set(getAllowedSections(auth.permissoes));
+  const podeEditar = isMaster || !!auth.editar;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: 640,
@@ -12372,6 +12482,7 @@ function App() {
     mobileOpen: mobileMenuOpen,
     nome: auth.nome,
     permissoes: auth.permissoes,
+    podeEditar: podeEditar,
     onLogout: logout,
     categorias: state.categorias,
     unidadeAtiva: unidadeAtiva,
@@ -12406,31 +12517,37 @@ function App() {
     pendingPatrimonio: pendingPatrimonio,
     onConsumePending: () => setPendingPatrimonio(null),
     pendingCategoriaFiltro: pendingCategoriaFiltro,
-    onConsumeCategoriaFiltro: () => setPendingCategoriaFiltro(null)
+    onConsumeCategoriaFiltro: () => setPendingCategoriaFiltro(null),
+    podeEditar: podeEditar
   }), view === "categorias" && allowed.has("categorias") && /*#__PURE__*/React.createElement(Categorias, {
     state: state,
     setState: setState,
-    unidadeAtiva: unidadeAtiva
+    unidadeAtiva: unidadeAtiva,
+    podeEditar: podeEditar
   }), view === "areas" && allowed.has("areas") && /*#__PURE__*/React.createElement(Areas, {
     state: state,
     setState: setState,
-    unidadeAtiva: unidadeAtiva
+    unidadeAtiva: unidadeAtiva,
+    podeEditar: podeEditar
   }), view === "responsaveis" && allowed.has("responsaveis") && /*#__PURE__*/React.createElement(Responsaveis, {
     state: state,
     setState: setState,
-    unidadeAtiva: unidadeAtiva
+    unidadeAtiva: unidadeAtiva,
+    podeEditar: podeEditar
   }), view === "relatorios" && allowed.has("relatorios") && /*#__PURE__*/React.createElement(Relatorios, {
     state: state,
     historico: historico
   }), view === "chamados" && allowed.has("chamados") && /*#__PURE__*/React.createElement(Chamados, {
     state: state,
     setState: setState,
-    unidadeAtiva: unidadeAtiva
+    unidadeAtiva: unidadeAtiva,
+    podeEditar: podeEditar
   }), view === "importar" && allowed.has("importar") && /*#__PURE__*/React.createElement(Importar, {
     state: state,
     setState: setState,
     unidadeAtiva: unidadeAtiva,
-    secret: secret
+    secret: secret,
+    podeEditar: podeEditar
   }), view === "usuarios" && isMaster && /*#__PURE__*/React.createElement(Usuarios, {
     solicitantes: usuarios,
     secret: secret,
@@ -12443,7 +12560,8 @@ function App() {
     state: state,
     setState: setState,
     abertoId: chamadoAbertoId,
-    onAbrirChange: setChamadoAbertoId
+    onAbrirChange: setChamadoAbertoId,
+    podeEditar: podeEditar
   })));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
