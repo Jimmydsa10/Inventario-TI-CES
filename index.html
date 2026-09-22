@@ -6675,9 +6675,21 @@ function emptyEquipForm() {
     dataCompra: "",
     valor: "",
     vidaUtil: "",
+    sistemaOperacional: "",
+    memoriaRam: "",
+    tipoArmazenamento: "",
+    capacidadeArmazenamento: "",
     historicoManutencao: [],
     unidade: "colegio"
   };
+}
+
+// Categorias que têm sistema operacional/memória/armazenamento — os demais
+// tipos de equipamento (projetor, impressora, monitor...) não têm esses
+// campos, então a seção "Especificações técnicas" só aparece pra essas.
+const CATEGORIAS_COM_SPECS = ["notebook", "computador desktop", "mini pc", "tablet"];
+function categoriaTemSpecs(categoria) {
+  return CATEGORIAS_COM_SPECS.includes(String(categoria || "").trim().toLowerCase());
 }
 function diasParaVencerGarantia(dataCompra, vidaUtilAnos) {
   if (!dataCompra || !vidaUtilAnos) return null;
@@ -6851,6 +6863,88 @@ function EquipForm({
       serie: e.target.value
     }),
     placeholder: "Opcional"
+  })), categoriaTemSpecs(form.categoria) && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1 / -1",
+      borderTop: `1px solid ${COLORS.line}`,
+      paddingTop: 14,
+      marginTop: 2,
+      marginBottom: 4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11.5,
+      fontWeight: 700,
+      color: COLORS.inkSoft,
+      textTransform: "uppercase",
+      letterSpacing: 0.4
+    }
+  }, "Especifica\xE7\xF5es t\xE9cnicas")), /*#__PURE__*/React.createElement(Field, {
+    label: "Sistema operacional"
+  }, /*#__PURE__*/React.createElement(Select, {
+    value: form.sistemaOperacional,
+    onChange: e => setForm({
+      ...form,
+      sistemaOperacional: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Selecione"), /*#__PURE__*/React.createElement("option", {
+    value: "Windows 10"
+  }, "Windows 10"), /*#__PURE__*/React.createElement("option", {
+    value: "Windows 11"
+  }, "Windows 11"), /*#__PURE__*/React.createElement("option", {
+    value: "macOS"
+  }, "macOS"), /*#__PURE__*/React.createElement("option", {
+    value: "Linux"
+  }, "Linux"), /*#__PURE__*/React.createElement("option", {
+    value: "ChromeOS"
+  }, "ChromeOS"), /*#__PURE__*/React.createElement("option", {
+    value: "N\xE3o se aplica"
+  }, "N\xE3o se aplica"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Mem\xF3ria RAM (GB)"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    type: "number",
+    value: form.memoriaRam,
+    onChange: e => setForm({
+      ...form,
+      memoriaRam: e.target.value
+    }),
+    placeholder: "Ex: 8, 16, 32"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Tipo de armazenamento"
+  }, /*#__PURE__*/React.createElement(Select, {
+    value: form.tipoArmazenamento,
+    onChange: e => setForm({
+      ...form,
+      tipoArmazenamento: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Selecione"), /*#__PURE__*/React.createElement("option", {
+    value: "HD (HDD)"
+  }, "HD (HDD)"), /*#__PURE__*/React.createElement("option", {
+    value: "SSD"
+  }, "SSD"), /*#__PURE__*/React.createElement("option", {
+    value: "SSD NVMe"
+  }, "SSD NVMe"), /*#__PURE__*/React.createElement("option", {
+    value: "N\xE3o se aplica"
+  }, "N\xE3o se aplica"))), /*#__PURE__*/React.createElement(Field, {
+    label: "Capacidade (GB)"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    type: "number",
+    value: form.capacidadeArmazenamento,
+    onChange: e => setForm({
+      ...form,
+      capacidadeArmazenamento: e.target.value
+    }),
+    placeholder: "Ex: 256, 512, 1000"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1 / -1",
+      borderTop: `1px solid ${COLORS.line}`,
+      marginBottom: 14
+    }
   })), /*#__PURE__*/React.createElement(Field, {
     label: "Sala/Localiza\xE7\xE3o"
   }, /*#__PURE__*/React.createElement(Select, {
@@ -7008,7 +7102,7 @@ function Inventario({
         mode: "edit",
         original: item,
         form: {
-          historicoManutencao: [],
+          ...emptyEquipForm(),
           ...item
         }
       });
@@ -7099,7 +7193,7 @@ function Inventario({
       mode: "edit",
       original: row,
       form: {
-        historicoManutencao: [],
+        ...emptyEquipForm(),
         ...row
       }
     });
