@@ -90,6 +90,17 @@ function checkSolicitanteLogin(nome, senha) {
   return s.senha === String(senha || '');
 }
 
+// Retorna o registro do solicitante (com o nome como está cadastrado) se
+// nome+senha baterem, ou null. Usado pra autenticar quem pode abrir chamado
+// e responder — sem isso, doPost aceitava novoChamado/novaMensagem de
+// qualquer um que soubesse a URL pública do backend, sem checar login algum.
+function authenticateSolicitante(nome, senha) {
+  const s = findSolicitante(nome);
+  if (!s) return null;
+  if (s.senha !== String(senha || '')) return null;
+  return s;
+}
+
 function getConfigValor(chave) {
   const sh = getOrCreateSheet('Config', ['chave', 'valor']);
   const data = sh.getDataRange().getValues();
@@ -345,9 +356,22 @@ function doPost(e) {
     return jsonOut({ ok: true });
   }
 
+  // Antes: novoChamado e novaMensagem não checavam login nenhum — qualquer
+  // um com a URL pública do backend podia criar chamados falsos ou postar
+  // mensagens em qualquer chamado, inclusive se passando pelo TI
+  // (mensagem.autor = 'ti'). Agora exige um solicitante autenticado (ou um
+  // admin) e o autor/criadoPor são fixados pelo servidor, nunca aceitos do
+  // jeito que o cliente mandou.
   if (body.action === 'novoChamado') {
+    const solicitante = authenticateSolicitante(body.userNome, body.userSenha);
+    if (!isAdmin && !solicitante) {
+      return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
     const state = readState();
-    body.chamado.criadoPor = body.userNome || body.chamado.criadoPor || '';
+    if (solicitante) {
+      body.chamado.criadoPor = solicitante.nome;
+      body.chamado.solicitante = solicitante.nome;
+    }
     state.chamados = state.chamados || [];
     state.chamados.push(body.chamado);
     writeState(state);
@@ -356,13 +380,25 @@ function doPost(e) {
   }
 
   if (body.action === 'novaMensagem') {
+    const solicitante = authenticateSolicitante(body.userNome, body.userSenha);
+    if (!isAdmin && !solicitante) {
+      return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
     const state = readState();
     const chamados = state.chamados || [];
     const chamado = chamados.filter(function (c) { return c.id === body.chamadoId; })[0];
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
-    chamado.mensagens.push(body.mensagem);
+    if (solicitante && !isAdmin) {
+      const dono = String(chamado.criadoPor || chamado.solicitante || '').trim().toLowerCase();
+      if (dono !== solicitante.nome.trim().toLowerCase()) {
+        return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
+      }
+    }
+    const mensagem = body.mensagem || {};
+    mensagem.autor = isAdmin ? 'ti' : 'solicitante';
+    chamado.mensagens.push(mensagem);
     writeState(state);
     return jsonOut({ ok: true });
   }
