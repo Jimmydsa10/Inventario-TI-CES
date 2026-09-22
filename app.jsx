@@ -1820,9 +1820,22 @@ function emptyEquipForm() {
     dataCompra: "",
     valor: "",
     vidaUtil: "",
+    sistemaOperacional: "",
+    memoriaRam: "",
+    tipoArmazenamento: "",
+    capacidadeArmazenamento: "",
     historicoManutencao: [],
     unidade: "colegio",
   };
+}
+
+// Categorias que têm sistema operacional/memória/armazenamento — os demais
+// tipos de equipamento (projetor, impressora, monitor...) não têm esses
+// campos, então a seção "Especificações técnicas" só aparece pra essas.
+const CATEGORIAS_COM_SPECS = ["notebook", "computador desktop", "mini pc", "tablet"];
+
+function categoriaTemSpecs(categoria) {
+  return CATEGORIAS_COM_SPECS.includes(String(categoria || "").trim().toLowerCase());
 }
 
 function diasParaVencerGarantia(dataCompra, vidaUtilAnos) {
@@ -1913,6 +1926,42 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
       <Field label="Nº de série">
         <TextInput value={form.serie} onChange={(e) => setForm({ ...form, serie: e.target.value })} placeholder="Opcional" />
       </Field>
+
+      {categoriaTemSpecs(form.categoria) && (
+        <>
+          <div style={{ gridColumn: "1 / -1", borderTop: `1px solid ${COLORS.line}`, paddingTop: 14, marginTop: 2, marginBottom: 4 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.4 }}>Especificações técnicas</div>
+          </div>
+          <Field label="Sistema operacional">
+            <Select value={form.sistemaOperacional} onChange={(e) => setForm({ ...form, sistemaOperacional: e.target.value })}>
+              <option value="">Selecione</option>
+              <option value="Windows 10">Windows 10</option>
+              <option value="Windows 11">Windows 11</option>
+              <option value="macOS">macOS</option>
+              <option value="Linux">Linux</option>
+              <option value="ChromeOS">ChromeOS</option>
+              <option value="Não se aplica">Não se aplica</option>
+            </Select>
+          </Field>
+          <Field label="Memória RAM (GB)">
+            <TextInput type="number" value={form.memoriaRam} onChange={(e) => setForm({ ...form, memoriaRam: e.target.value })} placeholder="Ex: 8, 16, 32" />
+          </Field>
+          <Field label="Tipo de armazenamento">
+            <Select value={form.tipoArmazenamento} onChange={(e) => setForm({ ...form, tipoArmazenamento: e.target.value })}>
+              <option value="">Selecione</option>
+              <option value="HD (HDD)">HD (HDD)</option>
+              <option value="SSD">SSD</option>
+              <option value="SSD NVMe">SSD NVMe</option>
+              <option value="Não se aplica">Não se aplica</option>
+            </Select>
+          </Field>
+          <Field label="Capacidade (GB)">
+            <TextInput type="number" value={form.capacidadeArmazenamento} onChange={(e) => setForm({ ...form, capacidadeArmazenamento: e.target.value })} placeholder="Ex: 256, 512, 1000" />
+          </Field>
+          <div style={{ gridColumn: "1 / -1", borderTop: `1px solid ${COLORS.line}`, marginBottom: 14 }} />
+        </>
+      )}
+
       <Field label="Sala/Localização">
         <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
           <option value="">Selecione</option>
@@ -2002,7 +2051,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
     if (!pendingPatrimonio) return;
     const item = state.inventario.find((r) => r.id === pendingPatrimonio);
     if (item) {
-      setModal({ mode: "edit", original: item, form: { historicoManutencao: [], ...item } });
+      setModal({ mode: "edit", original: item, form: { ...emptyEquipForm(), ...item } });
     }
     if (onConsumePending) onConsumePending();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2092,7 +2141,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   }
 
   function openEdit(row) {
-    setModal({ mode: "edit", original: row, form: { historicoManutencao: [], ...row } });
+    setModal({ mode: "edit", original: row, form: { ...emptyEquipForm(), ...row } });
     setError("");
   }
 
