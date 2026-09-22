@@ -1077,7 +1077,7 @@ function getAllowedSections(permissoes) {
     .filter(Boolean);
 }
 
-function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, onLogout, categorias, unidadeAtiva }) {
+function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, podeEditar, onLogout, categorias, unidadeAtiva }) {
   const isMaster = isAcessoTotal(permissoes);
   const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
   const [openGroups, setOpenGroups] = useState(() => {
@@ -1217,7 +1217,9 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
       </nav>
       <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)", paddingTop: 12, marginTop: 12 }}>
         <div style={{ fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 2 }}>{nome || "Administrador"}</div>
-        <div style={{ fontSize: 11, color: "#9AA6B8", marginBottom: 10 }}>{isMaster ? "Acesso total" : "Acesso restrito"}</div>
+        <div style={{ fontSize: 11, color: "#9AA6B8", marginBottom: 10 }}>
+          {isMaster ? "Acesso total" : podeEditar ? "Acesso restrito · pode editar" : "Acesso restrito · só visualização"}
+        </div>
         <button
           onClick={onLogout}
           style={{
@@ -1852,7 +1854,7 @@ function diasParaVencerGarantia(dataCompra, vidaUtilAnos) {
   return Math.round(diffMs / (1000 * 60 * 60 * 24));
 }
 
-function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
+function EquipForm({ form, setForm, state, isNew, onAddCategoria, podeEditar = true }) {
   const [novaCategoria, setNovaCategoria] = useState(false);
   const [novaCategoriaTexto, setNovaCategoriaTexto] = useState("");
 
@@ -1868,12 +1870,12 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
   return (
     <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
       <Field label="Nº de patrimônio">
-        <TextInput value={form.id} disabled={isNew} onChange={(e) => setForm({ ...form, id: e.target.value })} style={{ fontFamily: "ui-monospace, monospace", background: isNew ? "#F3F2ED" : "#fff" }} />
+        <TextInput value={form.id} disabled={isNew || !podeEditar} onChange={(e) => setForm({ ...form, id: e.target.value })} style={{ fontFamily: "ui-monospace, monospace", background: isNew ? "#F3F2ED" : "#fff" }} />
       </Field>
       <Field label="Categoria">
         {!novaCategoria ? (
           <div style={{ display: "flex", gap: 6 }}>
-            <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })} style={{ flex: 1 }}>
+            <Select value={form.categoria} disabled={!podeEditar} onChange={(e) => setForm({ ...form, categoria: e.target.value })} style={{ flex: 1 }}>
               <option value="">Selecione</option>
               {state.categorias.map((c) => (
                 <option key={c} value={c}>
@@ -1881,14 +1883,16 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
                 </option>
               ))}
             </Select>
-            <button
-              type="button"
-              onClick={() => setNovaCategoria(true)}
-              title="Adicionar nova categoria"
-              style={{ background: "#fff", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.ink, width: 36, flexShrink: 0 }}
-            >
-              <Plus size={15} style={{ margin: "0 auto" }} />
-            </button>
+            {podeEditar && (
+              <button
+                type="button"
+                onClick={() => setNovaCategoria(true)}
+                title="Adicionar nova categoria"
+                style={{ background: "#fff", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.ink, width: 36, flexShrink: 0 }}
+              >
+                <Plus size={15} style={{ margin: "0 auto" }} />
+              </button>
+            )}
           </div>
         ) : (
           <div style={{ display: "flex", gap: 6 }}>
@@ -1918,13 +1922,13 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
         )}
       </Field>
       <Field label="Marca">
-        <TextInput value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Dell, Epson, Lenovo..." />
+        <TextInput disabled={!podeEditar} value={form.marca} onChange={(e) => setForm({ ...form, marca: e.target.value })} placeholder="Dell, Epson, Lenovo..." />
       </Field>
       <Field label="Modelo">
-        <TextInput value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} placeholder="Opcional" />
+        <TextInput disabled={!podeEditar} value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} placeholder="Opcional" />
       </Field>
       <Field label="Nº de série">
-        <TextInput value={form.serie} onChange={(e) => setForm({ ...form, serie: e.target.value })} placeholder="Opcional" />
+        <TextInput disabled={!podeEditar} value={form.serie} onChange={(e) => setForm({ ...form, serie: e.target.value })} placeholder="Opcional" />
       </Field>
 
       {categoriaTemSpecs(form.categoria) && (
@@ -1933,7 +1937,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
             <div style={{ fontSize: 11.5, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.4 }}>Especificações técnicas</div>
           </div>
           <Field label="Sistema operacional">
-            <Select value={form.sistemaOperacional} onChange={(e) => setForm({ ...form, sistemaOperacional: e.target.value })}>
+            <Select disabled={!podeEditar} value={form.sistemaOperacional} onChange={(e) => setForm({ ...form, sistemaOperacional: e.target.value })}>
               <option value="">Selecione</option>
               <option value="Windows 10">Windows 10</option>
               <option value="Windows 11">Windows 11</option>
@@ -1944,10 +1948,10 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
             </Select>
           </Field>
           <Field label="Memória RAM (GB)">
-            <TextInput type="number" value={form.memoriaRam} onChange={(e) => setForm({ ...form, memoriaRam: e.target.value })} placeholder="Ex: 8, 16, 32" />
+            <TextInput disabled={!podeEditar} type="number" value={form.memoriaRam} onChange={(e) => setForm({ ...form, memoriaRam: e.target.value })} placeholder="Ex: 8, 16, 32" />
           </Field>
           <Field label="Tipo de armazenamento">
-            <Select value={form.tipoArmazenamento} onChange={(e) => setForm({ ...form, tipoArmazenamento: e.target.value })}>
+            <Select disabled={!podeEditar} value={form.tipoArmazenamento} onChange={(e) => setForm({ ...form, tipoArmazenamento: e.target.value })}>
               <option value="">Selecione</option>
               <option value="HD (HDD)">HD (HDD)</option>
               <option value="SSD">SSD</option>
@@ -1956,14 +1960,14 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
             </Select>
           </Field>
           <Field label="Capacidade (GB)">
-            <TextInput type="number" value={form.capacidadeArmazenamento} onChange={(e) => setForm({ ...form, capacidadeArmazenamento: e.target.value })} placeholder="Ex: 256, 512, 1000" />
+            <TextInput disabled={!podeEditar} type="number" value={form.capacidadeArmazenamento} onChange={(e) => setForm({ ...form, capacidadeArmazenamento: e.target.value })} placeholder="Ex: 256, 512, 1000" />
           </Field>
           <div style={{ gridColumn: "1 / -1", borderTop: `1px solid ${COLORS.line}`, marginBottom: 14 }} />
         </>
       )}
 
       <Field label="Sala/Localização">
-        <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
+        <Select disabled={!podeEditar} value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
           <option value="">Selecione</option>
           {state.areas.map((a) => (
             <option key={a.id} value={a.nome}>
@@ -1973,7 +1977,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
         </Select>
       </Field>
       <Field label="Status">
-        <Select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+        <Select disabled={!podeEditar} value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
           {STATUS_OPTIONS.map((s) => (
             <option key={s} value={s}>
               {s}
@@ -1982,7 +1986,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
         </Select>
       </Field>
       <Field label="Responsável">
-        <Select value={form.responsavel} onChange={(e) => setForm({ ...form, responsavel: e.target.value })}>
+        <Select disabled={!podeEditar} value={form.responsavel} onChange={(e) => setForm({ ...form, responsavel: e.target.value })}>
           <option value="">Nenhum</option>
           {state.responsaveis.map((r) => (
             <option key={r.id} value={r.nome}>
@@ -1992,13 +1996,13 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
         </Select>
       </Field>
       <Field label="Data de compra">
-        <TextInput type="date" value={form.dataCompra} onChange={(e) => setForm({ ...form, dataCompra: e.target.value })} />
+        <TextInput disabled={!podeEditar} type="date" value={form.dataCompra} onChange={(e) => setForm({ ...form, dataCompra: e.target.value })} />
       </Field>
       <Field label="Valor de aquisição (R$)">
-        <TextInput type="number" step="0.01" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} placeholder="Opcional" />
+        <TextInput disabled={!podeEditar} type="number" step="0.01" value={form.valor} onChange={(e) => setForm({ ...form, valor: e.target.value })} placeholder="Opcional" />
       </Field>
       <Field label="Vida útil estimada (anos)">
-        <TextInput type="number" value={form.vidaUtil} onChange={(e) => setForm({ ...form, vidaUtil: e.target.value })} placeholder="Opcional" />
+        <TextInput disabled={!podeEditar} type="number" value={form.vidaUtil} onChange={(e) => setForm({ ...form, vidaUtil: e.target.value })} placeholder="Opcional" />
         {(() => {
           const dias = diasParaVencerGarantia(form.dataCompra, form.vidaUtil);
           if (dias === null) return null;
@@ -2010,6 +2014,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
       <div style={{ gridColumn: "1 / -1" }}>
         <Field label="Observações">
           <textarea
+            disabled={!podeEditar}
             value={form.observacoes}
             onChange={(e) => setForm({ ...form, observacoes: e.target.value })}
             rows={3}
@@ -2033,7 +2038,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria }) {
   );
 }
 
-function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro }) {
+function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro, podeEditar = true }) {
   const [search, setSearch] = useState("");
   const [fCategoria, setFCategoria] = useState("");
   const [fSala, setFSala] = useState("");
@@ -2096,6 +2101,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   }
 
   function bulkDelete() {
+    if (!podeEditar) return;
     setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => !selected.has(r.id)) }));
     setSelected(new Set());
     setBulkDeleteOpen(false);
@@ -2133,6 +2139,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   const pageRows = ordenado.slice((pageSafe - 1) * PAGE_SIZE, pageSafe * PAGE_SIZE);
 
   function openNew() {
+    if (!podeEditar) return;
     const form = emptyEquipForm();
     form.id = nextPatrimonio(state.inventario, state.prefixo);
     form.unidade = unidadeAtiva;
@@ -2146,6 +2153,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   }
 
   function save() {
+    if (!podeEditar) return;
     const f = modal.form;
     if (!f.id.trim()) return setError("Informe o número de patrimônio.");
     if (!f.categoria) return setError("Selecione uma categoria.");
@@ -2178,6 +2186,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   }
 
   function remove(row) {
+    if (!podeEditar) return;
     setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => r !== row) }));
     setDeleteTarget(null);
     setModal(null);
@@ -2189,9 +2198,11 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Inventário</h2>
-        <Button variant="primary" icon={Plus} onClick={openNew}>
-          Novo equipamento
-        </Button>
+        {podeEditar && (
+          <Button variant="primary" icon={Plus} onClick={openNew}>
+            Novo equipamento
+          </Button>
+        )}
       </div>
 
       <Panel style={{ marginBottom: 14 }}>
@@ -2298,9 +2309,11 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
               >
                 Limpar
               </button>
-              <Button variant="danger" icon={Trash2} onClick={() => setBulkDeleteOpen(true)}>
-                Excluir selecionados
-              </Button>
+              {podeEditar && (
+                <Button variant="danger" icon={Trash2} onClick={() => setBulkDeleteOpen(true)}>
+                  Excluir selecionados
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -2392,11 +2405,11 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
       </Panel>
 
       {modal && (
-        <Modal title={modal.mode === "new" ? "Novo equipamento" : "Editar equipamento"} onClose={() => setModal(null)} width={620}>
-          <EquipForm form={modal.form} setForm={(f) => setModal({ ...modal, form: f })} state={stateUnidade} isNew={modal.mode === "new"} onAddCategoria={addCategoria} />
+        <Modal title={modal.mode === "new" ? "Novo equipamento" : podeEditar ? "Editar equipamento" : "Equipamento"} onClose={() => setModal(null)} width={620}>
+          <EquipForm form={modal.form} setForm={(f) => setModal({ ...modal, form: f })} state={stateUnidade} isNew={modal.mode === "new"} onAddCategoria={addCategoria} podeEditar={podeEditar} />
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ borderTop: `1px solid ${COLORS.line}`, marginTop: 4, paddingTop: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            {modal.mode === "edit" ? (
+            {modal.mode === "edit" && podeEditar ? (
               <Button variant="danger" icon={Trash2} onClick={() => setDeleteTarget(modal.original)}>
                 Excluir
               </Button>
@@ -2410,11 +2423,13 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
                 </Button>
               )}
               <Button variant="ghost" onClick={() => setModal(null)}>
-                Cancelar
+                {podeEditar ? "Cancelar" : "Fechar"}
               </Button>
-              <Button variant="primary" icon={Check} onClick={save}>
-                Salvar
-              </Button>
+              {podeEditar && (
+                <Button variant="primary" icon={Check} onClick={save}>
+                  Salvar
+                </Button>
+              )}
             </div>
           </div>
         </Modal>
@@ -2485,7 +2500,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
 
 // ---------- Categorias ----------
 
-function Categorias({ state, setState, unidadeAtiva }) {
+function Categorias({ state, setState, unidadeAtiva, podeEditar = true }) {
   const [novo, setNovo] = useState("");
   const [error, setError] = useState("");
   const [removeTarget, setRemoveTarget] = useState(null);
@@ -2503,6 +2518,7 @@ function Categorias({ state, setState, unidadeAtiva }) {
   }, [state.inventario, unidadeAtiva]);
 
   function add() {
+    if (!podeEditar) return;
     const v = novo.trim();
     if (!v) return;
     if (categoriasUnidade.some((c) => c.nome.toLowerCase() === v.toLowerCase())) {
@@ -2515,16 +2531,19 @@ function Categorias({ state, setState, unidadeAtiva }) {
   }
 
   function remove(catObj) {
+    if (!podeEditar) return;
     setState((prev) => ({ ...prev, categorias: prev.categorias.filter((c) => c !== catObj) }));
     setRemoveTarget(null);
   }
 
   function openEdit(catObj) {
+    if (!podeEditar) return;
     setEditModal({ original: catObj, nome: catObj.nome });
     setEditError("");
   }
 
   function saveEdit() {
+    if (!podeEditar) return;
     const novoNome = editModal.nome.trim();
     if (!novoNome) return setEditError("Informe o nome da categoria.");
     const dup = categoriasUnidade.some((c) => c !== editModal.original && c.nome.toLowerCase() === novoNome.toLowerCase());
@@ -2542,23 +2561,25 @@ function Categorias({ state, setState, unidadeAtiva }) {
     <div>
       <h2 style={{ margin: "0 0 18px 0", fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Categorias de equipamento</h2>
 
-      <Panel style={{ marginBottom: 14 }}>
-        <div style={{ display: "flex", gap: 10 }}>
-          <TextInput
-            value={novo}
-            onChange={(e) => {
-              setNovo(e.target.value);
-              setError("");
-            }}
-            placeholder="Nome da nova categoria"
-            onKeyDown={(e) => e.key === "Enter" && add()}
-          />
-          <Button variant="primary" icon={Plus} onClick={add}>
-            Adicionar
-          </Button>
-        </div>
-        {error && <div style={{ color: COLORS.danger, fontSize: 13, marginTop: 8 }}>{error}</div>}
-      </Panel>
+      {podeEditar && (
+        <Panel style={{ marginBottom: 14 }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <TextInput
+              value={novo}
+              onChange={(e) => {
+                setNovo(e.target.value);
+                setError("");
+              }}
+              placeholder="Nome da nova categoria"
+              onKeyDown={(e) => e.key === "Enter" && add()}
+            />
+            <Button variant="primary" icon={Plus} onClick={add}>
+              Adicionar
+            </Button>
+          </div>
+          {error && <div style={{ color: COLORS.danger, fontSize: 13, marginTop: 8 }}>{error}</div>}
+        </Panel>
+      )}
 
       <Panel>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
@@ -2580,12 +2601,16 @@ function Categorias({ state, setState, unidadeAtiva }) {
                 </td>
                 <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[c.nome] || 0}</td>
                 <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
-                  <button onClick={() => openEdit(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
-                    <Pencil size={15} />
-                  </button>
-                  <button onClick={() => setRemoveTarget(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
-                    <Trash2 size={15} />
-                  </button>
+                  {podeEditar && (
+                    <>
+                      <button onClick={() => openEdit(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                        <Pencil size={15} />
+                      </button>
+                      <button onClick={() => setRemoveTarget(c)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                        <Trash2 size={15} />
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
@@ -2648,7 +2673,7 @@ function Categorias({ state, setState, unidadeAtiva }) {
 // ---------- Áreas / Salas ----------
 
 
-function Areas({ state, setState, unidadeAtiva }) {
+function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
@@ -2670,14 +2695,17 @@ function Areas({ state, setState, unidadeAtiva }) {
   }, [state.inventario, unidadeAtiva]);
 
   function openNew() {
+    if (!podeEditar) return;
     setModal({ mode: "new", form: { id: uid("AR"), nome: "", tipo: "Sala de aula", unidade: unidadeAtiva } });
     setError("");
   }
   function openEdit(a) {
+    if (!podeEditar) return;
     setModal({ mode: "edit", form: { ...a } });
     setError("");
   }
   function save() {
+    if (!podeEditar) return;
     const f = modal.form;
     if (!f.nome.trim()) return setError("Informe o nome da sala/área.");
     const dupNome = areasUnidade.some((a) => a.id !== f.id && a.nome.toLowerCase() === f.nome.trim().toLowerCase());
@@ -2697,6 +2725,7 @@ function Areas({ state, setState, unidadeAtiva }) {
     setModal(null);
   }
   function remove(a) {
+    if (!podeEditar) return;
     setState((prev) => ({ ...prev, areas: prev.areas.filter((x) => x.id !== a.id) }));
     setRemoveTarget(null);
   }
@@ -2705,9 +2734,11 @@ function Areas({ state, setState, unidadeAtiva }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Salas e áreas</h2>
-        <Button variant="primary" icon={Plus} onClick={openNew}>
-          Nova sala/área
-        </Button>
+        {podeEditar && (
+          <Button variant="primary" icon={Plus} onClick={openNew}>
+            Nova sala/área
+          </Button>
+        )}
       </div>
 
       <Panel>
@@ -2733,26 +2764,30 @@ function Areas({ state, setState, unidadeAtiva }) {
                 <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{a.tipo}</td>
                 <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[a.nome] || 0}</td>
                 <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEdit(a);
-                    }}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }}
-                    aria-label="Editar"
-                  >
-                    <Pencil size={15} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setRemoveTarget(a);
-                    }}
-                    style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }}
-                    aria-label="Excluir"
-                  >
-                    <Trash2 size={15} />
-                  </button>
+                  {podeEditar && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(a);
+                        }}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }}
+                        aria-label="Editar"
+                      >
+                        <Pencil size={15} />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setRemoveTarget(a);
+                        }}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }}
+                        aria-label="Excluir"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </>
+                  )}
                 </td>
               </tr>
             ))}
@@ -2861,7 +2896,7 @@ function Areas({ state, setState, unidadeAtiva }) {
 
 // ---------- Responsáveis ----------
 
-function Responsaveis({ state, setState, unidadeAtiva }) {
+function Responsaveis({ state, setState, unidadeAtiva, podeEditar = true }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
@@ -2877,14 +2912,17 @@ function Responsaveis({ state, setState, unidadeAtiva }) {
   }, [state.inventario, unidadeAtiva]);
 
   function openNew() {
+    if (!podeEditar) return;
     setModal({ mode: "new", form: { id: uid("RE"), nome: "", cargo: "", contato: "", unidade: unidadeAtiva } });
     setError("");
   }
   function openEdit(r) {
+    if (!podeEditar) return;
     setModal({ mode: "edit", form: { ...r } });
     setError("");
   }
   function save() {
+    if (!podeEditar) return;
     const f = modal.form;
     if (!f.nome.trim()) return setError("Informe o nome do responsável.");
     setState((prev) => {
@@ -2902,6 +2940,7 @@ function Responsaveis({ state, setState, unidadeAtiva }) {
     setModal(null);
   }
   function remove(r) {
+    if (!podeEditar) return;
     setState((prev) => ({ ...prev, responsaveis: prev.responsaveis.filter((x) => x.id !== r.id) }));
     setRemoveTarget(null);
   }
@@ -2910,9 +2949,11 @@ function Responsaveis({ state, setState, unidadeAtiva }) {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
         <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Responsáveis</h2>
-        <Button variant="primary" icon={Plus} onClick={openNew}>
-          Novo responsável
-        </Button>
+        {podeEditar && (
+          <Button variant="primary" icon={Plus} onClick={openNew}>
+            Novo responsável
+          </Button>
+        )}
       </div>
 
       <Panel>
@@ -2937,12 +2978,16 @@ function Responsaveis({ state, setState, unidadeAtiva }) {
                   <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.contato}</td>
                   <td style={{ padding: "9px 6px", textAlign: "right", color: COLORS.inkSoft }}>{counts[r.nome] || 0}</td>
                   <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
-                    <button onClick={() => openEdit(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
-                      <Pencil size={15} />
-                    </button>
-                    <button onClick={() => setRemoveTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
-                      <Trash2 size={15} />
-                    </button>
+                    {podeEditar && (
+                      <>
+                        <button onClick={() => openEdit(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
+                          <Pencil size={15} />
+                        </button>
+                        <button onClick={() => setRemoveTarget(r)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.danger, padding: 4 }} aria-label="Excluir">
+                          <Trash2 size={15} />
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -3184,7 +3229,7 @@ function Relatorios({ state, historico }) {
 
 // ---------- Importar / Exportar ----------
 
-function Importar({ state, setState, unidadeAtiva, secret }) {
+function Importar({ state, setState, unidadeAtiva, secret, podeEditar = true }) {
   const fileRef = useRef(null);
   const [status, setStatus] = useState(null); // {type: 'ok'|'error', msg}
   const [busy, setBusy] = useState(false);
@@ -3198,6 +3243,7 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
   const inventarioUnidade = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
 
   function clearInventario() {
+    if (!podeEditar) return;
     if (clearSenha !== secret) {
       setClearErro("Senha incorreta.");
       return;
@@ -3210,6 +3256,7 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
   }
 
   function handleFile(e) {
+    if (!podeEditar) return;
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     setBusy(true);
@@ -3265,6 +3312,7 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
   }
 
   function confirmarImportacao(modo) {
+    if (!podeEditar) return;
     const brutos = pending;
     if (!brutos) return;
 
@@ -3363,10 +3411,16 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
           <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
             Envie um arquivo no formato da planilha original: colunas Categoria, Marca, Modelo, Nº de Série, Sala/Localização, Status, Responsável e Observações. Depois de ler o arquivo, você escolhe se quer substituir tudo ou adicionar aos equipamentos já existentes — assim dá pra evitar duplicar equipamentos ao reimportar a mesma planilha.
           </p>
-          <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
-          <Button variant="primary" icon={FileSpreadsheet} onClick={() => fileRef.current && fileRef.current.click()} disabled={busy}>
-            {busy ? "Importando..." : "Selecionar arquivo .xlsx"}
-          </Button>
+          {podeEditar ? (
+            <>
+              <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
+              <Button variant="primary" icon={FileSpreadsheet} onClick={() => fileRef.current && fileRef.current.click()} disabled={busy}>
+                {busy ? "Importando..." : "Selecionar arquivo .xlsx"}
+              </Button>
+            </>
+          ) : (
+            <p style={{ fontSize: 12.5, color: COLORS.inkSoft, fontStyle: "italic" }}>Você só tem permissão pra visualizar, não pra importar.</p>
+          )}
           {status && (
             <div
               style={{
@@ -3398,14 +3452,16 @@ function Importar({ state, setState, unidadeAtiva, secret }) {
         </Panel>
       </div>
 
-      <Panel title={`Zona de risco — ${nomeUnidade}`} style={{ marginTop: 16, borderColor: COLORS.dangerSoft }}>
-        <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
-          Exclui todos os {inventarioUnidade.length} equipamentos cadastrados nessa unidade ({nomeUnidade}) — não afeta as outras unidades. Útil para apagar dados desatualizados antes de importar uma planilha nova ou recomeçar o cadastro do zero. As categorias, salas e responsáveis cadastrados não são afetados.
-        </p>
-        <Button variant="danger" icon={Trash2} onClick={() => setClearOpen(true)} disabled={inventarioUnidade.length === 0}>
-          Excluir equipamentos de {nomeUnidade}
-        </Button>
-      </Panel>
+      {podeEditar && (
+        <Panel title={`Zona de risco — ${nomeUnidade}`} style={{ marginTop: 16, borderColor: COLORS.dangerSoft }}>
+          <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0 }}>
+            Exclui todos os {inventarioUnidade.length} equipamentos cadastrados nessa unidade ({nomeUnidade}) — não afeta as outras unidades. Útil para apagar dados desatualizados antes de importar uma planilha nova ou recomeçar o cadastro do zero. As categorias, salas e responsáveis cadastrados não são afetados.
+          </p>
+          <Button variant="danger" icon={Trash2} onClick={() => setClearOpen(true)} disabled={inventarioUnidade.length === 0}>
+            Excluir equipamentos de {nomeUnidade}
+          </Button>
+        </Panel>
+      )}
 
       {pending && (
         <Modal title={`Confirmar importação — ${nomeUnidade}`} onClose={() => setPending(null)} width={460}>
@@ -3531,7 +3587,7 @@ function novoChamadoForm(unidadeAtiva) {
   return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
 }
 
-function Chamados({ state, setState, unidadeAtiva }) {
+function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
   const [form, setForm] = useState(novoChamadoForm(unidadeAtiva));
@@ -3563,12 +3619,14 @@ function Chamados({ state, setState, unidadeAtiva }) {
   }, [selecionado, selecionado && selecionado.mensagens.length]);
 
   function abrirNovo() {
+    if (!podeEditar) return;
     setNovoMode(true);
     setSelectedId(null);
     setForm(novoChamadoForm(unidadeAtiva));
   }
 
   function enviarNovoChamado() {
+    if (!podeEditar) return;
     const texto = form.texto.trim();
     if (!texto) return;
     const chamado = {
@@ -3591,6 +3649,7 @@ function Chamados({ state, setState, unidadeAtiva }) {
   }
 
   function enviarResposta() {
+    if (!podeEditar) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
     setState((prev) => ({
@@ -3603,6 +3662,7 @@ function Chamados({ state, setState, unidadeAtiva }) {
   }
 
   function mudarStatus(status) {
+    if (!podeEditar) return;
     setState((prev) => ({
       ...prev,
       chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, status } : c)),
@@ -3610,6 +3670,7 @@ function Chamados({ state, setState, unidadeAtiva }) {
   }
 
   function excluirChamado(chamado) {
+    if (!podeEditar) return;
     setState((prev) => ({ ...prev, chamados: prev.chamados.filter((c) => c.id !== chamado.id) }));
     if (selectedId === chamado.id) setSelectedId(null);
     setDeleteTarget(null);
@@ -3652,9 +3713,11 @@ function Chamados({ state, setState, unidadeAtiva }) {
               Quadro
             </button>
           </div>
-          <Button variant="primary" icon={Plus} onClick={abrirNovo}>
-            Novo chamado
-          </Button>
+          {podeEditar && (
+            <Button variant="primary" icon={Plus} onClick={abrirNovo}>
+              Novo chamado
+            </Button>
+          )}
         </div>
       </div>
 
@@ -3699,16 +3762,18 @@ function Chamados({ state, setState, unidadeAtiva }) {
                     <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
                       {c.assunto} {c.tipo && c.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={c.tipo} />}
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteTarget(c);
-                      }}
-                      style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, flexShrink: 0 }}
-                      aria-label="Excluir chamado"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {podeEditar && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteTarget(c);
+                        }}
+                        style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, flexShrink: 0 }}
+                        aria-label="Excluir chamado"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</span>
@@ -3855,14 +3920,16 @@ function Chamados({ state, setState, unidadeAtiva }) {
                   <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
                     {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
                   </div>
-                  <button
-                    onClick={() => setDeleteTarget(selecionado)}
-                    style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "6px 9px", flexShrink: 0 }}
-                    aria-label="Excluir chamado"
-                    title="Excluir chamado"
-                  >
-                    <Trash2 size={14} />
-                  </button>
+                  {podeEditar && (
+                    <button
+                      onClick={() => setDeleteTarget(selecionado)}
+                      style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "6px 9px", flexShrink: 0 }}
+                      aria-label="Excluir chamado"
+                      title="Excluir chamado"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
                 </div>
 
                 <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
@@ -3905,18 +3972,20 @@ function Chamados({ state, setState, unidadeAtiva }) {
                   })}
                 </div>
 
-                <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
-                  <TextInput
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    placeholder="Escrever uma atualização..."
-                    onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                    style={{ flex: 1 }}
-                  />
-                  <Button variant="primary" icon={Send} onClick={enviarResposta}>
-                    Enviar
-                  </Button>
-                </div>
+                {podeEditar && (
+                  <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+                    <TextInput
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Escrever uma atualização..."
+                      onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                      style={{ flex: 1 }}
+                    />
+                    <Button variant="primary" icon={Send} onClick={enviarResposta}>
+                      Enviar
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div style={{ width: 220, flexShrink: 0, padding: 16, overflow: "auto" }}>
@@ -3934,7 +4003,7 @@ function Chamados({ state, setState, unidadeAtiva }) {
                 ))}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, color: COLORS.inkSoft, marginBottom: 4 }}>Status</div>
-                  <Select value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
+                  <Select disabled={!podeEditar} value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
                     {CHAMADO_STATUS_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -4089,7 +4158,7 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
   }
 
   return (
-    <div style={{ minHeight: 640, background: COLORS.paper, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+    <div style={{ position: "relative", minHeight: 640, background: COLORS.paper, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <div style={{ width: "100%", maxWidth: 340, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "28px 24px", textAlign: "center" }}>
         <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 64, height: 64, borderRadius: 12, margin: "0 auto 8px" }} />
         <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>Chamados de TI</div>
@@ -4109,14 +4178,29 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
         <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
           {busy ? "Aguarde..." : "Entrar"}
         </Button>
-
-        <button
-          onClick={onAdminClick}
-          style={{ background: "none", border: "none", color: COLORS.inkSoft, fontSize: 12, cursor: "pointer", marginTop: 18, textDecoration: "underline" }}
-        >
-          Login
-        </button>
       </div>
+
+      <button
+        onClick={onAdminClick}
+        title="Acesso administrativo"
+        aria-label="Acesso administrativo"
+        style={{
+          position: "absolute",
+          right: 14,
+          bottom: 10,
+          background: "none",
+          border: "none",
+          color: COLORS.line,
+          fontSize: 10,
+          cursor: "pointer",
+          padding: 4,
+          opacity: 0.7,
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
+        onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.line)}
+      >
+        ⚙
+      </button>
     </div>
   );
 }
@@ -4529,7 +4613,7 @@ const SECTION_LABELS = {
 };
 
 function emptyAdminForm() {
-  return { nome: "", senha: "", acessoTotal: true, secoes: {} };
+  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false };
 }
 
 function Administradores({ admins, secret, onAdminsChanged }) {
@@ -4554,7 +4638,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
     if (a.permissoes !== "todas") {
       a.permissoes.split(",").forEach((k) => (secoes[k.trim()] = true));
     }
-    setModal({ mode: "edit", original: a, form: { nome: a.nome, senha: "", acessoTotal: isAcessoTotal(a.permissoes), secoes } });
+    setModal({ mode: "edit", original: a, form: { nome: a.nome, senha: "", acessoTotal: isAcessoTotal(a.permissoes), secoes, editar: !!a.editar } });
     setError("");
   }
 
@@ -4586,7 +4670,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
     const permissoes = f.acessoTotal ? "todas" : secoesEscolhidas.join(",");
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
 
-    const novoAdmin = { nome, senha: senhaFinal, permissoes };
+    const novoAdmin = { nome, senha: senhaFinal, permissoes, editar: f.acessoTotal || !!f.editar };
     let novaLista;
     if (modal.mode === "new") {
       novaLista = [...lista, novoAdmin];
@@ -4613,7 +4697,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
       </div>
 
       <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0, marginBottom: 16 }}>
-        Cada administrador entra com seu próprio nome e senha, e só vê no menu as seções que você marcar para ele. Quem tiver "acesso total" também pode gerenciar outros administradores.
+        Cada administrador entra com seu próprio nome e senha, e só vê no menu as seções que você marcar para ele. Por padrão, um administrador restrito só visualiza essas seções — marque "Pode editar" pra ele conseguir adicionar, alterar ou excluir. Quem tiver "acesso total" vê e edita tudo, e também pode gerenciar outros administradores.
       </p>
 
       {status && (
@@ -4645,12 +4729,29 @@ function Administradores({ admins, secret, onAdminsChanged }) {
               <tr key={a.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                 <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{a.nome}</td>
                 <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>
-                  {isAcessoTotal(a.permissoes)
-                    ? "Acesso total"
-                    : a.permissoes
+                  {isAcessoTotal(a.permissoes) ? (
+                    "Acesso total"
+                  ) : (
+                    <>
+                      {a.permissoes
                         .split(",")
                         .map((k) => SECTION_LABELS[k.trim()] || k.trim())
                         .join(", ")}
+                      <span
+                        style={{
+                          marginLeft: 8,
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          color: a.editar ? COLORS.accent : COLORS.inkSoft,
+                          background: a.editar ? COLORS.accentSoft : COLORS.paper,
+                        }}
+                      >
+                        {a.editar ? "pode editar" : "só visualiza"}
+                      </span>
+                    </>
+                  )}
                 </td>
                 <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                   <button onClick={() => openEdit(a)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
@@ -4704,6 +4805,19 @@ function Administradores({ admins, secret, onAdminsChanged }) {
                   </label>
                 ))}
               </div>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={!!modal.form.editar}
+                  onChange={(e) => setModal({ ...modal, form: { ...modal.form, editar: e.target.checked } })}
+                />
+                <span style={{ fontSize: 13.5, color: COLORS.ink }}>Pode editar (adicionar, alterar, excluir) nessas seções</span>
+              </label>
+              <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 4, marginBottom: 0 }}>
+                {modal.form.editar
+                  ? "Esse administrador pode alterar o que estiver nas seções marcadas acima."
+                  : "Desmarcado: esse administrador só visualiza as seções marcadas acima, sem poder adicionar, editar ou excluir nada."}
+              </p>
             </div>
           )}
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
@@ -4913,7 +5027,7 @@ function LoadingScreen() {
 
 const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
 
-function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
+function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeEditar = true }) {
   const [texto, setTexto] = useState("");
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -4939,6 +5053,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
   }
 
   function enviarResposta() {
+    if (!podeEditar) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
     setState((prev) => ({
@@ -5048,18 +5163,20 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange }) {
             );
           })}
         </div>
-        <div style={{ padding: 12, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
-          <TextInput
-            value={texto}
-            onChange={(e) => setTexto(e.target.value)}
-            placeholder="Responder..."
-            onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-            style={{ flex: 1, minWidth: 0 }}
-          />
-          <Button variant="primary" icon={Send} onClick={enviarResposta}>
-            Enviar
-          </Button>
-        </div>
+        {podeEditar && (
+          <div style={{ padding: 12, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+            <TextInput
+              value={texto}
+              onChange={(e) => setTexto(e.target.value)}
+              placeholder="Responder..."
+              onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+              style={{ flex: 1, minWidth: 0 }}
+            />
+            <Button variant="primary" icon={Send} onClick={enviarResposta}>
+              Enviar
+            </Button>
+          </div>
+        )}
       </div>
     );
   }
@@ -5141,7 +5258,7 @@ function App() {
   const saveTimer = useRef(null);
 
   function aplicarLoginAdmin(data, senhaUsada) {
-    setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas" });
+    setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas", editar: !!data.editar });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
     setHistorico(data.historico || []);
@@ -5370,6 +5487,7 @@ function App() {
 
   const isMaster = isAcessoTotal(auth.permissoes);
   const allowed = new Set(getAllowedSections(auth.permissoes));
+  const podeEditar = isMaster || !!auth.editar;
 
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
@@ -5393,6 +5511,7 @@ function App() {
           mobileOpen={mobileMenuOpen}
           nome={auth.nome}
           permissoes={auth.permissoes}
+          podeEditar={podeEditar}
           onLogout={logout}
           categorias={state.categorias}
           unidadeAtiva={unidadeAtiva}
@@ -5422,19 +5541,20 @@ function App() {
               onConsumePending={() => setPendingPatrimonio(null)}
               pendingCategoriaFiltro={pendingCategoriaFiltro}
               onConsumeCategoriaFiltro={() => setPendingCategoriaFiltro(null)}
+              podeEditar={podeEditar}
             />
           )}
-          {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
-          {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
-          {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
+          {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
+          {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
+          {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
-          {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} unidadeAtiva={unidadeAtiva} />}
-          {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} />}
+          {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
+          {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} podeEditar={podeEditar} />}
           {view === "usuarios" && isMaster && <Usuarios solicitantes={usuarios} secret={secret} onSolicitantesChanged={setUsuarios} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
         {view !== "chamados" && allowed.has("chamados") && (
-          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} />
+          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} podeEditar={podeEditar} />
         )}
       </div>
     </div>
