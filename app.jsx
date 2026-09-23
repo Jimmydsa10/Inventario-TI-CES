@@ -951,7 +951,16 @@ function iniciais(nome) {
   return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
 }
 
-function Avatar({ nome, size = 30 }) {
+function Avatar({ nome, foto, size = 30 }) {
+  if (foto) {
+    return (
+      <img
+        src={foto}
+        alt={nome || ""}
+        style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+      />
+    );
+  }
   return (
     <div
       style={{
@@ -4117,7 +4126,7 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
       const data = await backendGetUser(nome.trim(), senha);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
       if (data.isUser) {
-        onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado);
+        onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado, data.foto || "");
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -4193,7 +4202,22 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
   );
 }
 
-function TopBarSolicitante({ nome, onLogout }) {
+function TopBarSolicitante({ nome, foto, onFotoChange, onLogout }) {
+  const fotoInputRef = useRef(null);
+  const [fotoBusy, setFotoBusy] = useState(false);
+
+  async function handleFoto(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setFotoBusy(true);
+    try {
+      const dataUrl = await resizeImageParaBase64(file, 240, 0.7);
+      await onFotoChange(dataUrl);
+    } catch (err) {}
+    setFotoBusy(false);
+    if (fotoInputRef.current) fotoInputRef.current.value = "";
+  }
+
   return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: COLORS.ink, color: "#fff" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -4203,7 +4227,34 @@ function TopBarSolicitante({ nome, onLogout }) {
           <div style={{ fontSize: 11.5, color: "#9AA6B8" }}>Olá, {nome}</div>
         </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
+        <button
+          onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
+          disabled={fotoBusy}
+          title="Trocar minha foto"
+          aria-label="Trocar minha foto"
+          style={{ position: "relative", background: "none", border: "none", padding: 0, cursor: "pointer", lineHeight: 0, opacity: fotoBusy ? 0.6 : 1 }}
+        >
+          <Avatar nome={nome} foto={foto} size={30} />
+          <span
+            style={{
+              position: "absolute",
+              bottom: -2,
+              right: -2,
+              width: 14,
+              height: 14,
+              borderRadius: "50%",
+              background: COLORS.accent,
+              border: `1.5px solid ${COLORS.ink}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Pencil size={8} color="#fff" />
+          </span>
+        </button>
         <button
           onClick={onLogout}
           style={{ background: "none", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 6, color: "#fff", fontSize: 12, padding: "6px 10px", cursor: "pointer" }}
@@ -4219,7 +4270,7 @@ function novoChamadoSolicitanteForm() {
   return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
-function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
+function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange }) {
   const areas = state.areas || [];
   const categorias = [...new Set((state.categorias || []).map((c) => c.nome))];
   const chamados = state.chamados || [];
@@ -4306,7 +4357,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
 
   return (
     <div style={{ minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      <TopBarSolicitante nome={userAuth.nome} onLogout={onLogout} />
+      <TopBarSolicitante nome={userAuth.nome} foto={userAuth.foto} onFotoChange={onFotoChange} onLogout={onLogout} />
       <div style={{ padding: "14px 24px 16px", maxWidth: 1160, margin: "0 auto" }}>
         <div
           className="welcome-banner-solicitante"
@@ -4494,7 +4545,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                   <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
                     {selecionado.foto && (
                       <div style={{ display: "flex", gap: 10 }}>
-                        <Avatar nome={userAuth.nome} />
+                        <Avatar nome={userAuth.nome} foto={userAuth.foto} />
                         <a href={selecionado.foto} target="_blank" rel="noreferrer">
                           <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 90, height: 90, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
                         </a>
@@ -4507,7 +4558,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                       const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
                       return (
                         <div key={i} style={{ display: "flex", gap: 10 }}>
-                          <Avatar nome={nomeAutor} />
+                          <Avatar nome={nomeAutor} foto={m.autor === "ti" ? undefined : userAuth.foto} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ padding: "9px 13px", borderRadius: 10, borderLeft: `3px solid ${borda}`, fontSize: 13.5, background: bg, color: COLORS.ink }}>
                               <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
@@ -4910,7 +4961,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
     if (dupNome) return setError("Já existe um usuário com esse nome.");
 
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
-    const novoUsuario = { nome, senha: senhaFinal, tipo: f.autorizado ? "autorizado" : "solicitante" };
+    const novoUsuario = { nome, senha: senhaFinal, tipo: f.autorizado ? "autorizado" : "solicitante", foto: modal.original ? modal.original.foto || "" : "" };
     let novaLista;
     if (modal.mode === "new") {
       novaLista = [...lista, novoUsuario];
@@ -5326,18 +5377,24 @@ function App() {
     }
   }
 
-  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado) {
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado, foto) {
     setAuth(
       isAutorizado
         ? { isAdmin: false, isAutorizado: true, nome: userCreds.nome, permissoes: AUTORIZADO_PERMISSOES, editar: false }
         : { isAdmin: false }
     );
-    setUserAuth(userCreds);
+    setUserAuth({ ...userCreds, foto: foto || "" });
     setState(estadoUsuario);
     setView("dashboard");
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
     } catch (e) {}
+  }
+
+  async function atualizarMinhaFoto(novaFoto) {
+    const res = await backendPost("atualizarFotoUsuario", { userNome: userAuth.nome, userSenha: userAuth.senha, foto: novaFoto });
+    if (!res.ok) throw new Error(res.error || "Não foi possível salvar a foto");
+    setUserAuth((prev) => ({ ...prev, foto: novaFoto }));
   }
 
   function logoutUsuario() {
@@ -5380,7 +5437,7 @@ function App() {
         const data = await backendGetUser(savedUser.nome, savedUser.senha || "");
         if (!data.ok) throw new Error(data.error || "Erro desconhecido");
         if (data.isUser) {
-          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state, !!data.isAutorizado);
+          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state, !!data.isAutorizado, data.foto || "");
           setLoaded(true);
           return;
         }
@@ -5509,7 +5566,7 @@ function App() {
     return (
       <>
         <style>{RESPONSIVE_CSS}</style>
-        <ChamadosSolicitante state={state} setState={setState} userAuth={userAuth} onLogout={logoutUsuario} />
+        <ChamadosSolicitante state={state} setState={setState} userAuth={userAuth} onLogout={logoutUsuario} onFotoChange={atualizarMinhaFoto} />
         {adminModal}
       </>
     );

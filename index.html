@@ -5252,8 +5252,22 @@ function iniciais(nome) {
 }
 function Avatar({
   nome,
+  foto,
   size = 30
 }) {
+  if (foto) {
+    return /*#__PURE__*/React.createElement("img", {
+      src: foto,
+      alt: nome || "",
+      style: {
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        objectFit: "cover",
+        flexShrink: 0
+      }
+    });
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       width: size,
@@ -10255,7 +10269,7 @@ function LoginPublico({
         onLoggedIn({
           nome: data.nome,
           senha
-        }, data.state, !!data.isAutorizado);
+        }, data.state, !!data.isAutorizado, data.foto || "");
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -10388,8 +10402,23 @@ function LoginPublico({
 }
 function TopBarSolicitante({
   nome,
+  foto,
+  onFotoChange,
   onLogout
 }) {
+  const fotoInputRef = useRef(null);
+  const [fotoBusy, setFotoBusy] = useState(false);
+  async function handleFoto(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setFotoBusy(true);
+    try {
+      const dataUrl = await resizeImageParaBase64(file, 240, 0.7);
+      await onFotoChange(dataUrl);
+    } catch (err) {}
+    setFotoBusy(false);
+    if (fotoInputRef.current) fotoInputRef.current.value = "";
+  }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -10429,9 +10458,52 @@ function TopBarSolicitante({
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 8
+      gap: 12
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, /*#__PURE__*/React.createElement("input", {
+    ref: fotoInputRef,
+    type: "file",
+    accept: "image/*",
+    onChange: handleFoto,
+    style: {
+      display: "none"
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: () => fotoInputRef.current && fotoInputRef.current.click(),
+    disabled: fotoBusy,
+    title: "Trocar minha foto",
+    "aria-label": "Trocar minha foto",
+    style: {
+      position: "relative",
+      background: "none",
+      border: "none",
+      padding: 0,
+      cursor: "pointer",
+      lineHeight: 0,
+      opacity: fotoBusy ? 0.6 : 1
+    }
+  }, /*#__PURE__*/React.createElement(Avatar, {
+    nome: nome,
+    foto: foto,
+    size: 30
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "absolute",
+      bottom: -2,
+      right: -2,
+      width: 14,
+      height: 14,
+      borderRadius: "50%",
+      background: COLORS.accent,
+      border: `1.5px solid ${COLORS.ink}`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement(Pencil, {
+    size: 8,
+    color: "#fff"
+  }))), /*#__PURE__*/React.createElement("button", {
     onClick: onLogout,
     style: {
       background: "none",
@@ -10458,7 +10530,8 @@ function ChamadosSolicitante({
   state,
   setState,
   userAuth,
-  onLogout
+  onLogout,
+  onFotoChange
 }) {
   const areas = state.areas || [];
   const categorias = [...new Set((state.categorias || []).map(c => c.nome))];
@@ -10572,6 +10645,8 @@ function ChamadosSolicitante({
     }
   }, /*#__PURE__*/React.createElement(TopBarSolicitante, {
     nome: userAuth.nome,
+    foto: userAuth.foto,
+    onFotoChange: onFotoChange,
     onLogout: onLogout
   }), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -10957,7 +11032,8 @@ function ChamadosSolicitante({
       gap: 10
     }
   }, /*#__PURE__*/React.createElement(Avatar, {
-    nome: userAuth.nome
+    nome: userAuth.nome,
+    foto: userAuth.foto
   }), /*#__PURE__*/React.createElement("a", {
     href: selecionado.foto,
     target: "_blank",
@@ -10984,7 +11060,8 @@ function ChamadosSolicitante({
         gap: 10
       }
     }, /*#__PURE__*/React.createElement(Avatar, {
-      nome: nomeAutor
+      nome: nomeAutor,
+      foto: m.autor === "ti" ? undefined : userAuth.foto
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
@@ -11603,7 +11680,8 @@ function Usuarios({
     const novoUsuario = {
       nome,
       senha: senhaFinal,
-      tipo: f.autorizado ? "autorizado" : "solicitante"
+      tipo: f.autorizado ? "autorizado" : "solicitante",
+      foto: modal.original ? modal.original.foto || "" : ""
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -12311,7 +12389,7 @@ function App() {
       setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
     }
   }
-  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado) {
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado, foto) {
     setAuth(isAutorizado ? {
       isAdmin: false,
       isAutorizado: true,
@@ -12321,12 +12399,27 @@ function App() {
     } : {
       isAdmin: false
     });
-    setUserAuth(userCreds);
+    setUserAuth({
+      ...userCreds,
+      foto: foto || ""
+    });
     setState(estadoUsuario);
     setView("dashboard");
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
     } catch (e) {}
+  }
+  async function atualizarMinhaFoto(novaFoto) {
+    const res = await backendPost("atualizarFotoUsuario", {
+      userNome: userAuth.nome,
+      userSenha: userAuth.senha,
+      foto: novaFoto
+    });
+    if (!res.ok) throw new Error(res.error || "Não foi possível salvar a foto");
+    setUserAuth(prev => ({
+      ...prev,
+      foto: novaFoto
+    }));
   }
   function logoutUsuario() {
     try {
@@ -12368,7 +12461,7 @@ function App() {
           aplicarLoginUsuario({
             nome: data.nome,
             senha: savedUser.senha
-          }, data.state, !!data.isAutorizado);
+          }, data.state, !!data.isAutorizado, data.foto || "");
           setLoaded(true);
           return;
         }
@@ -12497,7 +12590,8 @@ function App() {
       state: state,
       setState: setState,
       userAuth: userAuth,
-      onLogout: logoutUsuario
+      onLogout: logoutUsuario,
+      onFotoChange: atualizarMinhaFoto
     }), adminModal);
   }
   const NAV_TITLES = {

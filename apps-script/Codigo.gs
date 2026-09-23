@@ -63,11 +63,16 @@ function saveAdmins(list) {
 // 'autorizado' = só visualização (Painel, Categorias, Salas e Inventário),
 // sem poder abrir chamado, responder ou editar nada — ver authenticateSolicitante
 // e o ramo userNome de doGet.
+// Coluna "foto" (4ª): data URL (base64) da foto de perfil, redimensionada
+// pequena no cliente antes de mandar. Em branco = usa as iniciais do nome
+// (ver Avatar no frontend). Só o próprio usuário altera a própria foto, pela
+// action 'atualizarFotoUsuario' — nunca escrita pelo salvarSolicitantes do
+// master, que preserva o que já estava (ver Usuarios no frontend).
 function getSolicitantes() {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto']);
   const data = sh.getDataRange().getValues();
   return data.slice(1).filter(function (r) { return r[0]; }).map(function (r) {
-    return { nome: String(r[0] || ''), senha: String(r[1] || ''), tipo: String(r[2] || 'solicitante') || 'solicitante' };
+    return { nome: String(r[0] || ''), senha: String(r[1] || ''), tipo: String(r[2] || 'solicitante') || 'solicitante', foto: String(r[3] || '') };
   });
 }
 
@@ -82,15 +87,29 @@ function findSolicitante(nome) {
 }
 
 function saveSolicitantes(list) {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 3).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 4).clearContent();
   }
-  const rows = (list || []).map(function (s) { return [s.nome, s.senha, s.tipo === 'autorizado' ? 'autorizado' : 'solicitante']; });
+  const rows = (list || []).map(function (s) { return [s.nome, s.senha, s.tipo === 'autorizado' ? 'autorizado' : 'solicitante', s.foto || '']; });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 3).setValues(rows);
+    sh.getRange(2, 1, rows.length, 4).setValues(rows);
   }
+}
+
+// Atualiza só a foto de UM solicitante (o autenticado), preservando o resto
+// da linha dele. Separado de saveSolicitantes (que é do master, pra lista
+// inteira) porque aqui quem chama só pode mudar a própria foto — nunca a de
+// outra pessoa.
+function atualizarFotoSolicitante(nome, novaFoto) {
+  const lista = getSolicitantes();
+  const alvo = String(nome || '').trim().toLowerCase();
+  const atualizada = lista.map(function (s) {
+    if (s.nome.trim().toLowerCase() !== alvo) return s;
+    return { nome: s.nome, senha: s.senha, tipo: s.tipo, foto: novaFoto || '' };
+  });
+  saveSolicitantes(atualizada);
 }
 
 // Autentica só nome+senha, sem olhar o tipo — usado no LOGIN (ramo userNome
@@ -365,6 +384,7 @@ function doGet(e) {
         isUser: true,
         isAutorizado: true,
         nome: usuario.nome,
+        foto: usuario.foto || '',
         state: {
           categorias: state.categorias || [],
           areas: state.areas || [],
@@ -384,6 +404,7 @@ function doGet(e) {
         isAdmin: false,
         isUser: true,
         nome: usuario.nome,
+        foto: usuario.foto || '',
         state: { areas: state.areas || [], categorias: state.categorias || [], chamados: meusChamados }
       };
     } else {
@@ -429,6 +450,20 @@ function doPost(e) {
 
   if (isMaster && body.action === 'salvarSolicitantes') {
     saveSolicitantes(body.solicitantes || []);
+    return jsonOut({ ok: true });
+  }
+
+  // Autoatendimento: o próprio usuário (solicitante ou autorizado) troca a
+  // própria foto de perfil, sem precisar de admin. Autentica só com
+  // nome+senha (não authenticateSolicitante, que bloqueia autorizado — aqui
+  // ambos os tipos podem mudar a própria foto) e só mexe na foto, nunca em
+  // nome/senha/tipo de ninguém.
+  if (body.action === 'atualizarFotoUsuario') {
+    const usuario = autenticarUsuarioLogin(body.userNome, body.userSenha);
+    if (!usuario) {
+      return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
+    atualizarFotoSolicitante(usuario.nome, body.foto);
     return jsonOut({ ok: true });
   }
 
