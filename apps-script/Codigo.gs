@@ -367,7 +367,14 @@ function doGet(e) {
       permissoes: admin.permissoes,
       editar: !!admin.editar,
       state: state,
-      admins: isMaster ? admins.map(function (a) { return { nome: a.nome, permissoes: a.permissoes, editar: !!a.editar }; }) : [],
+      // Inclui a senha (como já fazemos pra solicitantes) porque o frontend
+      // (Administradores.save()) usa modal.original.senha pra manter a senha
+      // de quem já existe quando o campo "nova senha" fica em branco. Sem
+      // isso, editar qualquer admin (ex: só mudar uma permissão) sem
+      // redigitar a senha mandava senha undefined pro salvarAdmins e travava
+      // o login desse admin — bug real, encontrado numa validação de
+      // segurança antes de liberar pra uso real.
+      admins: isMaster ? admins.map(function (a) { return { nome: a.nome, senha: a.senha, permissoes: a.permissoes, editar: !!a.editar }; }) : [],
       solicitantes: isMaster ? getSolicitantes() : [],
       historico: getHistoricoMensal()
     };
