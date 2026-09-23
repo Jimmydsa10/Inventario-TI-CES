@@ -4336,7 +4336,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
           </Button>
         </div>
 
-        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 520 }}>
+        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 460 }}>
           <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
               {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
@@ -4369,9 +4369,9 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
           <Panel style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {novoMode ? (
               <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
-                <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
-                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                <div style={{ padding: "10px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
+                <div style={{ padding: 14, flex: 1, overflow: "auto" }}>
+                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                     <Field label="Tipo de chamado">
                       <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
                         {TIPO_CHAMADO_OPTIONS.map((t) => (
@@ -4391,7 +4391,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                       </Select>
                     </Field>
                   </div>
-                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                         <option value="">Nenhuma</option>
@@ -4421,7 +4421,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                     <textarea
                       value={form.texto}
                       onChange={(e) => setForm({ ...form, texto: e.target.value })}
-                      rows={4}
+                      rows={3}
                       placeholder={
                         form.tipo === "Problema técnico"
                           ? "Ex: O projetor da sala 108 não liga mais..."
@@ -4433,11 +4433,11 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                     />
                   </Field>
                   <div>
-                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>Foto (opcional)</div>
+                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 4 }}>Foto (opcional)</div>
                     <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
                     <div style={{ display: "flex", gap: 8 }}>
                       {form.foto && (
-                        <div style={{ width: 64, height: 64, borderRadius: 8, overflow: "hidden", border: `1px solid ${COLORS.line}`, position: "relative" }}>
+                        <div style={{ width: 52, height: 52, borderRadius: 8, overflow: "hidden", border: `1px solid ${COLORS.line}`, position: "relative" }}>
                           <img src={form.foto} alt="Foto anexada" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                           <button
                             onClick={() => setForm((prev) => ({ ...prev, foto: "" }))}
@@ -4452,8 +4452,8 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                         onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
                         disabled={fotoBusy}
                         style={{
-                          width: 64,
-                          height: 64,
+                          width: 52,
+                          height: 52,
                           borderRadius: 8,
                           border: `1px dashed ${COLORS.lineStrong}`,
                           background: "#fff",
@@ -4462,19 +4462,19 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          gap: 4,
+                          gap: 3,
                           cursor: "pointer",
-                          fontSize: 10,
+                          fontSize: 9.5,
                         }}
                       >
-                        <Plus size={16} />
+                        <Plus size={14} />
                         {fotoBusy ? "..." : "Adicionar"}
                       </button>
                     </div>
                   </div>
                   {erro && <div style={{ color: COLORS.danger, fontSize: 13 }}>{erro}</div>}
                 </div>
-                <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
+                <div style={{ padding: 10, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
                   {chamados.length > 0 && (
                     <Button variant="ghost" onClick={() => setNovoMode(false)}>
                       Cancelar

@@ -10635,7 +10635,7 @@ function ChamadosSolicitante({
       display: "grid",
       gridTemplateColumns: "260px 1fr",
       gap: 16,
-      height: 520
+      height: 460
     }
   }, /*#__PURE__*/React.createElement(Panel, {
     style: {
@@ -10718,7 +10718,7 @@ function ChamadosSolicitante({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: "14px 18px",
+      padding: "10px 18px",
       borderBottom: `1px solid ${COLORS.line}`,
       fontSize: 14,
       fontWeight: 700,
@@ -10726,7 +10726,7 @@ function ChamadosSolicitante({
     }
   }, "Abrir novo chamado"), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: 18,
+      padding: 14,
       flex: 1,
       overflow: "auto"
     }
@@ -10736,7 +10736,7 @@ function ChamadosSolicitante({
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 10,
-      marginBottom: 14
+      marginBottom: 10
     }
   }, /*#__PURE__*/React.createElement(Field, {
     label: "Tipo de chamado"
@@ -10766,7 +10766,7 @@ function ChamadosSolicitante({
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 10,
-      marginBottom: 14
+      marginBottom: 10
     }
   }, /*#__PURE__*/React.createElement(Field, {
     label: "Sala relacionada (opcional)"
@@ -10802,7 +10802,7 @@ function ChamadosSolicitante({
       ...form,
       texto: e.target.value
     }),
-    rows: 4,
+    rows: 3,
     placeholder: form.tipo === "Problema técnico" ? "Ex: O projetor da sala 108 não liga mais..." : form.tipo === "Solicitar" ? "Ex: Precisamos de mais 2 mouses pra sala 104..." : "Ex: Seria bom ter um jeito de...",
     style: {
       ...inputStyle,
@@ -10813,7 +10813,7 @@ function ChamadosSolicitante({
     style: {
       fontSize: 13,
       color: COLORS.inkSoft,
-      marginBottom: 5
+      marginBottom: 4
     }
   }, "Foto (opcional)"), /*#__PURE__*/React.createElement("input", {
     ref: fotoInputRef,
@@ -10830,8 +10830,8 @@ function ChamadosSolicitante({
     }
   }, form.foto && /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 64,
-      height: 64,
+      width: 52,
+      height: 52,
       borderRadius: 8,
       overflow: "hidden",
       border: `1px solid ${COLORS.line}`,
@@ -10868,8 +10868,8 @@ function ChamadosSolicitante({
     onClick: () => fotoInputRef.current && fotoInputRef.current.click(),
     disabled: fotoBusy,
     style: {
-      width: 64,
-      height: 64,
+      width: 52,
+      height: 52,
       borderRadius: 8,
       border: `1px dashed ${COLORS.lineStrong}`,
       background: "#fff",
@@ -10878,12 +10878,12 @@ function ChamadosSolicitante({
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
-      gap: 4,
+      gap: 3,
       cursor: "pointer",
-      fontSize: 10
+      fontSize: 9.5
     }
   }, /*#__PURE__*/React.createElement(Plus, {
-    size: 16
+    size: 14
   }), fotoBusy ? "..." : "Adicionar"))), erro && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
@@ -10891,7 +10891,7 @@ function ChamadosSolicitante({
     }
   }, erro)), /*#__PURE__*/React.createElement("div", {
     style: {
-      padding: 14,
+      padding: 10,
       borderTop: `1px solid ${COLORS.line}`,
       display: "flex",
       justifyContent: "flex-end",
