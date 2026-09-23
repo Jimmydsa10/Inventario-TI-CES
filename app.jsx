@@ -4309,25 +4309,25 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
   const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+    <div style={{ minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <TopBarSolicitante nome={userAuth.nome} onLogout={onLogout} />
-      <div style={{ padding: 24, maxWidth: 1160, margin: "0 auto" }}>
+      <div style={{ padding: "14px 24px 16px", maxWidth: 1160, margin: "0 auto" }}>
         <div
           className="welcome-banner-solicitante"
           style={{
             background: `linear-gradient(120deg, ${COLORS.ink} 0%, #223454 100%)`,
             borderRadius: 12,
-            padding: "22px 26px",
+            padding: "14px 22px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             gap: 16,
-            marginBottom: 20,
+            marginBottom: 14,
           }}
         >
           <div>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 4 }}>Bem-vindo(a) de volta, {userAuth.nome}</div>
-            <div style={{ fontSize: 12.5, color: "#B7C0CF" }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 2 }}>Bem-vindo(a) de volta, {userAuth.nome}</div>
+            <div style={{ fontSize: 12, color: "#B7C0CF" }}>
               Resumo dos seus chamados — <span style={{ color: "#E7C79A", fontWeight: 600 }}>{dataFormatada}, {horaFormatada}</span>
             </div>
           </div>
@@ -4336,7 +4336,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
           </Button>
         </div>
 
-        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 520 }}>
+        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 415 }}>
           <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
               {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
