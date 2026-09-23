@@ -11007,7 +11007,11 @@ function ChamadosSolicitante({
       color: COLORS.inkSoft,
       fontSize: 14
     }
-  }, "Selecione um chamado \xE0 esquerda ou abra um novo.")) : /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "texto-selecione-desktop"
+  }, "Selecione um chamado \xE0 esquerda ou abra um novo."), /*#__PURE__*/React.createElement("span", {
+    className: "texto-selecione-mobile"
+  }, "Selecione um chamado acima ou abra um novo."))) : /*#__PURE__*/React.createElement("div", {
     className: "chamado-detail",
     style: {
       display: "flex",
@@ -11201,8 +11205,11 @@ function useIsMobile() {
 }
 const RESPONSIVE_CSS = `
 .app-topbar-mobile { display: none; }
+.texto-selecione-mobile { display: none; }
 @media (max-width: 860px) {
   .app-topbar-mobile { display: flex !important; }
+  .texto-selecione-desktop { display: none !important; }
+  .texto-selecione-mobile { display: inline !important; }
   .app-sidebar {
     position: fixed !important;
     top: 0; left: 0; bottom: 0;
