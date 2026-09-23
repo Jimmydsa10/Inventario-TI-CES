@@ -4725,7 +4725,6 @@ function buildSeedState() {
     chamados: []
   };
 }
-const PRIORIDADE_OPTIONS = ["Baixa", "Média", "Alta"];
 const CHAMADO_STATUS_OPTIONS = ["Aberto", "Em andamento", "Resolvido"];
 const CHAMADO_STATUS_COLORS = {
   Aberto: "#B23A32",
@@ -9365,21 +9364,19 @@ function Importar({
 
 // ---------- Chamados (chat de abertura de chamados) ----------
 
-const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitação de compra"];
+const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitar"];
 function TipoChamadoBadge({
   tipo
 }) {
   if (!tipo || tipo === "Problema técnico") return null;
-  const cor = tipo === "Solicitação de compra" ? "#2F6F5E" : COLORS.accent;
-  const fundo = tipo === "Solicitação de compra" ? "#E3EEE9" : COLORS.accentSoft;
   return /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10.5,
       fontWeight: 600,
       padding: "2px 8px",
       borderRadius: 999,
-      color: cor,
-      background: fundo,
+      color: COLORS.accent,
+      background: COLORS.accentSoft,
       whiteSpace: "nowrap"
     }
   }, tipo);
@@ -9390,7 +9387,6 @@ function novoChamadoForm(unidadeAtiva) {
     unidade: unidadeAtiva || "colegio",
     sala: "",
     categoria: "",
-    prioridade: "Média",
     texto: "",
     foto: ""
   };
@@ -9447,7 +9443,6 @@ function Chamados({
       unidade: form.unidade || unidadeAtiva,
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -9718,10 +9713,10 @@ function Chamados({
     key: u.id,
     value: u.id
   }, u.nome))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid-3",
+    className: "grid-2",
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr",
       gap: 10,
       marginBottom: 14
     }
@@ -9751,18 +9746,7 @@ function Chamados({
   }, "Nenhuma"), [...new Set(state.categorias.map(c => c.nome))].map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c)))), /*#__PURE__*/React.createElement(Field, {
-    label: "Prioridade"
-  }, /*#__PURE__*/React.createElement(Select, {
-    value: form.prioridade,
-    onChange: e => setForm({
-      ...form,
-      prioridade: e.target.value
-    })
-  }, PRIORIDADE_OPTIONS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))))), /*#__PURE__*/React.createElement(Field, {
+  }, c))))), /*#__PURE__*/React.createElement(Field, {
     label: "Descreva"
   }, /*#__PURE__*/React.createElement("textarea", {
     value: form.texto,
@@ -10034,7 +10018,7 @@ function Chamados({
       letterSpacing: 0.3,
       marginBottom: 12
     }
-  }, "Propriedades"), [["Solicitante", selecionado.solicitante || "—"], ["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"], ["Prioridade", selecionado.prioridade]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
+  }, "Propriedades"), [["Solicitante", selecionado.solicitante || "—"], ["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
     key: label,
     style: {
       marginBottom: 14
@@ -10199,34 +10183,19 @@ function ChamadosKanban({
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
-      color: COLORS.inkSoft,
-      marginBottom: 6
+      color: COLORS.inkSoft
     }
-  }, c.solicitante ? c.solicitante + " · " : "", c.sala || "Sem sala"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center"
-    }
-  }, c.foto ? /*#__PURE__*/React.createElement("img", {
+  }, c.solicitante ? c.solicitante + " · " : "", c.sala || "Sem sala"), c.foto && /*#__PURE__*/React.createElement("img", {
     src: c.foto,
     alt: "",
     style: {
       width: 20,
       height: 20,
       borderRadius: 4,
-      objectFit: "cover"
+      objectFit: "cover",
+      marginTop: 6
     }
-  }) : /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5,
-      fontWeight: 600,
-      padding: "2px 8px",
-      borderRadius: 999,
-      color: c.prioridade === "Alta" ? COLORS.danger : c.prioridade === "Média" ? COLORS.accent : COLORS.inkSoft,
-      background: c.prioridade === "Alta" ? COLORS.dangerSoft : c.prioridade === "Média" ? COLORS.accentSoft : "#EEEEEE"
-    }
-  }, c.prioridade))))))));
+  })))))));
 }
 function ErrorScreen({
   msg,
@@ -10481,7 +10450,6 @@ function novoChamadoSolicitanteForm() {
     unidade: "colegio",
     sala: "",
     categoria: "",
-    prioridade: "Média",
     texto: "",
     foto: ""
   };
@@ -10537,7 +10505,6 @@ function ChamadosSolicitante({
       unidade: form.unidade || "colegio",
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -10597,6 +10564,17 @@ function ChamadosSolicitante({
     }
     setBusy(false);
   }
+  const agora = new Date();
+  const dataFormatada = agora.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+  const horaFormatada = agora.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: 640,
@@ -10609,29 +10587,47 @@ function ChamadosSolicitante({
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 24,
-      maxWidth: 900,
+      maxWidth: 1160,
       margin: "0 auto"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "welcome-banner-solicitante",
     style: {
+      background: `linear-gradient(120deg, ${COLORS.ink} 0%, #223454 100%)`,
+      borderRadius: 12,
+      padding: "22px 26px",
       display: "flex",
-      justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 16
+      justifyContent: "space-between",
+      gap: 16,
+      marginBottom: 20
     }
-  }, /*#__PURE__*/React.createElement("h2", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      margin: 0,
       fontSize: 20,
       fontWeight: 700,
-      color: COLORS.ink
+      color: "#fff",
+      marginBottom: 4
     }
-  }, "Chamados"), /*#__PURE__*/React.createElement(Button, {
-    variant: "primary",
+  }, "Bem-vindo(a) de volta, ", userAuth.nome), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: "#B7C0CF"
+    }
+  }, "Resumo dos seus chamados \u2014 ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#E7C79A",
+      fontWeight: 600
+    }
+  }, dataFormatada, ", ", horaFormatada))), /*#__PURE__*/React.createElement(Button, {
+    variant: "accent",
     icon: Plus,
     onClick: () => {
       setNovoMode(true);
       setSelectedId(null);
+    },
+    style: {
+      flexShrink: 0
     }
   }, "Novo chamado")), /*#__PURE__*/React.createElement("div", {
     className: "grid-chat",
@@ -10765,10 +10761,10 @@ function ChamadosSolicitante({
     key: u.id,
     value: u.id
   }, u.nome))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid-3",
+    className: "grid-2",
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr",
       gap: 10,
       marginBottom: 14
     }
@@ -10798,19 +10794,8 @@ function ChamadosSolicitante({
   }, "Nenhuma"), categorias.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c)))), /*#__PURE__*/React.createElement(Field, {
-    label: "Prioridade"
-  }, /*#__PURE__*/React.createElement(Select, {
-    value: form.prioridade,
-    onChange: e => setForm({
-      ...form,
-      prioridade: e.target.value
-    })
-  }, PRIORIDADE_OPTIONS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))))), /*#__PURE__*/React.createElement(Field, {
-    label: form.tipo === "Problema técnico" ? "Descreva o problema" : "Descreva sua sugestão"
+  }, c))))), /*#__PURE__*/React.createElement(Field, {
+    label: form.tipo === "Problema técnico" ? "Descreva o problema" : form.tipo === "Solicitar" ? "Descreva sua solicitação" : "Descreva sua sugestão"
   }, /*#__PURE__*/React.createElement("textarea", {
     value: form.texto,
     onChange: e => setForm({
@@ -10818,7 +10803,7 @@ function ChamadosSolicitante({
       texto: e.target.value
     }),
     rows: 4,
-    placeholder: form.tipo === "Problema técnico" ? "Ex: O projetor da sala 108 não liga mais..." : form.tipo === "Solicitação de compra" ? "Ex: Precisamos de mais 2 mouses pra sala 104..." : "Ex: Seria bom ter um jeito de...",
+    placeholder: form.tipo === "Problema técnico" ? "Ex: O projetor da sala 108 não liga mais..." : form.tipo === "Solicitar" ? "Ex: Precisamos de mais 2 mouses pra sala 104..." : "Ex: Seria bom ter um jeito de...",
     style: {
       ...inputStyle,
       resize: "vertical",
@@ -11068,7 +11053,7 @@ function ChamadosSolicitante({
       letterSpacing: 0.3,
       marginBottom: 12
     }
-  }, "Propriedades"), [["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"], ["Prioridade", selecionado.prioridade], ["Status", selecionado.status]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
+  }, "Propriedades"), [["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"], ["Status", selecionado.status]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
     key: label,
     style: {
       marginBottom: 14

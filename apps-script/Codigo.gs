@@ -239,8 +239,7 @@ function notificarNovoChamado(chamado) {
       body:
         'Solicitante: ' + (chamado.criadoPor || chamado.solicitante || '') + '\n' +
         'Sala: ' + (chamado.sala || '-') + '\n' +
-        'Categoria: ' + (chamado.categoria || '-') + '\n' +
-        'Prioridade: ' + (chamado.prioridade || '-') + '\n\n' +
+        'Categoria: ' + (chamado.categoria || '-') + '\n\n' +
         primeiraMsg
     });
   } catch (err) {

@@ -702,7 +702,6 @@ function buildSeedState() {
   };
 }
 
-const PRIORIDADE_OPTIONS = ["Baixa", "Média", "Alta"];
 const CHAMADO_STATUS_OPTIONS = ["Aberto", "Em andamento", "Resolvido"];
 const CHAMADO_STATUS_COLORS = {
   Aberto: "#B23A32",
@@ -3570,21 +3569,19 @@ function Importar({ state, setState, unidadeAtiva, secret, podeEditar = true }) 
 
 // ---------- Chamados (chat de abertura de chamados) ----------
 
-const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitação de compra"];
+const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitar"];
 
 function TipoChamadoBadge({ tipo }) {
   if (!tipo || tipo === "Problema técnico") return null;
-  const cor = tipo === "Solicitação de compra" ? "#2F6F5E" : COLORS.accent;
-  const fundo = tipo === "Solicitação de compra" ? "#E3EEE9" : COLORS.accentSoft;
   return (
-    <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: cor, background: fundo, whiteSpace: "nowrap" }}>
+    <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: COLORS.accent, background: COLORS.accentSoft, whiteSpace: "nowrap" }}>
       {tipo}
     </span>
   );
 }
 
 function novoChamadoForm(unidadeAtiva) {
-  return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+  return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
 function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
@@ -3636,7 +3633,6 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
       unidade: form.unidade || unidadeAtiva,
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -3821,7 +3817,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                     </Select>
                   </Field>
                 </div>
-                <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                   <Field label="Sala relacionada (opcional)">
                     <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                       <option value="">Nenhuma</option>
@@ -3838,15 +3834,6 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                       {[...new Set(state.categorias.map((c) => c.nome))].map((c) => (
                         <option key={c} value={c}>
                           {c}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                  <Field label="Prioridade">
-                    <Select value={form.prioridade} onChange={(e) => setForm({ ...form, prioridade: e.target.value })}>
-                      {PRIORIDADE_OPTIONS.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
                         </option>
                       ))}
                     </Select>
@@ -3994,7 +3981,6 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                   ["Solicitante", selecionado.solicitante || "—"],
                   ["Sala", selecionado.sala || "—"],
                   ["Categoria", selecionado.categoria || "—"],
-                  ["Prioridade", selecionado.prioridade],
                 ].map(([label, val]) => (
                   <div key={label} style={{ marginBottom: 14 }}>
                     <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
@@ -4078,24 +4064,8 @@ function ChamadosKanban({ chamados, onSelect }) {
                       <TipoChamadoBadge tipo={c.tipo} />
                     </div>
                   )}
-                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginBottom: 6 }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    {c.foto ? <img src={c.foto} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover" }} /> : <span />}
-                    <span
-                      style={{
-                        fontSize: 10.5,
-                        fontWeight: 600,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        color:
-                          c.prioridade === "Alta" ? COLORS.danger : c.prioridade === "Média" ? COLORS.accent : COLORS.inkSoft,
-                        background:
-                          c.prioridade === "Alta" ? COLORS.dangerSoft : c.prioridade === "Média" ? COLORS.accentSoft : "#EEEEEE",
-                      }}
-                    >
-                      {c.prioridade}
-                    </span>
-                  </div>
+                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</div>
+                  {c.foto && <img src={c.foto} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover", marginTop: 6 }} />}
                 </div>
               ))
             )}
@@ -4246,7 +4216,7 @@ function TopBarSolicitante({ nome, onLogout }) {
 }
 
 function novoChamadoSolicitanteForm() {
-  return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+  return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
 function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
@@ -4296,7 +4266,6 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
       unidade: form.unidade || "colegio",
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -4335,13 +4304,34 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
     setBusy(false);
   }
 
+  const agora = new Date();
+  const dataFormatada = agora.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <TopBarSolicitante nome={userAuth.nome} onLogout={onLogout} />
-      <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
-          <Button variant="primary" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }}>
+      <div style={{ padding: 24, maxWidth: 1160, margin: "0 auto" }}>
+        <div
+          className="welcome-banner-solicitante"
+          style={{
+            background: `linear-gradient(120deg, ${COLORS.ink} 0%, #223454 100%)`,
+            borderRadius: 12,
+            padding: "22px 26px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 4 }}>Bem-vindo(a) de volta, {userAuth.nome}</div>
+            <div style={{ fontSize: 12.5, color: "#B7C0CF" }}>
+              Resumo dos seus chamados — <span style={{ color: "#E7C79A", fontWeight: 600 }}>{dataFormatada}, {horaFormatada}</span>
+            </div>
+          </div>
+          <Button variant="accent" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }} style={{ flexShrink: 0 }}>
             Novo chamado
           </Button>
         </div>
@@ -4401,7 +4391,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                       </Select>
                     </Field>
                   </div>
-                  <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                         <option value="">Nenhuma</option>
@@ -4418,15 +4408,16 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                         ))}
                       </Select>
                     </Field>
-                    <Field label="Prioridade">
-                      <Select value={form.prioridade} onChange={(e) => setForm({ ...form, prioridade: e.target.value })}>
-                        {PRIORIDADE_OPTIONS.map((p) => (
-                          <option key={p} value={p}>{p}</option>
-                        ))}
-                      </Select>
-                    </Field>
                   </div>
-                  <Field label={form.tipo === "Problema técnico" ? "Descreva o problema" : "Descreva sua sugestão"}>
+                  <Field
+                    label={
+                      form.tipo === "Problema técnico"
+                        ? "Descreva o problema"
+                        : form.tipo === "Solicitar"
+                        ? "Descreva sua solicitação"
+                        : "Descreva sua sugestão"
+                    }
+                  >
                     <textarea
                       value={form.texto}
                       onChange={(e) => setForm({ ...form, texto: e.target.value })}
@@ -4434,7 +4425,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                       placeholder={
                         form.tipo === "Problema técnico"
                           ? "Ex: O projetor da sala 108 não liga mais..."
-                          : form.tipo === "Solicitação de compra"
+                          : form.tipo === "Solicitar"
                           ? "Ex: Precisamos de mais 2 mouses pra sala 104..."
                           : "Ex: Seria bom ter um jeito de..."
                       }
@@ -4552,7 +4543,6 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                   {[
                     ["Sala", selecionado.sala || "—"],
                     ["Categoria", selecionado.categoria || "—"],
-                    ["Prioridade", selecionado.prioridade],
                     ["Status", selecionado.status],
                   ].map(([label, val]) => (
                     <div key={label} style={{ marginBottom: 14 }}>
