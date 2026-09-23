@@ -1398,12 +1398,17 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
 
   const salasPorTipo = useMemo(() => {
     const map = {};
-    TIPO_AREA_OPTIONS.forEach((t) => (map[t] = 0));
     areasUnidade.forEach((a) => {
-      const t = TIPO_AREA_OPTIONS.includes(a.tipo) ? a.tipo : "Outro";
+      const t = (a.tipo && a.tipo.trim()) || "Outro";
       map[t] = (map[t] || 0) + 1;
     });
-    return TIPO_AREA_OPTIONS.map((t) => ({ tipo: t, value: map[t] }));
+    // Tipos personalizados (criados em Salas, além dos padrão) ganham cartão
+    // próprio em vez de caírem dentro de "Outro" — ordenados depois dos
+    // padrão, em ordem alfabética.
+    const personalizados = Object.keys(map)
+      .filter((t) => !TIPO_AREA_OPTIONS.includes(t))
+      .sort((a, b) => a.localeCompare(b, "pt-BR"));
+    return [...TIPO_AREA_OPTIONS, ...personalizados].map((t) => ({ tipo: t, value: map[t] || 0 }));
   }, [areasUnidade]);
 
   const pieColors = ["#2F6F5E", "#C97A2B", "#B23A32", "#6B7280", "#9CA3AF"];
@@ -2721,8 +2726,34 @@ function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
   const [viewing, setViewing] = useState(null);
+  const [novoTipo, setNovoTipo] = useState(false);
+  const [novoTipoTexto, setNovoTipoTexto] = useState("");
 
   const areasUnidade = useMemo(() => ordenarPorNome(state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), "nome"), [state.areas, unidadeAtiva]);
+
+  // Tipos personalizados já usados em qualquer unidade, além dos padrão —
+  // assim, uma vez criado, um tipo novo fica disponível pra escolher de novo
+  // sem precisar redigitar.
+  const tiposDisponiveis = useMemo(() => {
+    const customizados = [...new Set(state.areas.map((a) => a.tipo).filter((t) => t && !TIPO_AREA_OPTIONS.includes(t)))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    return [...TIPO_AREA_OPTIONS, ...customizados];
+  }, [state.areas]);
+
+  // Inclui o tipo recém-digitado no modal (ainda não salvo, então não está em
+  // state.areas nem em tiposDisponiveis) pra ele aparecer selecionado no
+  // <select> assim que o usuário confirma, sem precisar salvar primeiro.
+  const opcoesTipo = useMemo(() => {
+    const tipoAtual = modal && modal.form.tipo;
+    return tipoAtual && !tiposDisponiveis.includes(tipoAtual) ? [...tiposDisponiveis, tipoAtual] : tiposDisponiveis;
+  }, [tiposDisponiveis, modal]);
+
+  function confirmarNovoTipo() {
+    const v = novoTipoTexto.trim();
+    if (!v) return;
+    setModal((prev) => ({ ...prev, form: { ...prev.form, tipo: v } }));
+    setNovoTipoTexto("");
+    setNovoTipo(false);
+  }
 
   const equipDaSala = useMemo(() => {
     if (!viewing) return [];
@@ -2741,11 +2772,15 @@ function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
     if (!podeEditar) return;
     setModal({ mode: "new", form: { id: uid("AR"), nome: "", tipo: "Sala de aula", unidade: unidadeAtiva } });
     setError("");
+    setNovoTipo(false);
+    setNovoTipoTexto("");
   }
   function openEdit(a) {
     if (!podeEditar) return;
     setModal({ mode: "edit", form: { ...a } });
     setError("");
+    setNovoTipo(false);
+    setNovoTipoTexto("");
   }
   function save() {
     if (!podeEditar) return;
@@ -2844,13 +2879,50 @@ function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
             <TextInput value={modal.form.nome} onChange={(e) => setModal({ ...modal, form: { ...modal.form, nome: e.target.value } })} placeholder="Ex: Sala 103, Biblioteca..." />
           </Field>
           <Field label="Tipo de ambiente">
-            <Select value={modal.form.tipo} onChange={(e) => setModal({ ...modal, form: { ...modal.form, tipo: e.target.value } })}>
-              {TIPO_AREA_OPTIONS.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </Select>
+            {!novoTipo ? (
+              <div style={{ display: "flex", gap: 6 }}>
+                <Select value={modal.form.tipo} onChange={(e) => setModal({ ...modal, form: { ...modal.form, tipo: e.target.value } })} style={{ flex: 1 }}>
+                  {opcoesTipo.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </Select>
+                <button
+                  type="button"
+                  onClick={() => setNovoTipo(true)}
+                  title="Adicionar novo tipo de ambiente"
+                  style={{ background: "#fff", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.ink, width: 36, flexShrink: 0 }}
+                >
+                  <Plus size={15} style={{ margin: "0 auto" }} />
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: 6 }}>
+                <TextInput
+                  autoFocus
+                  value={novoTipoTexto}
+                  onChange={(e) => setNovoTipoTexto(e.target.value)}
+                  placeholder="Nome do novo tipo"
+                  onKeyDown={(e) => e.key === "Enter" && confirmarNovoTipo()}
+                  style={{ flex: 1 }}
+                />
+                <button type="button" onClick={confirmarNovoTipo} title="Confirmar" style={{ background: COLORS.ink, border: "none", borderRadius: 6, cursor: "pointer", color: "#fff", width: 36, flexShrink: 0 }}>
+                  <Check size={15} style={{ margin: "0 auto" }} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNovoTipo(false);
+                    setNovoTipoTexto("");
+                  }}
+                  title="Cancelar"
+                  style={{ background: "#fff", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.inkSoft, width: 36, flexShrink: 0 }}
+                >
+                  <X size={15} style={{ margin: "0 auto" }} />
+                </button>
+              </div>
+            )}
           </Field>
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
