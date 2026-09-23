@@ -3918,7 +3918,7 @@ function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, pod
                     </Select>
                   </Field>
                   <Field label="Unidade">
-                    <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value })}>
+                    <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value, sala: "", categoria: "" })}>
                       {UNIDADES.map((u) => (
                         <option key={u.id} value={u.id}>
                           {u.nome}
@@ -3931,7 +3931,7 @@ function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, pod
                   <Field label="Sala relacionada (opcional)">
                     <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                       <option value="">Nenhuma</option>
-                      {state.areas.map((a) => (
+                      {state.areas.filter((a) => unidadeDe(a) === form.unidade).map((a) => (
                         <option key={a.id} value={a.nome}>
                           {a.nome}
                         </option>
@@ -3941,7 +3941,7 @@ function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, pod
                   <Field label="Categoria relacionada (opcional)">
                     <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
                       <option value="">Nenhuma</option>
-                      {[...new Set(state.categorias.map((c) => c.nome))].map((c) => (
+                      {nomesCategoriasDaUnidade(state.categorias, form.unidade).map((c) => (
                         <option key={c} value={c}>
                           {c}
                         </option>
@@ -4372,12 +4372,16 @@ function novoChamadoSolicitanteForm() {
 }
 
 function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange }) {
-  const areas = state.areas || [];
-  const categorias = [...new Set((state.categorias || []).map((c) => c.nome))];
   const chamados = state.chamados || [];
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(chamados.length === 0);
   const [form, setForm] = useState(novoChamadoSolicitanteForm());
+  // Sala/categoria do formulário de novo chamado só mostram o que é da
+  // unidade escolhida ali (form.unidade) — antes vinha tudo junto, de
+  // todas as unidades, e um mesmo nome de sala/categoria repetido em mais
+  // de uma unidade aparecia duplicado na lista.
+  const areasFormUnidade = useMemo(() => (state.areas || []).filter((a) => unidadeDe(a) === form.unidade), [state.areas, form.unidade]);
+  const categoriasFormUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, form.unidade), [state.categorias, form.unidade]);
   const [replyText, setReplyText] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
@@ -4532,7 +4536,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                       </Select>
                     </Field>
                     <Field label="Unidade">
-                      <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value })}>
+                      <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value, sala: "", categoria: "" })}>
                         {UNIDADES.map((u) => (
                           <option key={u.id} value={u.id}>
                             {u.nome}
@@ -4545,7 +4549,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                         <option value="">Nenhuma</option>
-                        {areas.map((a) => (
+                        {areasFormUnidade.map((a) => (
                           <option key={a.id} value={a.nome}>{a.nome}</option>
                         ))}
                       </Select>
@@ -4553,7 +4557,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                     <Field label="Categoria relacionada (opcional)">
                       <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
                         <option value="">Nenhuma</option>
-                        {categorias.map((c) => (
+                        {categoriasFormUnidade.map((c) => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </Select>

@@ -9889,7 +9889,9 @@ function Chamados({
     value: form.unidade,
     onChange: e => setForm({
       ...form,
-      unidade: e.target.value
+      unidade: e.target.value,
+      sala: "",
+      categoria: ""
     })
   }, UNIDADES.map(u => /*#__PURE__*/React.createElement("option", {
     key: u.id,
@@ -9912,7 +9914,7 @@ function Chamados({
     })
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "Nenhuma"), state.areas.map(a => /*#__PURE__*/React.createElement("option", {
+  }, "Nenhuma"), state.areas.filter(a => unidadeDe(a) === form.unidade).map(a => /*#__PURE__*/React.createElement("option", {
     key: a.id,
     value: a.nome
   }, a.nome)))), /*#__PURE__*/React.createElement(Field, {
@@ -9925,7 +9927,7 @@ function Chamados({
     })
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "Nenhuma"), [...new Set(state.categorias.map(c => c.nome))].map(c => /*#__PURE__*/React.createElement("option", {
+  }, "Nenhuma"), nomesCategoriasDaUnidade(state.categorias, form.unidade).map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
   }, c))))), /*#__PURE__*/React.createElement(Field, {
@@ -10703,12 +10705,16 @@ function ChamadosSolicitante({
   onLogout,
   onFotoChange
 }) {
-  const areas = state.areas || [];
-  const categorias = [...new Set((state.categorias || []).map(c => c.nome))];
   const chamados = state.chamados || [];
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(chamados.length === 0);
   const [form, setForm] = useState(novoChamadoSolicitanteForm());
+  // Sala/categoria do formulário de novo chamado só mostram o que é da
+  // unidade escolhida ali (form.unidade) — antes vinha tudo junto, de
+  // todas as unidades, e um mesmo nome de sala/categoria repetido em mais
+  // de uma unidade aparecia duplicado na lista.
+  const areasFormUnidade = useMemo(() => (state.areas || []).filter(a => unidadeDe(a) === form.unidade), [state.areas, form.unidade]);
+  const categoriasFormUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, form.unidade), [state.categorias, form.unidade]);
   const [replyText, setReplyText] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
@@ -10996,7 +11002,9 @@ function ChamadosSolicitante({
     value: form.unidade,
     onChange: e => setForm({
       ...form,
-      unidade: e.target.value
+      unidade: e.target.value,
+      sala: "",
+      categoria: ""
     })
   }, UNIDADES.map(u => /*#__PURE__*/React.createElement("option", {
     key: u.id,
@@ -11019,7 +11027,7 @@ function ChamadosSolicitante({
     })
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "Nenhuma"), areas.map(a => /*#__PURE__*/React.createElement("option", {
+  }, "Nenhuma"), areasFormUnidade.map(a => /*#__PURE__*/React.createElement("option", {
     key: a.id,
     value: a.nome
   }, a.nome)))), /*#__PURE__*/React.createElement(Field, {
@@ -11032,7 +11040,7 @@ function ChamadosSolicitante({
     })
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, "Nenhuma"), categorias.map(c => /*#__PURE__*/React.createElement("option", {
+  }, "Nenhuma"), categoriasFormUnidade.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
   }, c))))), /*#__PURE__*/React.createElement(Field, {
