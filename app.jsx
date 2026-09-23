@@ -4176,7 +4176,6 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
         <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 68, height: 68, borderRadius: 14, background: "#fff", padding: 4, marginBottom: 18 }} />
         <div style={{ fontSize: 19, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>Escola Espírito Santo</div>
         <div style={{ fontSize: 13.5, color: "#B7C0CF", marginTop: 4 }}>Chamados de TI</div>
-        <div style={{ fontSize: 11.5, color: "#7D8AA0", marginTop: 14 }}>Colégio · Maternal · Berçário · Madre Josefa</div>
       </div>
 
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 28 }}>
