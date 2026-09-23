@@ -1,4 +1,4 @@
-const CACHE_NAME = "inventario-ti-v6";
+const CACHE_NAME = "inventario-ti-v7";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
