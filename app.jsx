@@ -4336,7 +4336,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
           </Button>
         </div>
 
-        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 415 }}>
+        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 520 }}>
           <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
               {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
