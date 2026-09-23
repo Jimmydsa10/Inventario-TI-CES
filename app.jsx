@@ -4158,49 +4158,68 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
   }
 
   return (
-    <div style={{ position: "relative", minHeight: 640, background: COLORS.paper, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      <div style={{ width: "100%", maxWidth: 340, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "28px 24px", textAlign: "center" }}>
-        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 64, height: 64, borderRadius: 12, margin: "0 auto 8px" }} />
-        <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>Chamados de TI</div>
-        <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 22 }}>Escola Espírito Santo</div>
-
-        <div style={{ textAlign: "left" }}>
-          <Field label="Nome">
-            <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
-          </Field>
-          <Field label="Senha">
-            <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
-          </Field>
-        </div>
-
-        {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
-
-        <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
-          {busy ? "Aguarde..." : "Entrar"}
-        </Button>
+    <div className="login-split" style={{ minHeight: 640, background: COLORS.paper, display: "flex", fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      <div
+        className="login-brand-panel"
+        style={{
+          width: "42%",
+          minWidth: 280,
+          background: `linear-gradient(160deg, ${COLORS.ink} 0%, #223454 100%)`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 40,
+          textAlign: "center",
+        }}
+      >
+        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 68, height: 68, borderRadius: 14, background: "#fff", padding: 4, marginBottom: 18 }} />
+        <div style={{ fontSize: 19, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>Escola Espírito Santo</div>
+        <div style={{ fontSize: 13.5, color: "#B7C0CF", marginTop: 4 }}>Chamados de TI</div>
+        <div style={{ fontSize: 11.5, color: "#7D8AA0", marginTop: 14 }}>Colégio · Maternal · Berçário · Madre Josefa</div>
       </div>
 
-      <button
-        onClick={onAdminClick}
-        title="Acesso administrativo"
-        aria-label="Acesso administrativo"
-        style={{
-          position: "absolute",
-          right: 14,
-          bottom: 10,
-          background: "none",
-          border: "none",
-          color: COLORS.line,
-          fontSize: 10,
-          cursor: "pointer",
-          padding: 4,
-          opacity: 0.7,
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
-        onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.line)}
-      >
-        ⚙
-      </button>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 28 }}>
+        <div style={{ width: "100%", maxWidth: 300 }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Bem-vindo(a)</div>
+          <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Entre com seu nome e senha de acesso</div>
+
+          <div style={{ textAlign: "left" }}>
+            <Field label="Nome">
+              <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
+            </Field>
+            <Field label="Senha">
+              <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
+            </Field>
+          </div>
+
+          {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
+
+          <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+            {busy ? "Aguarde..." : "Entrar"}
+          </Button>
+
+          <button
+            onClick={onAdminClick}
+            style={{
+              display: "block",
+              width: "100%",
+              textAlign: "center",
+              marginTop: 16,
+              background: "none",
+              border: "none",
+              color: COLORS.lineStrong,
+              fontSize: 11.5,
+              cursor: "pointer",
+              padding: 4,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
+            onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.lineStrong)}
+          >
+            ⚙ Acesso administrativo
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -4596,6 +4615,8 @@ const RESPONSIVE_CSS = `
   .chamado-detail { flex-direction: column !important; }
   .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
   .chamados-dock { display: none !important; }
+  .login-split { flex-direction: column !important; }
+  .login-brand-panel { width: 100% !important; min-width: 0 !important; padding: 28px 20px !important; }
 }
 `;
 
