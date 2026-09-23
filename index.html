@@ -10883,9 +10883,38 @@ function ChamadosSolicitante({
     icon: Send,
     onClick: enviarNovoChamado,
     disabled: busy || !form.texto.trim()
-  }, busy ? "Enviando..." : "Abrir chamado"))) : !selecionado ? /*#__PURE__*/React.createElement(EmptyState, {
-    text: "Selecione um chamado \xE0 esquerda ou abra um novo."
-  }) : /*#__PURE__*/React.createElement("div", {
+  }, busy ? "Enviando..." : "Abrir chamado"))) : !selecionado ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      position: "relative",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      inset: 0,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      pointerEvents: "none"
+    }
+  }, /*#__PURE__*/React.createElement("img", {
+    src: LOGO_DATA_URL,
+    alt: "",
+    style: {
+      width: 200,
+      height: 200,
+      opacity: 0.16
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative",
+      paddingTop: 40,
+      textAlign: "center",
+      color: COLORS.inkSoft,
+      fontSize: 14
+    }
+  }, "Selecione um chamado \xE0 esquerda ou abra um novo.")) : /*#__PURE__*/React.createElement("div", {
     className: "chamado-detail",
     style: {
       display: "flex",
