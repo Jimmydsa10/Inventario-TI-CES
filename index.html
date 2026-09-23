@@ -10286,7 +10286,7 @@ function LoginPublico({
         onLoggedIn({
           nome: data.nome,
           senha
-        }, data.state);
+        }, data.state, !!data.isAutorizado);
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -11509,10 +11509,12 @@ function Administradores({
     onClick: () => remove(removeTarget)
   }, "Excluir"))));
 }
+const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
 function emptyUsuarioForm() {
   return {
     nome: "",
-    senha: ""
+    senha: "",
+    autorizado: false
   };
 }
 function Usuarios({
@@ -11542,7 +11544,8 @@ function Usuarios({
       original: u,
       form: {
         nome: u.nome,
-        senha: ""
+        senha: "",
+        autorizado: u.tipo === "autorizado"
       }
     });
     setError("");
@@ -11579,7 +11582,8 @@ function Usuarios({
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
     const novoUsuario = {
       nome,
-      senha: senhaFinal
+      senha: senhaFinal,
+      tipo: f.autorizado ? "autorizado" : "solicitante"
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -11620,7 +11624,7 @@ function Usuarios({
       marginTop: 0,
       marginBottom: 16
     }
-  }, "Cadastro livre est\xE1 desativado \u2014 s\xF3 um administrador pode criar acesso pra quem vai abrir chamados. Cada usu\xE1rio entra com o nome e a senha cadastrados aqui."), status && /*#__PURE__*/React.createElement("div", {
+  }, "Cadastro livre est\xE1 desativado \u2014 s\xF3 um administrador pode criar acesso. Cada usu\xE1rio entra com o nome e a senha cadastrados aqui, na mesma tela de login p\xFAblica (n\xE3o \xE9 um administrador). Por padr\xE3o ele abre e acompanha chamados; marcando \"Autorizado\", ele passa a s\xF3 visualizar Painel, Categorias, Salas e Invent\xE1rio, sem poder abrir chamado nem editar nada."), status && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14,
       padding: "10px 12px",
@@ -11650,6 +11654,13 @@ function Usuarios({
     }
   }, "Nome"), /*#__PURE__*/React.createElement("th", {
     style: {
+      textAlign: "left",
+      padding: "8px 6px",
+      color: COLORS.inkSoft,
+      fontSize: 12
+    }
+  }, "Acesso"), /*#__PURE__*/React.createElement("th", {
+    style: {
       padding: "8px 6px"
     }
   }))), /*#__PURE__*/React.createElement("tbody", null, lista.map(u => /*#__PURE__*/React.createElement("tr", {
@@ -11664,6 +11675,19 @@ function Usuarios({
       fontWeight: 600
     }
   }, u.nome), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "1px 7px",
+      borderRadius: 999,
+      color: u.tipo === "autorizado" ? COLORS.accent : COLORS.inkSoft,
+      background: u.tipo === "autorizado" ? COLORS.accentSoft : COLORS.paper
+    }
+  }, u.tipo === "autorizado" ? "autorizado · só visualização" : "abre chamados")), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "9px 6px",
       textAlign: "right",
@@ -11721,7 +11745,38 @@ function Usuarios({
       }
     }),
     placeholder: modal.mode === "new" ? "" : "••••••••"
-  })), error && /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 4,
+      marginBottom: 4,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!modal.form.autorizado,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        autorizado: e.target.checked
+      }
+    })
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13.5,
+      color: COLORS.ink
+    }
+  }, "Autorizado (s\xF3 visualiza\xE7\xE3o \u2014 sem abrir chamados)")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: COLORS.inkSoft,
+      marginTop: 0,
+      marginBottom: 12
+    }
+  }, modal.form.autorizado ? "Esse usuário só visualiza Painel, Categorias, Salas e Inventário. Não abre chamado, não responde e não edita nada." : "Desmarcado: esse usuário entra normalmente pra abrir e acompanhar seus chamados."), error && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
       fontSize: 13,
@@ -12236,12 +12291,19 @@ function App() {
       setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
     }
   }
-  function aplicarLoginUsuario(userCreds, estadoUsuario) {
-    setAuth({
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado) {
+    setAuth(isAutorizado ? {
+      isAdmin: false,
+      isAutorizado: true,
+      nome: userCreds.nome,
+      permissoes: AUTORIZADO_PERMISSOES,
+      editar: false
+    } : {
       isAdmin: false
     });
     setUserAuth(userCreds);
     setState(estadoUsuario);
+    setView("dashboard");
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
     } catch (e) {}
@@ -12286,7 +12348,7 @@ function App() {
           aplicarLoginUsuario({
             nome: data.nome,
             senha: savedUser.senha
-          }, data.state);
+          }, data.state, !!data.isAutorizado);
           setLoaded(true);
           return;
         }
@@ -12363,7 +12425,7 @@ function App() {
       detail: loadErrorDetail
     });
   }
-  if (!auth.isAdmin) {
+  if (!auth.isAdmin && !auth.isAutorizado) {
     const adminModal = loginOpen && /*#__PURE__*/React.createElement(Modal, {
       title: "Entrar como administrador",
       onClose: () => {
@@ -12483,7 +12545,7 @@ function App() {
     nome: auth.nome,
     permissoes: auth.permissoes,
     podeEditar: podeEditar,
-    onLogout: logout,
+    onLogout: auth.isAdmin ? logout : logoutUsuario,
     categorias: state.categorias,
     unidadeAtiva: unidadeAtiva,
     onNavigate: key => {

@@ -58,11 +58,16 @@ function saveAdmins(list) {
 
 // ---------- Solicitantes (quem abre chamados) ----------
 
+// Coluna "tipo" (3ª): 'solicitante' (padrão, inclusive linhas antigas de
+// antes dessa coluna existir) = abre e responde chamados, como sempre foi.
+// 'autorizado' = só visualização (Painel, Categorias, Salas e Inventário),
+// sem poder abrir chamado, responder ou editar nada — ver authenticateSolicitante
+// e o ramo userNome de doGet.
 function getSolicitantes() {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo']);
   const data = sh.getDataRange().getValues();
   return data.slice(1).filter(function (r) { return r[0]; }).map(function (r) {
-    return { nome: String(r[0] || ''), senha: String(r[1] || '') };
+    return { nome: String(r[0] || ''), senha: String(r[1] || ''), tipo: String(r[2] || 'solicitante') || 'solicitante' };
   });
 }
 
@@ -77,31 +82,35 @@ function findSolicitante(nome) {
 }
 
 function saveSolicitantes(list) {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 2).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 3).clearContent();
   }
-  const rows = (list || []).map(function (s) { return [s.nome, s.senha]; });
+  const rows = (list || []).map(function (s) { return [s.nome, s.senha, s.tipo === 'autorizado' ? 'autorizado' : 'solicitante']; });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 2).setValues(rows);
+    sh.getRange(2, 1, rows.length, 3).setValues(rows);
   }
 }
 
-function checkSolicitanteLogin(nome, senha) {
-  const s = findSolicitante(nome);
-  if (!s) return false;
-  return s.senha === String(senha || '');
-}
-
-// Retorna o registro do solicitante (com o nome como está cadastrado) se
-// nome+senha baterem, ou null. Usado pra autenticar quem pode abrir chamado
-// e responder — sem isso, doPost aceitava novoChamado/novaMensagem de
-// qualquer um que soubesse a URL pública do backend, sem checar login algum.
-function authenticateSolicitante(nome, senha) {
+// Autentica só nome+senha, sem olhar o tipo — usado no LOGIN (ramo userNome
+// de doGet), onde tanto solicitante quanto autorizado podem entrar.
+function autenticarUsuarioLogin(nome, senha) {
   const s = findSolicitante(nome);
   if (!s) return null;
   if (s.senha !== String(senha || '')) return null;
+  return s;
+}
+
+// Retorna o registro do solicitante (com o nome como está cadastrado) se
+// nome+senha baterem E ele não for do tipo 'autorizado', ou null. Usado pra
+// autenticar quem pode abrir chamado e responder — sem isso, doPost aceitava
+// novoChamado/novaMensagem de qualquer um que soubesse a URL pública do
+// backend, sem checar login algum. Um "autorizado" é só visualização: mesmo
+// logado, não pode criar chamado nem responder.
+function authenticateSolicitante(nome, senha) {
+  const s = autenticarUsuarioLogin(nome, senha);
+  if (!s || s.tipo === 'autorizado') return null;
   return s;
 }
 
@@ -345,7 +354,27 @@ function doGet(e) {
       historico: getHistoricoMensal()
     };
   } else if (userNome) {
-    if (checkSolicitanteLogin(userNome, userSenha)) {
+    const usuario = autenticarUsuarioLogin(userNome, userSenha);
+    if (usuario && usuario.tipo === 'autorizado') {
+      // Autorizado: entra como um usuário comum (não como admin), mas com
+      // visão só-leitura de Painel/Categorias/Salas/Inventário — sem
+      // chamados dos outros, sem admins/solicitantes/histórico.
+      const state = readState();
+      payload = {
+        ok: true,
+        isAdmin: false,
+        isUser: true,
+        isAutorizado: true,
+        nome: usuario.nome,
+        state: {
+          categorias: state.categorias || [],
+          areas: state.areas || [],
+          responsaveis: state.responsaveis || [],
+          inventario: state.inventario || [],
+          chamados: state.chamados || []
+        }
+      };
+    } else if (usuario) {
       const state = readState();
       const alvo = userNome.trim().toLowerCase();
       const meusChamados = (state.chamados || []).filter(function (c) {
@@ -355,7 +384,7 @@ function doGet(e) {
         ok: true,
         isAdmin: false,
         isUser: true,
-        nome: userNome,
+        nome: usuario.nome,
         state: { areas: state.areas || [], categorias: state.categorias || [], chamados: meusChamados }
       };
     } else {

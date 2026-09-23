@@ -4147,7 +4147,7 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
       const data = await backendGetUser(nome.trim(), senha);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
       if (data.isUser) {
-        onLoggedIn({ nome: data.nome, senha }, data.state);
+        onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado);
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -4851,8 +4851,10 @@ function Administradores({ admins, secret, onAdminsChanged }) {
   );
 }
 
+const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
+
 function emptyUsuarioForm() {
-  return { nome: "", senha: "" };
+  return { nome: "", senha: "", autorizado: false };
 }
 
 function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
@@ -4873,7 +4875,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
   }
 
   function openEdit(u) {
-    setModal({ mode: "edit", original: u, form: { nome: u.nome, senha: "" } });
+    setModal({ mode: "edit", original: u, form: { nome: u.nome, senha: "", autorizado: u.tipo === "autorizado" } });
     setError("");
   }
 
@@ -4900,7 +4902,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
     if (dupNome) return setError("Já existe um usuário com esse nome.");
 
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
-    const novoUsuario = { nome, senha: senhaFinal };
+    const novoUsuario = { nome, senha: senhaFinal, tipo: f.autorizado ? "autorizado" : "solicitante" };
     let novaLista;
     if (modal.mode === "new") {
       novaLista = [...lista, novoUsuario];
@@ -4927,7 +4929,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
       </div>
 
       <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0, marginBottom: 16 }}>
-        Cadastro livre está desativado — só um administrador pode criar acesso pra quem vai abrir chamados. Cada usuário entra com o nome e a senha cadastrados aqui.
+        Cadastro livre está desativado — só um administrador pode criar acesso. Cada usuário entra com o nome e a senha cadastrados aqui, na mesma tela de login pública (não é um administrador). Por padrão ele abre e acompanha chamados; marcando "Autorizado", ele passa a só visualizar Painel, Categorias, Salas e Inventário, sem poder abrir chamado nem editar nada.
       </p>
 
       {status && (
@@ -4953,6 +4955,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
             <thead>
               <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
                 <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Acesso</th>
                 <th style={{ padding: "8px 6px" }}></th>
               </tr>
             </thead>
@@ -4960,6 +4963,20 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
               {lista.map((u) => (
                 <tr key={u.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                   <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{u.nome}</td>
+                  <td style={{ padding: "9px 6px" }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: "1px 7px",
+                        borderRadius: 999,
+                        color: u.tipo === "autorizado" ? COLORS.accent : COLORS.inkSoft,
+                        background: u.tipo === "autorizado" ? COLORS.accentSoft : COLORS.paper,
+                      }}
+                    >
+                      {u.tipo === "autorizado" ? "autorizado · só visualização" : "abre chamados"}
+                    </span>
+                  </td>
                   <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                     <button onClick={() => openEdit(u)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
                       <Pencil size={15} />
@@ -4983,6 +5000,19 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
           <Field label={modal.mode === "new" ? "Senha" : "Nova senha (deixe em branco para manter a atual)"}>
             <TextInput type="text" value={modal.form.senha} onChange={(e) => setModal({ ...modal, form: { ...modal.form, senha: e.target.value } })} placeholder={modal.mode === "new" ? "" : "••••••••"} />
           </Field>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, marginBottom: 4, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={!!modal.form.autorizado}
+              onChange={(e) => setModal({ ...modal, form: { ...modal.form, autorizado: e.target.checked } })}
+            />
+            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Autorizado (só visualização — sem abrir chamados)</span>
+          </label>
+          <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: 12 }}>
+            {modal.form.autorizado
+              ? "Esse usuário só visualiza Painel, Categorias, Salas e Inventário. Não abre chamado, não responde e não edita nada."
+              : "Desmarcado: esse usuário entra normalmente pra abrir e acompanhar seus chamados."}
+          </p>
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
             <Button variant="ghost" onClick={() => setModal(null)}>
@@ -5288,10 +5318,15 @@ function App() {
     }
   }
 
-  function aplicarLoginUsuario(userCreds, estadoUsuario) {
-    setAuth({ isAdmin: false });
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado) {
+    setAuth(
+      isAutorizado
+        ? { isAdmin: false, isAutorizado: true, nome: userCreds.nome, permissoes: AUTORIZADO_PERMISSOES, editar: false }
+        : { isAdmin: false }
+    );
     setUserAuth(userCreds);
     setState(estadoUsuario);
+    setView("dashboard");
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
     } catch (e) {}
@@ -5337,7 +5372,7 @@ function App() {
         const data = await backendGetUser(savedUser.nome, savedUser.senha || "");
         if (!data.ok) throw new Error(data.error || "Erro desconhecido");
         if (data.isUser) {
-          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state);
+          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state, !!data.isAutorizado);
           setLoaded(true);
           return;
         }
@@ -5414,7 +5449,7 @@ function App() {
     return <ErrorScreen msg={loadError} detail={loadErrorDetail} />;
   }
 
-  if (!auth.isAdmin) {
+  if (!auth.isAdmin && !auth.isAutorizado) {
     const adminModal = loginOpen && (
       <Modal
         title="Entrar como administrador"
@@ -5512,7 +5547,7 @@ function App() {
           nome={auth.nome}
           permissoes={auth.permissoes}
           podeEditar={podeEditar}
-          onLogout={logout}
+          onLogout={auth.isAdmin ? logout : logoutUsuario}
           categorias={state.categorias}
           unidadeAtiva={unidadeAtiva}
           onNavigate={(key) => {
