@@ -20,16 +20,32 @@ function getOrCreateSheet(name, header) {
 // true = pode adicionar/editar/excluir nas seções liberadas pra ele; false
 // (ou em branco, inclusive linhas antigas de antes dessa coluna existir) =
 // só visualiza, sem poder mudar nada — ver filtrarEstadoPorPermissao.
+// Colunas "podeAbrirChamados"/"podeResponderChamados" (5ª/6ª): só importam
+// pra admin restrito com "chamados" nas seções liberadas — controlam,
+// separado do "editar" geral, se ele pode abrir chamado novo e/ou responder
+// chamado existente (mudar status, excluir, mandar mensagem). Em branco
+// (inclusive linhas antigas de antes dessas colunas existirem) herda o valor
+// de "editar", pra não mudar o comportamento de quem já estava cadastrado.
 function getAdmins() {
-  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar']);
+  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar', 'podeAbrirChamados', 'podeResponderChamados']);
   const data = sh.getDataRange().getValues();
   const rows = data.slice(1).filter(function (r) { return r[0] || r[1]; });
   if (rows.length === 0) {
-    sh.appendRow(['Administrador', 'mude-esta-senha-123', 'todas', true]);
-    return [{ nome: 'Administrador', senha: 'mude-esta-senha-123', permissoes: 'todas', editar: true }];
+    sh.appendRow(['Administrador', 'mude-esta-senha-123', 'todas', true, true, true]);
+    return [{ nome: 'Administrador', senha: 'mude-esta-senha-123', permissoes: 'todas', editar: true, podeAbrirChamados: true, podeResponderChamados: true }];
   }
   return rows.map(function (r) {
-    return { nome: String(r[0] || ''), senha: String(r[1] || ''), permissoes: String(r[2] || 'todas'), editar: r[3] === true };
+    const editar = r[3] === true;
+    const abrirEmBranco = r[4] === '' || r[4] === undefined || r[4] === null;
+    const responderEmBranco = r[5] === '' || r[5] === undefined || r[5] === null;
+    return {
+      nome: String(r[0] || ''),
+      senha: String(r[1] || ''),
+      permissoes: String(r[2] || 'todas'),
+      editar: editar,
+      podeAbrirChamados: abrirEmBranco ? editar : r[4] === true,
+      podeResponderChamados: responderEmBranco ? editar : r[5] === true,
+    };
   });
 }
 
@@ -45,14 +61,23 @@ function findAdminBySecret(secret, adminsList) {
 }
 
 function saveAdmins(list) {
-  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar']);
+  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar', 'podeAbrirChamados', 'podeResponderChamados']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 4).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 6).clearContent();
   }
-  const rows = list.map(function (a) { return [a.nome, a.senha, a.permissoes, !!a.editar]; });
+  // Se quem chamou (frontend atual, sempre manda os dois campos; uma
+  // chamada externa/antiga pode não mandar) não informar
+  // podeAbrirChamados/podeResponderChamados, herda de "editar" — mesma
+  // regra de fallback usada pra linha em branco em getAdmins, só que aqui
+  // pro objeto JS recebido em vez da célula da planilha.
+  const rows = list.map(function (a) {
+    const abrir = a.podeAbrirChamados === undefined ? !!a.editar : !!a.podeAbrirChamados;
+    const responder = a.podeResponderChamados === undefined ? !!a.editar : !!a.podeResponderChamados;
+    return [a.nome, a.senha, a.permissoes, !!a.editar, abrir, responder];
+  });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 4).setValues(rows);
+    sh.getRange(2, 1, rows.length, 6).setValues(rows);
   }
 }
 
@@ -318,21 +343,28 @@ const ESTADO_CAMPO_PARA_SECAO = {
 // categorias, salas, inventário etc., já que o autosave manda o estado
 // inteiro de uma vez e nada limitava quais partes ele podia de fato mudar.
 // Agora, pra um admin não-master, cada seção do estado só é aceita do jeito
-// que o cliente mandou se a permissão dele cobrir aquela seção E ele tiver
-// "editar" marcado; o resto mantém o valor que já estava salvo (a mudança é
+// que o cliente mandou se a permissão dele cobrir aquela seção E ele puder
+// escrever nela; o resto mantém o valor que já estava salvo (a mudança é
 // ignorada, não rejeitada por inteiro, pra não quebrar o autosave de quem só
-// mexeu no que pode). Um admin restrito sem "editar" (só visualização) não
+// mexeu no que pode). Um admin restrito sem permissão de escrita não
 // consegue mudar seção nenhuma por aqui — vira, na prática, um no-op.
+// "chamados" é especial: em vez do "editar" geral, usa podeAbrirChamados OU
+// podeResponderChamados (abrir chamado novo e responder/mudar status/excluir
+// um existente chegam aqui juntos, dentro do mesmo array — ver Chamados no
+// frontend, que já esconde os botões de cada ação conforme a permissão
+// específica; aqui é só o gate de "pode escrever nessa seção ou não").
 function filtrarEstadoPorPermissao(novoEstado, admin) {
   const isMaster = admin && admin.permissoes === 'todas';
   if (isMaster) return novoEstado;
-  const podeEditar = !!(admin && admin.editar);
-  const permitido = podeEditar ? String(admin.permissoes || '').split(',').map(function (s) { return s.trim().toLowerCase(); }) : [];
+  const secoesPermitidas = String((admin && admin.permissoes) || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
   const atual = readState();
   const resultado = {};
   for (const chave in novoEstado) {
     const secao = ESTADO_CAMPO_PARA_SECAO[chave];
-    if (secao && permitido.indexOf(secao) !== -1) {
+    const podeEscreverSecao = secao === 'chamados'
+      ? !!(admin && (admin.podeAbrirChamados || admin.podeResponderChamados))
+      : !!(admin && admin.editar);
+    if (secao && secoesPermitidas.indexOf(secao) !== -1 && podeEscreverSecao) {
       resultado[chave] = novoEstado[chave];
     } else if (Object.prototype.hasOwnProperty.call(atual, chave)) {
       resultado[chave] = atual[chave];
@@ -366,6 +398,8 @@ function doGet(e) {
       nome: admin.nome,
       permissoes: admin.permissoes,
       editar: !!admin.editar,
+      podeAbrirChamados: !!admin.podeAbrirChamados,
+      podeResponderChamados: !!admin.podeResponderChamados,
       state: state,
       // Inclui a senha (como já fazemos pra solicitantes) porque o frontend
       // (Administradores.save()) usa modal.original.senha pra manter a senha
@@ -374,7 +408,16 @@ function doGet(e) {
       // redigitar a senha mandava senha undefined pro salvarAdmins e travava
       // o login desse admin — bug real, encontrado numa validação de
       // segurança antes de liberar pra uso real.
-      admins: isMaster ? admins.map(function (a) { return { nome: a.nome, senha: a.senha, permissoes: a.permissoes, editar: !!a.editar }; }) : [],
+      admins: isMaster ? admins.map(function (a) {
+        return {
+          nome: a.nome,
+          senha: a.senha,
+          permissoes: a.permissoes,
+          editar: !!a.editar,
+          podeAbrirChamados: !!a.podeAbrirChamados,
+          podeResponderChamados: !!a.podeResponderChamados,
+        };
+      }) : [],
       solicitantes: isMaster ? getSolicitantes() : [],
       historico: getHistoricoMensal()
     };
@@ -439,9 +482,13 @@ function doPost(e) {
   const isAdmin = !!admin;
   const isMaster = admin && admin.permissoes === 'todas';
   // Admin com acesso restrito e "editar" desmarcado só pode visualizar — não
-  // conta como alguém que pode escrever em novoChamado/novaMensagem, mesmo
-  // sendo um admin válido.
+  // conta como alguém que pode escrever, mesmo sendo um admin válido.
   const adminPodeEscrever = isAdmin && (isMaster || admin.editar);
+  // novoChamado/novaMensagem (chamados abertos direto pelo admin, via secret,
+  // sem userNome/userSenha) usam as permissões específicas de Chamados em
+  // vez do "editar" geral — mesmo critério do filtrarEstadoPorPermissao.
+  const adminPodeAbrirChamados = isAdmin && (isMaster || admin.podeAbrirChamados);
+  const adminPodeResponderChamados = isAdmin && (isMaster || admin.podeResponderChamados);
 
   if (isAdmin && body.action === 'salvarTudo') {
     const estadoFiltrado = filtrarEstadoPorPermissao(body.state, admin);
@@ -482,7 +529,7 @@ function doPost(e) {
   // jeito que o cliente mandou.
   if (body.action === 'novoChamado') {
     const solicitante = authenticateSolicitante(body.userNome, body.userSenha);
-    if (!adminPodeEscrever && !solicitante) {
+    if (!adminPodeAbrirChamados && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
     const state = readState();
@@ -499,7 +546,7 @@ function doPost(e) {
 
   if (body.action === 'novaMensagem') {
     const solicitante = authenticateSolicitante(body.userNome, body.userSenha);
-    if (!adminPodeEscrever && !solicitante) {
+    if (!adminPodeResponderChamados && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
     const state = readState();
@@ -508,14 +555,14 @@ function doPost(e) {
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
-    if (solicitante && !adminPodeEscrever) {
+    if (solicitante && !adminPodeResponderChamados) {
       const dono = String(chamado.criadoPor || chamado.solicitante || '').trim().toLowerCase();
       if (dono !== solicitante.nome.trim().toLowerCase()) {
         return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
       }
     }
     const mensagem = body.mensagem || {};
-    mensagem.autor = adminPodeEscrever ? 'ti' : 'solicitante';
+    mensagem.autor = adminPodeResponderChamados ? 'ti' : 'solicitante';
     chamado.mensagens.push(mensagem);
     writeState(state);
     return jsonOut({ ok: true });

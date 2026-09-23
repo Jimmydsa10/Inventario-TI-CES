@@ -1380,6 +1380,16 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
     { label: "Categorias cadastradas", value: categoriasUnidade.length },
   ];
 
+  const salasPorTipo = useMemo(() => {
+    const map = {};
+    TIPO_AREA_OPTIONS.forEach((t) => (map[t] = 0));
+    areasUnidade.forEach((a) => {
+      const t = TIPO_AREA_OPTIONS.includes(a.tipo) ? a.tipo : "Outro";
+      map[t] = (map[t] || 0) + 1;
+    });
+    return TIPO_AREA_OPTIONS.map((t) => ({ tipo: t, value: map[t] }));
+  }, [areasUnidade]);
+
   const pieColors = ["#2F6F5E", "#C97A2B", "#B23A32", "#6B7280", "#9CA3AF"];
 
   return (
@@ -1571,6 +1581,16 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
             <StatTile icon={DoorOpen} value={areasUnidade.length} label="Salas cadastradas" />
             <StatTile icon={Tag} value={categoriasUnidade.length} label="Categorias cadastradas" />
             <StatTile icon={Clock} value={garantiasVencendo.length} label="Garantias vencendo em 90 dias" accent />
+          </div>
+
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 10 }}>
+            Salas por tipo
+          </div>
+          <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 16 }}>
+            <StatTile icon={DoorOpen} value={areasUnidade.length} label="Total de salas" accent />
+            {salasPorTipo.map((s) => (
+              <StatTile key={s.tipo} icon={DoorOpen} value={s.value} label={s.tipo} />
+            ))}
           </div>
 
           <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
@@ -3593,7 +3613,7 @@ function novoChamadoForm(unidadeAtiva) {
   return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
-function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
+function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, podeResponderChamados = true }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
   const [form, setForm] = useState(novoChamadoForm(unidadeAtiva));
@@ -3625,14 +3645,14 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
   }, [selecionado, selecionado && selecionado.mensagens.length]);
 
   function abrirNovo() {
-    if (!podeEditar) return;
+    if (!podeAbrirChamados) return;
     setNovoMode(true);
     setSelectedId(null);
     setForm(novoChamadoForm(unidadeAtiva));
   }
 
   function enviarNovoChamado() {
-    if (!podeEditar) return;
+    if (!podeAbrirChamados) return;
     const texto = form.texto.trim();
     if (!texto) return;
     const chamado = {
@@ -3654,7 +3674,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
   }
 
   function enviarResposta() {
-    if (!podeEditar) return;
+    if (!podeResponderChamados) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
     setState((prev) => ({
@@ -3667,7 +3687,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
   }
 
   function mudarStatus(status) {
-    if (!podeEditar) return;
+    if (!podeResponderChamados) return;
     setState((prev) => ({
       ...prev,
       chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, status } : c)),
@@ -3675,7 +3695,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
   }
 
   function excluirChamado(chamado) {
-    if (!podeEditar) return;
+    if (!podeResponderChamados) return;
     setState((prev) => ({ ...prev, chamados: prev.chamados.filter((c) => c.id !== chamado.id) }));
     if (selectedId === chamado.id) setSelectedId(null);
     setDeleteTarget(null);
@@ -3718,7 +3738,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
               Quadro
             </button>
           </div>
-          {podeEditar && (
+          {podeAbrirChamados && (
             <Button variant="primary" icon={Plus} onClick={abrirNovo}>
               Novo chamado
             </Button>
@@ -3767,7 +3787,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                     <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
                       {c.assunto} {c.tipo && c.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={c.tipo} />}
                     </div>
-                    {podeEditar && (
+                    {podeResponderChamados && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -3916,7 +3936,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                   <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
                     {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
                   </div>
-                  {podeEditar && (
+                  {podeResponderChamados && (
                     <button
                       onClick={() => setDeleteTarget(selecionado)}
                       style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "6px 9px", flexShrink: 0 }}
@@ -3968,7 +3988,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                   })}
                 </div>
 
-                {podeEditar && (
+                {podeResponderChamados && (
                   <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
                     <TextInput
                       value={replyText}
@@ -3998,7 +4018,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                 ))}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, color: COLORS.inkSoft, marginBottom: 4 }}>Status</div>
-                  <Select disabled={!podeEditar} value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
+                  <Select disabled={!podeResponderChamados} value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
                     {CHAMADO_STATUS_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -4683,7 +4703,7 @@ const SECTION_LABELS = {
 };
 
 function emptyAdminForm() {
-  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false };
+  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false, podeAbrirChamados: false, podeResponderChamados: false };
 }
 
 function Administradores({ admins, secret, onAdminsChanged }) {
@@ -4708,7 +4728,19 @@ function Administradores({ admins, secret, onAdminsChanged }) {
     if (a.permissoes !== "todas") {
       a.permissoes.split(",").forEach((k) => (secoes[k.trim()] = true));
     }
-    setModal({ mode: "edit", original: a, form: { nome: a.nome, senha: "", acessoTotal: isAcessoTotal(a.permissoes), secoes, editar: !!a.editar } });
+    setModal({
+      mode: "edit",
+      original: a,
+      form: {
+        nome: a.nome,
+        senha: "",
+        acessoTotal: isAcessoTotal(a.permissoes),
+        secoes,
+        editar: !!a.editar,
+        podeAbrirChamados: a.podeAbrirChamados !== undefined ? !!a.podeAbrirChamados : !!a.editar,
+        podeResponderChamados: a.podeResponderChamados !== undefined ? !!a.podeResponderChamados : !!a.editar,
+      },
+    });
     setError("");
   }
 
@@ -4740,7 +4772,15 @@ function Administradores({ admins, secret, onAdminsChanged }) {
     const permissoes = f.acessoTotal ? "todas" : secoesEscolhidas.join(",");
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
 
-    const novoAdmin = { nome, senha: senhaFinal, permissoes, editar: f.acessoTotal || !!f.editar };
+    const temChamados = f.acessoTotal || secoesEscolhidas.includes("chamados");
+    const novoAdmin = {
+      nome,
+      senha: senhaFinal,
+      permissoes,
+      editar: f.acessoTotal || !!f.editar,
+      podeAbrirChamados: f.acessoTotal || (temChamados && !!f.podeAbrirChamados),
+      podeResponderChamados: f.acessoTotal || (temChamados && !!f.podeResponderChamados),
+    };
     let novaLista;
     if (modal.mode === "new") {
       novaLista = [...lista, novoAdmin];
@@ -4820,6 +4860,40 @@ function Administradores({ admins, secret, onAdminsChanged }) {
                       >
                         {a.editar ? "pode editar" : "só visualiza"}
                       </span>
+                      {a.permissoes.split(",").some((k) => k.trim() === "chamados") && (
+                        <>
+                          {a.podeAbrirChamados && (
+                            <span
+                              style={{
+                                marginLeft: 6,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: "1px 7px",
+                                borderRadius: 999,
+                                color: COLORS.accent,
+                                background: COLORS.accentSoft,
+                              }}
+                            >
+                              abre chamados
+                            </span>
+                          )}
+                          {a.podeResponderChamados && (
+                            <span
+                              style={{
+                                marginLeft: 6,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: "1px 7px",
+                                borderRadius: 999,
+                                color: COLORS.accent,
+                                background: COLORS.accentSoft,
+                              }}
+                            >
+                              responde chamados
+                            </span>
+                          )}
+                        </>
+                      )}
                     </>
                   )}
                 </td>
@@ -4886,8 +4960,40 @@ function Administradores({ admins, secret, onAdminsChanged }) {
               <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 4, marginBottom: 0 }}>
                 {modal.form.editar
                   ? "Esse administrador pode alterar o que estiver nas seções marcadas acima."
+                  : modal.form.secoes.chamados
+                  ? "Desmarcado: esse administrador só visualiza as seções marcadas acima (menos Chamados, que tem as opções próprias abaixo)."
                   : "Desmarcado: esse administrador só visualiza as seções marcadas acima, sem poder adicionar, editar ou excluir nada."}
               </p>
+              {modal.form.secoes.chamados && (
+                <div
+                  style={{
+                    margin: "10px 0 4px 0",
+                    padding: "12px 14px",
+                    background: COLORS.paper,
+                    border: `1px solid ${COLORS.line}`,
+                    borderLeft: `3px solid ${COLORS.accent}`,
+                    borderRadius: 8,
+                  }}
+                >
+                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>Permissões de Chamados</div>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={!!modal.form.podeAbrirChamados}
+                      onChange={(e) => setModal({ ...modal, form: { ...modal.form, podeAbrirChamados: e.target.checked } })}
+                    />
+                    <span style={{ fontSize: 13, color: COLORS.ink }}>Pode abrir chamados</span>
+                  </label>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={!!modal.form.podeResponderChamados}
+                      onChange={(e) => setModal({ ...modal, form: { ...modal.form, podeResponderChamados: e.target.checked } })}
+                    />
+                    <span style={{ fontSize: 13, color: COLORS.ink }}>Pode responder chamados</span>
+                  </label>
+                </div>
+              )}
             </div>
           )}
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
@@ -5127,7 +5233,7 @@ function LoadingScreen() {
 
 const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
 
-function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeEditar = true }) {
+function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeResponderChamados = true }) {
   const [texto, setTexto] = useState("");
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -5153,7 +5259,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeEditar = t
   }
 
   function enviarResposta() {
-    if (!podeEditar) return;
+    if (!podeResponderChamados) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
     setState((prev) => ({
@@ -5263,7 +5369,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeEditar = t
             );
           })}
         </div>
-        {podeEditar && (
+        {podeResponderChamados && (
           <div style={{ padding: 12, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
             <TextInput
               value={texto}
@@ -5358,7 +5464,14 @@ function App() {
   const saveTimer = useRef(null);
 
   function aplicarLoginAdmin(data, senhaUsada) {
-    setAuth({ isAdmin: true, nome: data.nome || "Administrador", permissoes: data.permissoes || "todas", editar: !!data.editar });
+    setAuth({
+      isAdmin: true,
+      nome: data.nome || "Administrador",
+      permissoes: data.permissoes || "todas",
+      editar: !!data.editar,
+      podeAbrirChamados: data.podeAbrirChamados,
+      podeResponderChamados: data.podeResponderChamados,
+    });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
     setHistorico(data.historico || []);
@@ -5599,6 +5712,8 @@ function App() {
   const isMaster = isAcessoTotal(auth.permissoes);
   const allowed = new Set(getAllowedSections(auth.permissoes));
   const podeEditar = isMaster || !!auth.editar;
+  const podeAbrirChamados = isMaster || (auth.podeAbrirChamados !== undefined ? !!auth.podeAbrirChamados : !!auth.editar);
+  const podeResponderChamados = isMaster || (auth.podeResponderChamados !== undefined ? !!auth.podeResponderChamados : !!auth.editar);
 
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
@@ -5659,13 +5774,21 @@ function App() {
           {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
-          {view === "chamados" && allowed.has("chamados") && <Chamados state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
+          {view === "chamados" && allowed.has("chamados") && (
+            <Chamados
+              state={state}
+              setState={setState}
+              unidadeAtiva={unidadeAtiva}
+              podeAbrirChamados={podeAbrirChamados}
+              podeResponderChamados={podeResponderChamados}
+            />
+          )}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} podeEditar={podeEditar} />}
           {view === "usuarios" && isMaster && <Usuarios solicitantes={usuarios} secret={secret} onSolicitantesChanged={setUsuarios} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
         {view !== "chamados" && allowed.has("chamados") && (
-          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} podeEditar={podeEditar} />
+          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} podeResponderChamados={podeResponderChamados} />
         )}
       </div>
     </div>
