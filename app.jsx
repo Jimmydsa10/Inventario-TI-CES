@@ -4378,7 +4378,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
         >
           <div>
             <div style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>Bem-vindo(a), {userAuth.nome}</div>
-            <div style={{ fontSize: 12, color: "#B7C0CF", marginTop: 2 }}>{dataFormatada}, {horaFormatada}</div>
+            <div style={{ fontSize: 12, color: "#E7C79A", fontWeight: 600, marginTop: 2 }}>{dataFormatada}, {horaFormatada}</div>
           </div>
           <Button variant="accent" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }} style={{ flexShrink: 0 }}>
             Novo chamado
