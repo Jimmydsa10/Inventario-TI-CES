@@ -88,6 +88,8 @@ const TIPO_AREA_EMOJI = {
   "Biblioteca": "📚",
   "Administrativo": "🗄️",
   Outro: "➕",
+  "Informática": "💻",
+  "Laboratório de Informática": "💻",
 };
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
@@ -3692,7 +3694,7 @@ function novoChamadoForm(unidadeAtiva) {
   return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
-function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, podeResponderChamados = true }) {
+function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, podeResponderChamados = true, fotosSolicitantes = {} }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
   const [form, setForm] = useState(novoChamadoForm(unidadeAtiva));
@@ -4030,7 +4032,7 @@ function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, pod
                 <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
                   {selecionado.foto && (
                     <div style={{ display: "flex", gap: 10 }}>
-                      <Avatar nome={selecionado.solicitante || "?"} />
+                      <Avatar nome={selecionado.solicitante || "?"} foto={fotosSolicitantes[selecionado.solicitante]} />
                       <a href={selecionado.foto} target="_blank" rel="noreferrer">
                         <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 90, height: 90, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
                       </a>
@@ -4043,7 +4045,7 @@ function Chamados({ state, setState, unidadeAtiva, podeAbrirChamados = true, pod
                     const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
                     return (
                       <div key={i} style={{ display: "flex", gap: 10 }}>
-                        <Avatar nome={nomeAutor} />
+                        <Avatar nome={nomeAutor} foto={m.autor === "ti" ? undefined : fotosSolicitantes[selecionado.solicitante]} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div
                             style={{
@@ -5312,7 +5314,7 @@ function LoadingScreen() {
 
 const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
 
-function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeResponderChamados = true }) {
+function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeResponderChamados = true, fotosSolicitantes = {} }) {
   const [texto, setTexto] = useState("");
   const [collapsed, setCollapsed] = useState(() => {
     try {
@@ -5434,7 +5436,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeResponderC
             const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
             return (
               <div key={i} style={{ display: "flex", gap: 9 }}>
-                <Avatar nome={nomeAutor} size={26} />
+                <Avatar nome={nomeAutor} foto={m.autor === "ti" ? undefined : fotosSolicitantes[selecionado.solicitante]} size={26} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ padding: "9px 12px", borderRadius: 10, borderLeft: `3px solid ${borda}`, fontSize: 13, background: bg, color: COLORS.ink }}>
                     <div style={{ fontSize: 10.5, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
@@ -5490,7 +5492,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, podeResponderC
               onClick={() => onAbrirChange(c.id)}
               style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer" }}
             >
-              <Avatar nome={c.solicitante || "?"} size={32} />
+              <Avatar nome={c.solicitante || "?"} foto={fotosSolicitantes[c.solicitante]} size={32} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.solicitante || "Solicitante"}</div>
@@ -5518,6 +5520,7 @@ function App() {
   const [userAuth, setUserAuth] = useState(null); // { nome, senha } — solicitante logado
   const [admins, setAdmins] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [fotosSolicitantes, setFotosSolicitantes] = useState({});
   const [historico, setHistorico] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -5553,6 +5556,7 @@ function App() {
     });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
+    setFotosSolicitantes(data.fotosSolicitantes || {});
     setHistorico(data.historico || []);
     setUserAuth(null);
     try {
@@ -5860,6 +5864,7 @@ function App() {
               unidadeAtiva={unidadeAtiva}
               podeAbrirChamados={podeAbrirChamados}
               podeResponderChamados={podeResponderChamados}
+              fotosSolicitantes={fotosSolicitantes}
             />
           )}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} podeEditar={podeEditar} />}
@@ -5867,7 +5872,7 @@ function App() {
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
         {view !== "chamados" && allowed.has("chamados") && (
-          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} podeResponderChamados={podeResponderChamados} />
+          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} podeResponderChamados={podeResponderChamados} fotosSolicitantes={fotosSolicitantes} />
         )}
       </div>
     </div>

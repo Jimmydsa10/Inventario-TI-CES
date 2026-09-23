@@ -392,6 +392,16 @@ function doGet(e) {
   if (admin) {
     const isMaster = admin.permissoes === 'todas';
     const state = readState();
+    // getSolicitantes() é lido pra qualquer admin autenticado (não só
+    // master) porque a foto de perfil de quem abriu um chamado precisa
+    // aparecer pro admin de Chamados também — mas só a foto vai pra quem
+    // não é master (fotosSolicitantes), nunca a lista com senha
+    // (solicitantes), que continua exclusiva do master.
+    const solicitantesList = getSolicitantes();
+    const fotosSolicitantes = {};
+    solicitantesList.forEach(function (s) {
+      if (s.foto) fotosSolicitantes[s.nome] = s.foto;
+    });
     payload = {
       ok: true,
       isAdmin: true,
@@ -418,7 +428,8 @@ function doGet(e) {
           podeResponderChamados: !!a.podeResponderChamados,
         };
       }) : [],
-      solicitantes: isMaster ? getSolicitantes() : [],
+      solicitantes: isMaster ? solicitantesList : [],
+      fotosSolicitantes: fotosSolicitantes,
       historico: getHistoricoMensal()
     };
   } else if (userNome) {
