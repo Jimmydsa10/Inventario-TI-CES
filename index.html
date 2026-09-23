@@ -138,7 +138,9 @@ const TIPO_AREA_EMOJI = {
   "Laboratório": "🧪",
   "Biblioteca": "📚",
   "Administrativo": "🗄️",
-  Outro: "➕"
+  Outro: "➕",
+  "Informática": "💻",
+  "Laboratório de Informática": "💻"
 };
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
@@ -9574,7 +9576,8 @@ function Chamados({
   setState,
   unidadeAtiva,
   podeAbrirChamados = true,
-  podeResponderChamados = true
+  podeResponderChamados = true,
+  fotosSolicitantes = {}
 }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
@@ -10101,7 +10104,8 @@ function Chamados({
       gap: 10
     }
   }, /*#__PURE__*/React.createElement(Avatar, {
-    nome: selecionado.solicitante || "?"
+    nome: selecionado.solicitante || "?",
+    foto: fotosSolicitantes[selecionado.solicitante]
   }), /*#__PURE__*/React.createElement("a", {
     href: selecionado.foto,
     target: "_blank",
@@ -10128,7 +10132,8 @@ function Chamados({
         gap: 10
       }
     }, /*#__PURE__*/React.createElement(Avatar, {
-      nome: nomeAutor
+      nome: nomeAutor,
+      foto: m.autor === "ti" ? undefined : fotosSolicitantes[selecionado.solicitante]
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         flex: 1,
@@ -12216,7 +12221,8 @@ function ChamadosDock({
   setState,
   abertoId,
   onAbrirChange,
-  podeResponderChamados = true
+  podeResponderChamados = true,
+  fotosSolicitantes = {}
 }) {
   const [texto, setTexto] = useState("");
   const [collapsed, setCollapsed] = useState(() => {
@@ -12412,6 +12418,7 @@ function ChamadosDock({
         }
       }, /*#__PURE__*/React.createElement(Avatar, {
         nome: nomeAutor,
+        foto: m.autor === "ti" ? undefined : fotosSolicitantes[selecionado.solicitante],
         size: 26
       }), /*#__PURE__*/React.createElement("div", {
         style: {
@@ -12538,6 +12545,7 @@ function ChamadosDock({
       }
     }, /*#__PURE__*/React.createElement(Avatar, {
       nome: c.solicitante || "?",
+      foto: fotosSolicitantes[c.solicitante],
       size: 32
     }), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -12609,6 +12617,7 @@ function App() {
   const [userAuth, setUserAuth] = useState(null); // { nome, senha } — solicitante logado
   const [admins, setAdmins] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
+  const [fotosSolicitantes, setFotosSolicitantes] = useState({});
   const [historico, setHistorico] = useState([]);
   const [state, setState] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -12643,6 +12652,7 @@ function App() {
     });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
+    setFotosSolicitantes(data.fotosSolicitantes || {});
     setHistorico(data.historico || []);
     setUserAuth(null);
     try {
@@ -13000,7 +13010,8 @@ function App() {
     setState: setState,
     unidadeAtiva: unidadeAtiva,
     podeAbrirChamados: podeAbrirChamados,
-    podeResponderChamados: podeResponderChamados
+    podeResponderChamados: podeResponderChamados,
+    fotosSolicitantes: fotosSolicitantes
   }), view === "importar" && allowed.has("importar") && /*#__PURE__*/React.createElement(Importar, {
     state: state,
     setState: setState,
@@ -13020,7 +13031,8 @@ function App() {
     setState: setState,
     abertoId: chamadoAbertoId,
     onAbrirChange: setChamadoAbertoId,
-    podeResponderChamados: podeResponderChamados
+    podeResponderChamados: podeResponderChamados,
+    fotosSolicitantes: fotosSolicitantes
   })));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(App, null));
