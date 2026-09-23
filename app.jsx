@@ -702,7 +702,6 @@ function buildSeedState() {
   };
 }
 
-const PRIORIDADE_OPTIONS = ["Baixa", "Média", "Alta"];
 const CHAMADO_STATUS_OPTIONS = ["Aberto", "Em andamento", "Resolvido"];
 const CHAMADO_STATUS_COLORS = {
   Aberto: "#B23A32",
@@ -3570,21 +3569,19 @@ function Importar({ state, setState, unidadeAtiva, secret, podeEditar = true }) 
 
 // ---------- Chamados (chat de abertura de chamados) ----------
 
-const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitação de compra"];
+const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitar"];
 
 function TipoChamadoBadge({ tipo }) {
   if (!tipo || tipo === "Problema técnico") return null;
-  const cor = tipo === "Solicitação de compra" ? "#2F6F5E" : COLORS.accent;
-  const fundo = tipo === "Solicitação de compra" ? "#E3EEE9" : COLORS.accentSoft;
   return (
-    <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: cor, background: fundo, whiteSpace: "nowrap" }}>
+    <span style={{ fontSize: 10.5, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: COLORS.accent, background: COLORS.accentSoft, whiteSpace: "nowrap" }}>
       {tipo}
     </span>
   );
 }
 
 function novoChamadoForm(unidadeAtiva) {
-  return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+  return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
 function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
@@ -3636,7 +3633,6 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
       unidade: form.unidade || unidadeAtiva,
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -3821,7 +3817,7 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                     </Select>
                   </Field>
                 </div>
-                <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                   <Field label="Sala relacionada (opcional)">
                     <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                       <option value="">Nenhuma</option>
@@ -3838,15 +3834,6 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                       {[...new Set(state.categorias.map((c) => c.nome))].map((c) => (
                         <option key={c} value={c}>
                           {c}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                  <Field label="Prioridade">
-                    <Select value={form.prioridade} onChange={(e) => setForm({ ...form, prioridade: e.target.value })}>
-                      {PRIORIDADE_OPTIONS.map((p) => (
-                        <option key={p} value={p}>
-                          {p}
                         </option>
                       ))}
                     </Select>
@@ -3994,7 +3981,6 @@ function Chamados({ state, setState, unidadeAtiva, podeEditar = true }) {
                   ["Solicitante", selecionado.solicitante || "—"],
                   ["Sala", selecionado.sala || "—"],
                   ["Categoria", selecionado.categoria || "—"],
-                  ["Prioridade", selecionado.prioridade],
                 ].map(([label, val]) => (
                   <div key={label} style={{ marginBottom: 14 }}>
                     <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
@@ -4078,24 +4064,8 @@ function ChamadosKanban({ chamados, onSelect }) {
                       <TipoChamadoBadge tipo={c.tipo} />
                     </div>
                   )}
-                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginBottom: 6 }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    {c.foto ? <img src={c.foto} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover" }} /> : <span />}
-                    <span
-                      style={{
-                        fontSize: 10.5,
-                        fontWeight: 600,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        color:
-                          c.prioridade === "Alta" ? COLORS.danger : c.prioridade === "Média" ? COLORS.accent : COLORS.inkSoft,
-                        background:
-                          c.prioridade === "Alta" ? COLORS.dangerSoft : c.prioridade === "Média" ? COLORS.accentSoft : "#EEEEEE",
-                      }}
-                    >
-                      {c.prioridade}
-                    </span>
-                  </div>
+                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</div>
+                  {c.foto && <img src={c.foto} alt="" style={{ width: 20, height: 20, borderRadius: 4, objectFit: "cover", marginTop: 6 }} />}
                 </div>
               ))
             )}
@@ -4147,7 +4117,7 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
       const data = await backendGetUser(nome.trim(), senha);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
       if (data.isUser) {
-        onLoggedIn({ nome: data.nome, senha }, data.state);
+        onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado);
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -4158,49 +4128,67 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
   }
 
   return (
-    <div style={{ position: "relative", minHeight: 640, background: COLORS.paper, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      <div style={{ width: "100%", maxWidth: 340, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: "28px 24px", textAlign: "center" }}>
-        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 64, height: 64, borderRadius: 12, margin: "0 auto 8px" }} />
-        <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink }}>Chamados de TI</div>
-        <div style={{ fontSize: 12, color: COLORS.inkSoft, marginBottom: 22 }}>Escola Espírito Santo</div>
-
-        <div style={{ textAlign: "left" }}>
-          <Field label="Nome">
-            <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
-          </Field>
-          <Field label="Senha">
-            <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
-          </Field>
-        </div>
-
-        {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
-
-        <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
-          {busy ? "Aguarde..." : "Entrar"}
-        </Button>
+    <div className="login-split" style={{ minHeight: 640, background: COLORS.paper, display: "flex", fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      <div
+        className="login-brand-panel"
+        style={{
+          width: "42%",
+          minWidth: 280,
+          background: `linear-gradient(160deg, ${COLORS.ink} 0%, #223454 100%)`,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 40,
+          textAlign: "center",
+        }}
+      >
+        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 68, height: 68, borderRadius: 14, background: "#fff", padding: 4, marginBottom: 18 }} />
+        <div style={{ fontSize: 19, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>Escola Espírito Santo</div>
+        <div style={{ fontSize: 13.5, color: "#B7C0CF", marginTop: 4 }}>Chamados de TI</div>
       </div>
 
-      <button
-        onClick={onAdminClick}
-        title="Acesso administrativo"
-        aria-label="Acesso administrativo"
-        style={{
-          position: "absolute",
-          right: 14,
-          bottom: 10,
-          background: "none",
-          border: "none",
-          color: COLORS.line,
-          fontSize: 10,
-          cursor: "pointer",
-          padding: 4,
-          opacity: 0.7,
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
-        onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.line)}
-      >
-        ⚙
-      </button>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 28 }}>
+        <div style={{ width: "100%", maxWidth: 300 }}>
+          <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Bem-vindo(a)</div>
+          <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Entre com seu nome e senha de acesso</div>
+
+          <div style={{ textAlign: "left" }}>
+            <Field label="Nome">
+              <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
+            </Field>
+            <Field label="Senha">
+              <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
+            </Field>
+          </div>
+
+          {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
+
+          <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+            {busy ? "Aguarde..." : "Entrar"}
+          </Button>
+
+          <button
+            onClick={onAdminClick}
+            style={{
+              display: "block",
+              width: "100%",
+              textAlign: "center",
+              marginTop: 16,
+              background: "none",
+              border: "none",
+              color: COLORS.lineStrong,
+              fontSize: 11.5,
+              cursor: "pointer",
+              padding: 4,
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
+            onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.lineStrong)}
+          >
+            ⚙ Acesso administrativo
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -4228,7 +4216,7 @@ function TopBarSolicitante({ nome, onLogout }) {
 }
 
 function novoChamadoSolicitanteForm() {
-  return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", prioridade: "Média", texto: "", foto: "" };
+  return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
 function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
@@ -4278,7 +4266,6 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
       unidade: form.unidade || "colegio",
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -4317,13 +4304,34 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
     setBusy(false);
   }
 
+  const agora = new Date();
+  const dataFormatada = agora.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <TopBarSolicitante nome={userAuth.nome} onLogout={onLogout} />
-      <div style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
-          <Button variant="primary" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }}>
+      <div style={{ padding: 24, maxWidth: 1160, margin: "0 auto" }}>
+        <div
+          className="welcome-banner-solicitante"
+          style={{
+            background: `linear-gradient(120deg, ${COLORS.ink} 0%, #223454 100%)`,
+            borderRadius: 12,
+            padding: "22px 26px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "#fff", marginBottom: 4 }}>Bem-vindo(a) de volta, {userAuth.nome}</div>
+            <div style={{ fontSize: 12.5, color: "#B7C0CF" }}>
+              Resumo dos seus chamados — <span style={{ color: "#E7C79A", fontWeight: 600 }}>{dataFormatada}, {horaFormatada}</span>
+            </div>
+          </div>
+          <Button variant="accent" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }} style={{ flexShrink: 0 }}>
             Novo chamado
           </Button>
         </div>
@@ -4383,7 +4391,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                       </Select>
                     </Field>
                   </div>
-                  <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 14 }}>
+                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                     <Field label="Sala relacionada (opcional)">
                       <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
                         <option value="">Nenhuma</option>
@@ -4400,15 +4408,16 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                         ))}
                       </Select>
                     </Field>
-                    <Field label="Prioridade">
-                      <Select value={form.prioridade} onChange={(e) => setForm({ ...form, prioridade: e.target.value })}>
-                        {PRIORIDADE_OPTIONS.map((p) => (
-                          <option key={p} value={p}>{p}</option>
-                        ))}
-                      </Select>
-                    </Field>
                   </div>
-                  <Field label={form.tipo === "Problema técnico" ? "Descreva o problema" : "Descreva sua sugestão"}>
+                  <Field
+                    label={
+                      form.tipo === "Problema técnico"
+                        ? "Descreva o problema"
+                        : form.tipo === "Solicitar"
+                        ? "Descreva sua solicitação"
+                        : "Descreva sua sugestão"
+                    }
+                  >
                     <textarea
                       value={form.texto}
                       onChange={(e) => setForm({ ...form, texto: e.target.value })}
@@ -4416,7 +4425,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                       placeholder={
                         form.tipo === "Problema técnico"
                           ? "Ex: O projetor da sala 108 não liga mais..."
-                          : form.tipo === "Solicitação de compra"
+                          : form.tipo === "Solicitar"
                           ? "Ex: Precisamos de mais 2 mouses pra sala 104..."
                           : "Ex: Seria bom ter um jeito de..."
                       }
@@ -4534,7 +4543,6 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                   {[
                     ["Sala", selecionado.sala || "—"],
                     ["Categoria", selecionado.categoria || "—"],
-                    ["Prioridade", selecionado.prioridade],
                     ["Status", selecionado.status],
                   ].map(([label, val]) => (
                     <div key={label} style={{ marginBottom: 14 }}>
@@ -4596,6 +4604,8 @@ const RESPONSIVE_CSS = `
   .chamado-detail { flex-direction: column !important; }
   .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
   .chamados-dock { display: none !important; }
+  .login-split { flex-direction: column !important; }
+  .login-brand-panel { width: 100% !important; min-width: 0 !important; padding: 28px 20px !important; }
 }
 `;
 
@@ -4851,8 +4861,10 @@ function Administradores({ admins, secret, onAdminsChanged }) {
   );
 }
 
+const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
+
 function emptyUsuarioForm() {
-  return { nome: "", senha: "" };
+  return { nome: "", senha: "", autorizado: false };
 }
 
 function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
@@ -4873,7 +4885,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
   }
 
   function openEdit(u) {
-    setModal({ mode: "edit", original: u, form: { nome: u.nome, senha: "" } });
+    setModal({ mode: "edit", original: u, form: { nome: u.nome, senha: "", autorizado: u.tipo === "autorizado" } });
     setError("");
   }
 
@@ -4900,7 +4912,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
     if (dupNome) return setError("Já existe um usuário com esse nome.");
 
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
-    const novoUsuario = { nome, senha: senhaFinal };
+    const novoUsuario = { nome, senha: senhaFinal, tipo: f.autorizado ? "autorizado" : "solicitante" };
     let novaLista;
     if (modal.mode === "new") {
       novaLista = [...lista, novoUsuario];
@@ -4927,7 +4939,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
       </div>
 
       <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0, marginBottom: 16 }}>
-        Cadastro livre está desativado — só um administrador pode criar acesso pra quem vai abrir chamados. Cada usuário entra com o nome e a senha cadastrados aqui.
+        Cadastro livre está desativado — só um administrador pode criar acesso. Cada usuário entra com o nome e a senha cadastrados aqui, na mesma tela de login pública (não é um administrador). Por padrão ele abre e acompanha chamados; marcando "Autorizado", ele passa a só visualizar Painel, Categorias, Salas e Inventário, sem poder abrir chamado nem editar nada.
       </p>
 
       {status && (
@@ -4953,6 +4965,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
             <thead>
               <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
                 <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Acesso</th>
                 <th style={{ padding: "8px 6px" }}></th>
               </tr>
             </thead>
@@ -4960,6 +4973,20 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
               {lista.map((u) => (
                 <tr key={u.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                   <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{u.nome}</td>
+                  <td style={{ padding: "9px 6px" }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        padding: "1px 7px",
+                        borderRadius: 999,
+                        color: u.tipo === "autorizado" ? COLORS.accent : COLORS.inkSoft,
+                        background: u.tipo === "autorizado" ? COLORS.accentSoft : COLORS.paper,
+                      }}
+                    >
+                      {u.tipo === "autorizado" ? "autorizado · só visualização" : "abre chamados"}
+                    </span>
+                  </td>
                   <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                     <button onClick={() => openEdit(u)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
                       <Pencil size={15} />
@@ -4983,6 +5010,19 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
           <Field label={modal.mode === "new" ? "Senha" : "Nova senha (deixe em branco para manter a atual)"}>
             <TextInput type="text" value={modal.form.senha} onChange={(e) => setModal({ ...modal, form: { ...modal.form, senha: e.target.value } })} placeholder={modal.mode === "new" ? "" : "••••••••"} />
           </Field>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4, marginBottom: 4, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={!!modal.form.autorizado}
+              onChange={(e) => setModal({ ...modal, form: { ...modal.form, autorizado: e.target.checked } })}
+            />
+            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Autorizado (só visualização — sem abrir chamados)</span>
+          </label>
+          <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: 12 }}>
+            {modal.form.autorizado
+              ? "Esse usuário só visualiza Painel, Categorias, Salas e Inventário. Não abre chamado, não responde e não edita nada."
+              : "Desmarcado: esse usuário entra normalmente pra abrir e acompanhar seus chamados."}
+          </p>
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
             <Button variant="ghost" onClick={() => setModal(null)}>
@@ -5288,10 +5328,15 @@ function App() {
     }
   }
 
-  function aplicarLoginUsuario(userCreds, estadoUsuario) {
-    setAuth({ isAdmin: false });
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado) {
+    setAuth(
+      isAutorizado
+        ? { isAdmin: false, isAutorizado: true, nome: userCreds.nome, permissoes: AUTORIZADO_PERMISSOES, editar: false }
+        : { isAdmin: false }
+    );
     setUserAuth(userCreds);
     setState(estadoUsuario);
+    setView("dashboard");
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
     } catch (e) {}
@@ -5337,7 +5382,7 @@ function App() {
         const data = await backendGetUser(savedUser.nome, savedUser.senha || "");
         if (!data.ok) throw new Error(data.error || "Erro desconhecido");
         if (data.isUser) {
-          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state);
+          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state, !!data.isAutorizado);
           setLoaded(true);
           return;
         }
@@ -5414,7 +5459,7 @@ function App() {
     return <ErrorScreen msg={loadError} detail={loadErrorDetail} />;
   }
 
-  if (!auth.isAdmin) {
+  if (!auth.isAdmin && !auth.isAutorizado) {
     const adminModal = loginOpen && (
       <Modal
         title="Entrar como administrador"
@@ -5512,7 +5557,7 @@ function App() {
           nome={auth.nome}
           permissoes={auth.permissoes}
           podeEditar={podeEditar}
-          onLogout={logout}
+          onLogout={auth.isAdmin ? logout : logoutUsuario}
           categorias={state.categorias}
           unidadeAtiva={unidadeAtiva}
           onNavigate={(key) => {

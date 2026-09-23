@@ -4725,7 +4725,6 @@ function buildSeedState() {
     chamados: []
   };
 }
-const PRIORIDADE_OPTIONS = ["Baixa", "Média", "Alta"];
 const CHAMADO_STATUS_OPTIONS = ["Aberto", "Em andamento", "Resolvido"];
 const CHAMADO_STATUS_COLORS = {
   Aberto: "#B23A32",
@@ -9365,21 +9364,19 @@ function Importar({
 
 // ---------- Chamados (chat de abertura de chamados) ----------
 
-const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitação de compra"];
+const TIPO_CHAMADO_OPTIONS = ["Problema técnico", "Sugestão/Feedback", "Solicitar"];
 function TipoChamadoBadge({
   tipo
 }) {
   if (!tipo || tipo === "Problema técnico") return null;
-  const cor = tipo === "Solicitação de compra" ? "#2F6F5E" : COLORS.accent;
-  const fundo = tipo === "Solicitação de compra" ? "#E3EEE9" : COLORS.accentSoft;
   return /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 10.5,
       fontWeight: 600,
       padding: "2px 8px",
       borderRadius: 999,
-      color: cor,
-      background: fundo,
+      color: COLORS.accent,
+      background: COLORS.accentSoft,
       whiteSpace: "nowrap"
     }
   }, tipo);
@@ -9390,7 +9387,6 @@ function novoChamadoForm(unidadeAtiva) {
     unidade: unidadeAtiva || "colegio",
     sala: "",
     categoria: "",
-    prioridade: "Média",
     texto: "",
     foto: ""
   };
@@ -9447,7 +9443,6 @@ function Chamados({
       unidade: form.unidade || unidadeAtiva,
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -9718,10 +9713,10 @@ function Chamados({
     key: u.id,
     value: u.id
   }, u.nome))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid-3",
+    className: "grid-2",
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr",
       gap: 10,
       marginBottom: 14
     }
@@ -9751,18 +9746,7 @@ function Chamados({
   }, "Nenhuma"), [...new Set(state.categorias.map(c => c.nome))].map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c)))), /*#__PURE__*/React.createElement(Field, {
-    label: "Prioridade"
-  }, /*#__PURE__*/React.createElement(Select, {
-    value: form.prioridade,
-    onChange: e => setForm({
-      ...form,
-      prioridade: e.target.value
-    })
-  }, PRIORIDADE_OPTIONS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))))), /*#__PURE__*/React.createElement(Field, {
+  }, c))))), /*#__PURE__*/React.createElement(Field, {
     label: "Descreva"
   }, /*#__PURE__*/React.createElement("textarea", {
     value: form.texto,
@@ -10034,7 +10018,7 @@ function Chamados({
       letterSpacing: 0.3,
       marginBottom: 12
     }
-  }, "Propriedades"), [["Solicitante", selecionado.solicitante || "—"], ["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"], ["Prioridade", selecionado.prioridade]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
+  }, "Propriedades"), [["Solicitante", selecionado.solicitante || "—"], ["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
     key: label,
     style: {
       marginBottom: 14
@@ -10199,34 +10183,19 @@ function ChamadosKanban({
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
-      color: COLORS.inkSoft,
-      marginBottom: 6
+      color: COLORS.inkSoft
     }
-  }, c.solicitante ? c.solicitante + " · " : "", c.sala || "Sem sala"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center"
-    }
-  }, c.foto ? /*#__PURE__*/React.createElement("img", {
+  }, c.solicitante ? c.solicitante + " · " : "", c.sala || "Sem sala"), c.foto && /*#__PURE__*/React.createElement("img", {
     src: c.foto,
     alt: "",
     style: {
       width: 20,
       height: 20,
       borderRadius: 4,
-      objectFit: "cover"
+      objectFit: "cover",
+      marginTop: 6
     }
-  }) : /*#__PURE__*/React.createElement("span", null), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10.5,
-      fontWeight: 600,
-      padding: "2px 8px",
-      borderRadius: 999,
-      color: c.prioridade === "Alta" ? COLORS.danger : c.prioridade === "Média" ? COLORS.accent : COLORS.inkSoft,
-      background: c.prioridade === "Alta" ? COLORS.dangerSoft : c.prioridade === "Média" ? COLORS.accentSoft : "#EEEEEE"
-    }
-  }, c.prioridade))))))));
+  })))))));
 }
 function ErrorScreen({
   msg,
@@ -10286,7 +10255,7 @@ function LoginPublico({
         onLoggedIn({
           nome: data.nome,
           senha
-        }, data.state);
+        }, data.state, !!data.isAutorizado);
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -10296,48 +10265,76 @@ function LoginPublico({
     setBusy(false);
   }
   return /*#__PURE__*/React.createElement("div", {
+    className: "login-split",
     style: {
-      position: "relative",
       minHeight: 640,
       background: COLORS.paper,
       display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: 20,
       fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "login-brand-panel",
     style: {
-      width: "100%",
-      maxWidth: 340,
-      background: "#fff",
-      border: `1px solid ${COLORS.line}`,
-      borderRadius: 12,
-      padding: "28px 24px",
+      width: "42%",
+      minWidth: 280,
+      background: `linear-gradient(160deg, ${COLORS.ink} 0%, #223454 100%)`,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 40,
       textAlign: "center"
     }
   }, /*#__PURE__*/React.createElement("img", {
     src: LOGO_DATA_URL,
     alt: "Logo Col\xE9gio Esp\xEDrito Santo",
     style: {
-      width: 64,
-      height: 64,
-      borderRadius: 12,
-      margin: "0 auto 8px"
+      width: 68,
+      height: 68,
+      borderRadius: 14,
+      background: "#fff",
+      padding: 4,
+      marginBottom: 18
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 15,
+      fontSize: 19,
+      fontWeight: 700,
+      color: "#fff",
+      lineHeight: 1.3
+    }
+  }, "Escola Esp\xEDrito Santo"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13.5,
+      color: "#B7C0CF",
+      marginTop: 4
+    }
+  }, "Chamados de TI")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 28
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      maxWidth: 300
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
       fontWeight: 700,
       color: COLORS.ink
     }
-  }, "Chamados de TI"), /*#__PURE__*/React.createElement("div", {
+  }, "Bem-vindo(a)"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
+      fontSize: 12.5,
       color: COLORS.inkSoft,
       marginBottom: 22
     }
-  }, "Escola Esp\xEDrito Santo"), /*#__PURE__*/React.createElement("div", {
+  }, "Entre com seu nome e senha de acesso"), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "left"
     }
@@ -10371,25 +10368,23 @@ function LoginPublico({
       justifyContent: "center",
       marginTop: 4
     }
-  }, busy ? "Aguarde..." : "Entrar")), /*#__PURE__*/React.createElement("button", {
+  }, busy ? "Aguarde..." : "Entrar"), /*#__PURE__*/React.createElement("button", {
     onClick: onAdminClick,
-    title: "Acesso administrativo",
-    "aria-label": "Acesso administrativo",
     style: {
-      position: "absolute",
-      right: 14,
-      bottom: 10,
+      display: "block",
+      width: "100%",
+      textAlign: "center",
+      marginTop: 16,
       background: "none",
       border: "none",
-      color: COLORS.line,
-      fontSize: 10,
+      color: COLORS.lineStrong,
+      fontSize: 11.5,
       cursor: "pointer",
-      padding: 4,
-      opacity: 0.7
+      padding: 4
     },
     onMouseEnter: e => e.currentTarget.style.color = COLORS.inkSoft,
-    onMouseLeave: e => e.currentTarget.style.color = COLORS.line
-  }, "\u2699"));
+    onMouseLeave: e => e.currentTarget.style.color = COLORS.lineStrong
+  }, "\u2699 Acesso administrativo"))));
 }
 function TopBarSolicitante({
   nome,
@@ -10455,7 +10450,6 @@ function novoChamadoSolicitanteForm() {
     unidade: "colegio",
     sala: "",
     categoria: "",
-    prioridade: "Média",
     texto: "",
     foto: ""
   };
@@ -10511,7 +10505,6 @@ function ChamadosSolicitante({
       unidade: form.unidade || "colegio",
       sala: form.sala,
       categoria: form.categoria,
-      prioridade: form.prioridade,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
@@ -10571,6 +10564,17 @@ function ChamadosSolicitante({
     }
     setBusy(false);
   }
+  const agora = new Date();
+  const dataFormatada = agora.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+  const horaFormatada = agora.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: 640,
@@ -10583,29 +10587,47 @@ function ChamadosSolicitante({
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 24,
-      maxWidth: 900,
+      maxWidth: 1160,
       margin: "0 auto"
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: "welcome-banner-solicitante",
     style: {
+      background: `linear-gradient(120deg, ${COLORS.ink} 0%, #223454 100%)`,
+      borderRadius: 12,
+      padding: "22px 26px",
       display: "flex",
-      justifyContent: "space-between",
       alignItems: "center",
-      marginBottom: 16
+      justifyContent: "space-between",
+      gap: 16,
+      marginBottom: 20
     }
-  }, /*#__PURE__*/React.createElement("h2", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      margin: 0,
       fontSize: 20,
       fontWeight: 700,
-      color: COLORS.ink
+      color: "#fff",
+      marginBottom: 4
     }
-  }, "Chamados"), /*#__PURE__*/React.createElement(Button, {
-    variant: "primary",
+  }, "Bem-vindo(a) de volta, ", userAuth.nome), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: "#B7C0CF"
+    }
+  }, "Resumo dos seus chamados \u2014 ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#E7C79A",
+      fontWeight: 600
+    }
+  }, dataFormatada, ", ", horaFormatada))), /*#__PURE__*/React.createElement(Button, {
+    variant: "accent",
     icon: Plus,
     onClick: () => {
       setNovoMode(true);
       setSelectedId(null);
+    },
+    style: {
+      flexShrink: 0
     }
   }, "Novo chamado")), /*#__PURE__*/React.createElement("div", {
     className: "grid-chat",
@@ -10739,10 +10761,10 @@ function ChamadosSolicitante({
     key: u.id,
     value: u.id
   }, u.nome))))), /*#__PURE__*/React.createElement("div", {
-    className: "grid-3",
+    className: "grid-2",
     style: {
       display: "grid",
-      gridTemplateColumns: "1fr 1fr 1fr",
+      gridTemplateColumns: "1fr 1fr",
       gap: 10,
       marginBottom: 14
     }
@@ -10772,19 +10794,8 @@ function ChamadosSolicitante({
   }, "Nenhuma"), categorias.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c)))), /*#__PURE__*/React.createElement(Field, {
-    label: "Prioridade"
-  }, /*#__PURE__*/React.createElement(Select, {
-    value: form.prioridade,
-    onChange: e => setForm({
-      ...form,
-      prioridade: e.target.value
-    })
-  }, PRIORIDADE_OPTIONS.map(p => /*#__PURE__*/React.createElement("option", {
-    key: p,
-    value: p
-  }, p))))), /*#__PURE__*/React.createElement(Field, {
-    label: form.tipo === "Problema técnico" ? "Descreva o problema" : "Descreva sua sugestão"
+  }, c))))), /*#__PURE__*/React.createElement(Field, {
+    label: form.tipo === "Problema técnico" ? "Descreva o problema" : form.tipo === "Solicitar" ? "Descreva sua solicitação" : "Descreva sua sugestão"
   }, /*#__PURE__*/React.createElement("textarea", {
     value: form.texto,
     onChange: e => setForm({
@@ -10792,7 +10803,7 @@ function ChamadosSolicitante({
       texto: e.target.value
     }),
     rows: 4,
-    placeholder: form.tipo === "Problema técnico" ? "Ex: O projetor da sala 108 não liga mais..." : form.tipo === "Solicitação de compra" ? "Ex: Precisamos de mais 2 mouses pra sala 104..." : "Ex: Seria bom ter um jeito de...",
+    placeholder: form.tipo === "Problema técnico" ? "Ex: O projetor da sala 108 não liga mais..." : form.tipo === "Solicitar" ? "Ex: Precisamos de mais 2 mouses pra sala 104..." : "Ex: Seria bom ter um jeito de...",
     style: {
       ...inputStyle,
       resize: "vertical",
@@ -11042,7 +11053,7 @@ function ChamadosSolicitante({
       letterSpacing: 0.3,
       marginBottom: 12
     }
-  }, "Propriedades"), [["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"], ["Prioridade", selecionado.prioridade], ["Status", selecionado.status]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
+  }, "Propriedades"), [["Sala", selecionado.sala || "—"], ["Categoria", selecionado.categoria || "—"], ["Status", selecionado.status]].map(([label, val]) => /*#__PURE__*/React.createElement("div", {
     key: label,
     style: {
       marginBottom: 14
@@ -11110,6 +11121,8 @@ const RESPONSIVE_CSS = `
   .chamado-detail { flex-direction: column !important; }
   .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
   .chamados-dock { display: none !important; }
+  .login-split { flex-direction: column !important; }
+  .login-brand-panel { width: 100% !important; min-width: 0 !important; padding: 28px 20px !important; }
 }
 `;
 
@@ -11509,10 +11522,12 @@ function Administradores({
     onClick: () => remove(removeTarget)
   }, "Excluir"))));
 }
+const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
 function emptyUsuarioForm() {
   return {
     nome: "",
-    senha: ""
+    senha: "",
+    autorizado: false
   };
 }
 function Usuarios({
@@ -11542,7 +11557,8 @@ function Usuarios({
       original: u,
       form: {
         nome: u.nome,
-        senha: ""
+        senha: "",
+        autorizado: u.tipo === "autorizado"
       }
     });
     setError("");
@@ -11579,7 +11595,8 @@ function Usuarios({
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
     const novoUsuario = {
       nome,
-      senha: senhaFinal
+      senha: senhaFinal,
+      tipo: f.autorizado ? "autorizado" : "solicitante"
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -11620,7 +11637,7 @@ function Usuarios({
       marginTop: 0,
       marginBottom: 16
     }
-  }, "Cadastro livre est\xE1 desativado \u2014 s\xF3 um administrador pode criar acesso pra quem vai abrir chamados. Cada usu\xE1rio entra com o nome e a senha cadastrados aqui."), status && /*#__PURE__*/React.createElement("div", {
+  }, "Cadastro livre est\xE1 desativado \u2014 s\xF3 um administrador pode criar acesso. Cada usu\xE1rio entra com o nome e a senha cadastrados aqui, na mesma tela de login p\xFAblica (n\xE3o \xE9 um administrador). Por padr\xE3o ele abre e acompanha chamados; marcando \"Autorizado\", ele passa a s\xF3 visualizar Painel, Categorias, Salas e Invent\xE1rio, sem poder abrir chamado nem editar nada."), status && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14,
       padding: "10px 12px",
@@ -11650,6 +11667,13 @@ function Usuarios({
     }
   }, "Nome"), /*#__PURE__*/React.createElement("th", {
     style: {
+      textAlign: "left",
+      padding: "8px 6px",
+      color: COLORS.inkSoft,
+      fontSize: 12
+    }
+  }, "Acesso"), /*#__PURE__*/React.createElement("th", {
+    style: {
       padding: "8px 6px"
     }
   }))), /*#__PURE__*/React.createElement("tbody", null, lista.map(u => /*#__PURE__*/React.createElement("tr", {
@@ -11664,6 +11688,19 @@ function Usuarios({
       fontWeight: 600
     }
   }, u.nome), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "1px 7px",
+      borderRadius: 999,
+      color: u.tipo === "autorizado" ? COLORS.accent : COLORS.inkSoft,
+      background: u.tipo === "autorizado" ? COLORS.accentSoft : COLORS.paper
+    }
+  }, u.tipo === "autorizado" ? "autorizado · só visualização" : "abre chamados")), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "9px 6px",
       textAlign: "right",
@@ -11721,7 +11758,38 @@ function Usuarios({
       }
     }),
     placeholder: modal.mode === "new" ? "" : "••••••••"
-  })), error && /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginTop: 4,
+      marginBottom: 4,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!modal.form.autorizado,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        autorizado: e.target.checked
+      }
+    })
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13.5,
+      color: COLORS.ink
+    }
+  }, "Autorizado (s\xF3 visualiza\xE7\xE3o \u2014 sem abrir chamados)")), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: COLORS.inkSoft,
+      marginTop: 0,
+      marginBottom: 12
+    }
+  }, modal.form.autorizado ? "Esse usuário só visualiza Painel, Categorias, Salas e Inventário. Não abre chamado, não responde e não edita nada." : "Desmarcado: esse usuário entra normalmente pra abrir e acompanhar seus chamados."), error && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
       fontSize: 13,
@@ -12236,12 +12304,19 @@ function App() {
       setView(allowed.includes("dashboard") ? "dashboard" : allowed[0] || "chamados");
     }
   }
-  function aplicarLoginUsuario(userCreds, estadoUsuario) {
-    setAuth({
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado) {
+    setAuth(isAutorizado ? {
+      isAdmin: false,
+      isAutorizado: true,
+      nome: userCreds.nome,
+      permissoes: AUTORIZADO_PERMISSOES,
+      editar: false
+    } : {
       isAdmin: false
     });
     setUserAuth(userCreds);
     setState(estadoUsuario);
+    setView("dashboard");
     try {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userCreds));
     } catch (e) {}
@@ -12286,7 +12361,7 @@ function App() {
           aplicarLoginUsuario({
             nome: data.nome,
             senha: savedUser.senha
-          }, data.state);
+          }, data.state, !!data.isAutorizado);
           setLoaded(true);
           return;
         }
@@ -12363,7 +12438,7 @@ function App() {
       detail: loadErrorDetail
     });
   }
-  if (!auth.isAdmin) {
+  if (!auth.isAdmin && !auth.isAutorizado) {
     const adminModal = loginOpen && /*#__PURE__*/React.createElement(Modal, {
       title: "Entrar como administrador",
       onClose: () => {
@@ -12483,7 +12558,7 @@ function App() {
     nome: auth.nome,
     permissoes: auth.permissoes,
     podeEditar: podeEditar,
-    onLogout: logout,
+    onLogout: auth.isAdmin ? logout : logoutUsuario,
     categorias: state.categorias,
     unidadeAtiva: unidadeAtiva,
     onNavigate: key => {
