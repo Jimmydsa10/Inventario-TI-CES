@@ -4477,7 +4477,14 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
                 </div>
               </div>
             ) : !selecionado ? (
-              <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
+              <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
+                  <img src={LOGO_DATA_URL} alt="" style={{ width: 200, height: 200, opacity: 0.16 }} />
+                </div>
+                <div style={{ position: "relative", paddingTop: 40, textAlign: "center", color: COLORS.inkSoft, fontSize: 14 }}>
+                  Selecione um chamado à esquerda ou abra um novo.
+                </div>
+              </div>
             ) : (
               <div className="chamado-detail" style={{ display: "flex", height: "100%" }}>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, borderRight: `1px solid ${COLORS.line}` }}>
