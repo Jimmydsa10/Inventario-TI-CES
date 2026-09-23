@@ -4540,7 +4540,8 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                   <img src={LOGO_DATA_URL} alt="" style={{ width: 200, height: 200, opacity: 0.16 }} />
                 </div>
                 <div style={{ position: "relative", paddingTop: 40, textAlign: "center", color: COLORS.inkSoft, fontSize: 14 }}>
-                  Selecione um chamado à esquerda ou abra um novo.
+                  <span className="texto-selecione-desktop">Selecione um chamado à esquerda ou abra um novo.</span>
+                  <span className="texto-selecione-mobile">Selecione um chamado acima ou abra um novo.</span>
                 </div>
               </div>
             ) : (
@@ -4638,8 +4639,11 @@ function useIsMobile() {
 
 const RESPONSIVE_CSS = `
 .app-topbar-mobile { display: none; }
+.texto-selecione-mobile { display: none; }
 @media (max-width: 860px) {
   .app-topbar-mobile { display: flex !important; }
+  .texto-selecione-desktop { display: none !important; }
+  .texto-selecione-mobile { display: inline !important; }
   .app-sidebar {
     position: fixed !important;
     top: 0; left: 0; bottom: 0;
