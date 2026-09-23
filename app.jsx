@@ -44,10 +44,6 @@ const ICON_PATHS = {
   qrcode: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm14 0h2v2h-2zm-4 0h2v2h-2zm4 4h2v2h-2zm-4 0h2v2h-2z",
   pin: "M12 17v5m-5-9h10l-1.5-2V5a3.5 3.5 0 00-7 0v6L7 13z",
   clock: "M12 21a9 9 0 100-18 9 9 0 000 18zm0-14v5l3.5 2",
-  cap: "M2 8l10-5 10 5-10 5-10-5zm5 2.5V16c0 1.5 2.5 3 5 3s5-1.5 5-3v-5.5M22 8v6.5",
-  flask: "M9 2h6M10 2v6l-5.5 9.5A2 2 0 006.2 21h11.6a2 2 0 001.7-3.5L14 8V2M8 14h8",
-  book: "M12 6c-1.8-1.3-4.5-2-8-2v15c3.5 0 6.2.7 8 2 1.8-1.3 4.5-2 8-2V4c-3.5 0-6.2.7-8 2z",
-  briefcase: "M7 7V5a2 2 0 012-2h6a2 2 0 012 2v2M3 7h18v11a2 2 0 01-2 2H5a2 2 0 01-2-2V7zM3 12h18",
 };
 
 function Icon({ name, size = 16, ...rest }) {
@@ -85,17 +81,13 @@ const Menu = IconWrap("menu");
 const QrCode = IconWrap("qrcode");
 const Pin = IconWrap("pin");
 const Clock = IconWrap("clock");
-const GraduationCap = IconWrap("cap");
-const FlaskConical = IconWrap("flask");
-const BookOpen = IconWrap("book");
-const Briefcase = IconWrap("briefcase");
 
-const TIPO_AREA_ICONS = {
-  "Sala de aula": GraduationCap,
-  "Laboratório": FlaskConical,
-  "Biblioteca": BookOpen,
-  "Administrativo": Briefcase,
-  Outro: Plus,
+const TIPO_AREA_EMOJI = {
+  "Sala de aula": "🎓",
+  "Laboratório": "🧪",
+  "Biblioteca": "📚",
+  "Administrativo": "🗄️",
+  Outro: "➕",
 };
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
@@ -1268,7 +1260,7 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
 
 const DASH_VIEW_STORAGE_KEY = "inventario-ti-dashview";
 
-function StatTile({ icon: Icon, value, label, accent }) {
+function StatTile({ icon: Icon, emoji, value, label, accent }) {
   return (
     <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
       <div
@@ -1284,7 +1276,7 @@ function StatTile({ icon: Icon, value, label, accent }) {
           flexShrink: 0,
         }}
       >
-        <Icon size={18} />
+        {emoji ? <span style={{ fontSize: 18, lineHeight: 1 }}>{emoji}</span> : <Icon size={18} />}
       </div>
       <div>
         <div style={{ fontSize: 20, fontWeight: 700, color: accent ? COLORS.accent : COLORS.ink, lineHeight: 1 }}>{value}</div>
@@ -1609,7 +1601,7 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
           </div>
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 16 }}>
             {salasPorTipo.map((s) => (
-              <StatTile key={s.tipo} icon={TIPO_AREA_ICONS[s.tipo] || DoorOpen} value={s.value} label={s.tipo} />
+              <StatTile key={s.tipo} emoji={TIPO_AREA_EMOJI[s.tipo] || "🚪"} value={s.value} label={s.tipo} />
             ))}
           </div>
 
