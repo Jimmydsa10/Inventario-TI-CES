@@ -4355,6 +4355,10 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
     setBusy(false);
   }
 
+  const agora = new Date();
+  const dataFormatada = agora.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+
   return (
     <div style={{ minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <TopBarSolicitante nome={userAuth.nome} foto={userAuth.foto} onFotoChange={onFotoChange} onLogout={onLogout} />
@@ -4372,7 +4376,10 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
             marginBottom: 14,
           }}
         >
-          <div style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>Bem-vindo(a), {userAuth.nome}</div>
+          <div>
+            <div style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>Bem-vindo(a), {userAuth.nome}</div>
+            <div style={{ fontSize: 12, color: "#B7C0CF", marginTop: 2 }}>{dataFormatada}, {horaFormatada}</div>
+          </div>
           <Button variant="accent" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }} style={{ flexShrink: 0 }}>
             Novo chamado
           </Button>

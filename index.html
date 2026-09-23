@@ -10637,6 +10637,17 @@ function ChamadosSolicitante({
     }
     setBusy(false);
   }
+  const agora = new Date();
+  const dataFormatada = agora.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+  const horaFormatada = agora.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: "100vh",
@@ -10666,13 +10677,19 @@ function ChamadosSolicitante({
       gap: 16,
       marginBottom: 14
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 17,
       fontWeight: 700,
       color: "#fff"
     }
-  }, "Bem-vindo(a), ", userAuth.nome), /*#__PURE__*/React.createElement(Button, {
+  }, "Bem-vindo(a), ", userAuth.nome), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: "#B7C0CF",
+      marginTop: 2
+    }
+  }, dataFormatada, ", ", horaFormatada)), /*#__PURE__*/React.createElement(Button, {
     variant: "accent",
     icon: Plus,
     onClick: () => {
