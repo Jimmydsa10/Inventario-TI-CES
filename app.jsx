@@ -4304,10 +4304,6 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
     setBusy(false);
   }
 
-  const agora = new Date();
-  const dataFormatada = agora.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-
   return (
     <div style={{ minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
       <TopBarSolicitante nome={userAuth.nome} onLogout={onLogout} />
@@ -4325,12 +4321,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout }) {
             marginBottom: 14,
           }}
         >
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#fff", marginBottom: 2 }}>Bem-vindo(a) de volta, {userAuth.nome}</div>
-            <div style={{ fontSize: 12, color: "#B7C0CF" }}>
-              Resumo dos seus chamados — <span style={{ color: "#E7C79A", fontWeight: 600 }}>{dataFormatada}, {horaFormatada}</span>
-            </div>
-          </div>
+          <div style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>Bem-vindo(a), {userAuth.nome}</div>
           <Button variant="accent" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }} style={{ flexShrink: 0 }}>
             Novo chamado
           </Button>
