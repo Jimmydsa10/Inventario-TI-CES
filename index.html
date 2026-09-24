@@ -145,8 +145,31 @@ const TIPO_AREA_EMOJI = {
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
+// Desenha o valor de cada barra escrito do lado dela — sem isso o número só
+// aparecia passando o mouse (tooltip do Chart.js), o que não funciona em
+// print nem no celular.
+const valueLabelsPlugin = {
+  id: "valueLabels",
+  afterDatasetsDraw(chart) {
+    const {
+      ctx
+    } = chart;
+    chart.data.datasets.forEach((ds, i) => {
+      chart.getDatasetMeta(i).data.forEach((bar, idx) => {
+        ctx.save();
+        ctx.fillStyle = "#16233D";
+        ctx.font = "700 11px ui-sans-serif, system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(ds.data[idx], bar.x + 6, bar.y);
+        ctx.restore();
+      });
+    });
+  }
+};
 function BarChartHorizontal({
-  data
+  data,
+  color = "#C97A2B"
 }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
@@ -160,7 +183,7 @@ function BarChartHorizontal({
         labels: data.map(d => d.name),
         datasets: [{
           data: data.map(d => d.value),
-          backgroundColor: "#C97A2B",
+          backgroundColor: color,
           borderRadius: 3
         }]
       },
@@ -168,6 +191,11 @@ function BarChartHorizontal({
         indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
+        layout: {
+          padding: {
+            right: 34
+          }
+        },
         plugins: {
           legend: {
             display: false
@@ -200,12 +228,13 @@ function BarChartHorizontal({
             }
           }
         }
-      }
+      },
+      plugins: [valueLabelsPlugin]
     });
     return () => {
       if (chartRef.current) chartRef.current.destroy();
     };
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(data), color]);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: "relative",
@@ -5714,7 +5743,8 @@ function Dashboard({
   state,
   setView,
   unidadeAtiva,
-  onAbrirChamado
+  onAbrirChamado,
+  onFiltrarStatus
 }) {
   const inv = useMemo(() => state.inventario.filter(r => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter(a => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
@@ -6407,7 +6437,11 @@ function Dashboard({
       marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement(EquipamentosKanban, {
-    inventario: inv
+    inventario: inv,
+    onVerTodos: status => {
+      onFiltrarStatus(status);
+      setView("inventario");
+    }
   })), /*#__PURE__*/React.createElement(Panel, {
     title: "Chamados por status"
   }, /*#__PURE__*/React.createElement(ChamadosKanban, {
@@ -6462,36 +6496,14 @@ function Dashboard({
       gap: 16
     }
   }, /*#__PURE__*/React.createElement(Panel, {
-    title: "Equipamentos por sala"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      maxHeight: 280,
-      overflow: "auto"
-    }
-  }, /*#__PURE__*/React.createElement("table", {
-    style: {
-      width: "100%",
-      borderCollapse: "collapse",
-      fontSize: 13
-    }
-  }, /*#__PURE__*/React.createElement("tbody", null, porSala.slice(0, 15).map(s => /*#__PURE__*/React.createElement("tr", {
-    key: s.name,
-    style: {
-      borderBottom: `1px solid ${COLORS.line}`
-    }
-  }, /*#__PURE__*/React.createElement("td", {
-    style: {
-      padding: "7px 4px",
-      color: COLORS.ink
-    }
-  }, s.name), /*#__PURE__*/React.createElement("td", {
-    style: {
-      padding: "7px 4px",
-      textAlign: "right",
-      fontWeight: 600,
-      color: COLORS.ink
-    }
-  }, s.value)))))), porSala.length > 15 && /*#__PURE__*/React.createElement("div", {
+    title: "Equipamentos por sala (top 8)"
+  }, /*#__PURE__*/React.createElement(BarChartHorizontal, {
+    data: porSala.slice(0, 8).map(s => ({
+      name: s.name,
+      value: s.value
+    })),
+    color: STATUS_COLORS["Em uso"]
+  }), porSala.length > 8 && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 10
     }
@@ -6609,8 +6621,21 @@ function Dashboard({
     }
   }, dias < 0 ? `Vencida há ${Math.abs(dias)} dias` : `Vence em ${dias} dias`)))))));
 }
+
+// Rótulo curto só pro cabeçalho da coluna do Kanban — o valor de verdade
+// (usado em filtros, backend etc.) continua sendo o texto completo em
+// STATUS_OPTIONS. Sem isso, "Precisa de manutenção" quebra em 2 linhas e
+// desalinha a altura das colunas em relação às outras.
+const STATUS_LABEL_CURTO = {
+  "Em uso": "Em uso",
+  "Em manutenção": "Em manut.",
+  "Precisa de manutenção": "Precisa manut.",
+  "Em estoque": "Em estoque",
+  "Descartado": "Descartado"
+};
 function EquipamentosKanban({
-  inventario
+  inventario,
+  onVerTodos
 }) {
   const colunas = useMemo(() => {
     const map = {};
@@ -6638,34 +6663,37 @@ function EquipamentosKanban({
       display: "flex",
       alignItems: "center",
       gap: 6,
-      marginBottom: 10
+      height: 30,
+      marginBottom: 10,
+      paddingBottom: 8,
+      borderBottom: `2px solid ${STATUS_COLORS[col.status]}`
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 8,
-      height: 8,
-      borderRadius: 999,
-      background: STATUS_COLORS[col.status],
-      display: "inline-block",
-      flexShrink: 0
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
       fontSize: 12.5,
       fontWeight: 700,
-      color: COLORS.ink
+      color: COLORS.ink,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
     }
-  }, col.status), /*#__PURE__*/React.createElement("span", {
+  }, STATUS_LABEL_CURTO[col.status] || col.status), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11.5,
-      color: COLORS.inkSoft
+      marginLeft: "auto",
+      flexShrink: 0,
+      fontSize: 10.5,
+      fontWeight: 700,
+      padding: "1px 7px",
+      borderRadius: 999,
+      color: STATUS_COLORS[col.status],
+      background: STATUS_BG[col.status]
     }
   }, col.itens.length)), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       flexDirection: "column",
-      gap: 8,
-      maxHeight: 150,
+      gap: 7,
+      maxHeight: 190,
       overflow: "auto"
     }
   }, col.itens.length === 0 ? /*#__PURE__*/React.createElement("div", {
@@ -6679,8 +6707,10 @@ function EquipamentosKanban({
     style: {
       background: COLORS.surface,
       border: `1px solid ${COLORS.line}`,
-      borderRadius: 10,
-      padding: 10
+      borderLeft: `3px solid ${STATUS_COLORS[col.status]}`,
+      borderRadius: 8,
+      padding: "8px 10px",
+      boxShadow: "0 1px 2px rgba(22,35,61,0.05)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6696,32 +6726,36 @@ function EquipamentosKanban({
     color: COLORS.accent
   }), r.categoria), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 11.5,
+      fontSize: 11,
       color: COLORS.inkSoft,
       marginTop: 2
     }
-  }, r.sala || "Sem sala"), /*#__PURE__*/React.createElement("div", {
+  }, r.sala || "Sem sala", " \xB7 ", /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 10.5,
-      color: COLORS.inkSoft,
-      marginTop: 2,
       fontFamily: "ui-monospace, monospace"
     }
-  }, r.id))), col.itens.length > LIMITE && /*#__PURE__*/React.createElement("div", {
+  }, r.id)))), col.itens.length > LIMITE && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: COLORS.inkSoft,
       textAlign: "center",
       padding: "4px 0"
     }
-  }, "+", col.itens.length - LIMITE, " mais")), col.itens.length > 3 && /*#__PURE__*/React.createElement("div", {
+  }, "+", col.itens.length - LIMITE, " mais")), onVerTodos && col.itens.length > 0 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => onVerTodos(col.status),
     style: {
-      fontSize: 10.5,
-      color: COLORS.inkSoft,
-      textAlign: "center",
-      marginTop: 4
+      width: "100%",
+      marginTop: 8,
+      padding: "7px 4px",
+      fontSize: 11,
+      fontWeight: 700,
+      color: COLORS.ink,
+      background: COLORS.paper,
+      border: "none",
+      borderRadius: 6,
+      cursor: "pointer"
     }
-  }, "role para ver mais \u2193"))));
+  }, "Ver todos (", col.itens.length, ") \u2192"))));
 }
 
 // ---------- Inventário ----------
@@ -7163,6 +7197,8 @@ function Inventario({
   onConsumePending,
   pendingCategoriaFiltro,
   onConsumeCategoriaFiltro,
+  pendingStatusFiltro,
+  onConsumeStatusFiltro,
   podeEditar = true
 }) {
   const [search, setSearch] = useState("");
@@ -7200,6 +7236,13 @@ function Inventario({
     if (onConsumeCategoriaFiltro) onConsumeCategoriaFiltro();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingCategoriaFiltro]);
+  useEffect(() => {
+    if (pendingStatusFiltro === null || pendingStatusFiltro === undefined) return;
+    setFStatus(pendingStatusFiltro);
+    setPage(1);
+    if (onConsumeStatusFiltro) onConsumeStatusFiltro();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingStatusFiltro]);
   function addCategoria(nome) {
     setState(prev => prev.categorias.some(c => c.nome.toLowerCase() === nome.toLowerCase() && unidadeDe(c) === unidadeAtiva) ? prev : {
       ...prev,
@@ -10308,26 +10351,30 @@ function ChamadosKanban({
       display: "flex",
       alignItems: "center",
       gap: 6,
-      marginBottom: 10
+      height: 30,
+      marginBottom: 10,
+      paddingBottom: 8,
+      borderBottom: `2px solid ${CHAMADO_STATUS_COLORS[col.status]}`
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      width: 8,
-      height: 8,
-      borderRadius: 999,
-      background: CHAMADO_STATUS_COLORS[col.status],
-      flexShrink: 0
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
       fontSize: 13,
       fontWeight: 700,
-      color: COLORS.ink
+      color: COLORS.ink,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
     }
   }, col.status), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontSize: 11.5,
-      color: COLORS.inkSoft
+      marginLeft: "auto",
+      flexShrink: 0,
+      fontSize: 10.5,
+      fontWeight: 700,
+      padding: "1px 7px",
+      borderRadius: 999,
+      color: CHAMADO_STATUS_COLORS[col.status],
+      background: CHAMADO_STATUS_BG[col.status]
     }
   }, col.itens.length)), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -10349,9 +10396,11 @@ function ChamadosKanban({
     style: {
       background: COLORS.surface,
       border: `1px solid ${COLORS.line}`,
-      borderRadius: 10,
-      padding: 12,
-      cursor: "pointer"
+      borderLeft: `3px solid ${CHAMADO_STATUS_COLORS[col.status]}`,
+      borderRadius: 8,
+      padding: "10px 12px",
+      cursor: "pointer",
+      boxShadow: "0 1px 2px rgba(22,35,61,0.05)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -12647,6 +12696,7 @@ function App() {
     }
   });
   const [pendingCategoriaFiltro, setPendingCategoriaFiltro] = useState(null);
+  const [pendingStatusFiltro, setPendingStatusFiltro] = useState(null);
   const [unidadeAtiva, setUnidadeAtiva] = useState("colegio");
   const saveTimer = useRef(null);
   function aplicarLoginAdmin(data, senhaUsada) {
@@ -12985,7 +13035,8 @@ function App() {
     state: state,
     setView: setView,
     unidadeAtiva: unidadeAtiva,
-    onAbrirChamado: setChamadoAbertoId
+    onAbrirChamado: setChamadoAbertoId,
+    onFiltrarStatus: status => setPendingStatusFiltro(status)
   }), view === "inventario" && allowed.has("inventario") && /*#__PURE__*/React.createElement(Inventario, {
     state: state,
     setState: setState,
@@ -12994,6 +13045,8 @@ function App() {
     onConsumePending: () => setPendingPatrimonio(null),
     pendingCategoriaFiltro: pendingCategoriaFiltro,
     onConsumeCategoriaFiltro: () => setPendingCategoriaFiltro(null),
+    pendingStatusFiltro: pendingStatusFiltro,
+    onConsumeStatusFiltro: () => setPendingStatusFiltro(null),
     podeEditar: podeEditar
   }), view === "categorias" && allowed.has("categorias") && /*#__PURE__*/React.createElement(Categorias, {
     state: state,
