@@ -94,7 +94,28 @@ const TIPO_AREA_EMOJI = {
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
-function BarChartHorizontal({ data }) {
+// Desenha o valor de cada barra escrito do lado dela — sem isso o número só
+// aparecia passando o mouse (tooltip do Chart.js), o que não funciona em
+// print nem no celular.
+const valueLabelsPlugin = {
+  id: "valueLabels",
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    chart.data.datasets.forEach((ds, i) => {
+      chart.getDatasetMeta(i).data.forEach((bar, idx) => {
+        ctx.save();
+        ctx.fillStyle = "#16233D";
+        ctx.font = "700 11px ui-sans-serif, system-ui, sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.fillText(ds.data[idx], bar.x + 6, bar.y);
+        ctx.restore();
+      });
+    });
+  },
+};
+
+function BarChartHorizontal({ data, color = "#C97A2B" }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
 
@@ -106,23 +127,25 @@ function BarChartHorizontal({ data }) {
       type: "bar",
       data: {
         labels: data.map((d) => d.name),
-        datasets: [{ data: data.map((d) => d.value), backgroundColor: "#C97A2B", borderRadius: 3 }],
+        datasets: [{ data: data.map((d) => d.value), backgroundColor: color, borderRadius: 3 }],
       },
       options: {
         indexAxis: "y",
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { right: 34 } },
         plugins: { legend: { display: false }, tooltip: { enabled: true } },
         scales: {
           x: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: "#E1DDD0" } },
           y: { ticks: { font: { size: 11 } }, grid: { display: false } },
         },
       },
+      plugins: [valueLabelsPlugin],
     });
     return () => {
       if (chartRef.current) chartRef.current.destroy();
     };
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(data), color]);
 
   return (
     <div style={{ position: "relative", height: Math.max(280, data.length * 24) }}>
@@ -1288,7 +1311,7 @@ function StatTile({ icon: Icon, emoji, value, label, accent }) {
   );
 }
 
-function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
+function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStatus }) {
   const inv = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
   const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
@@ -1679,7 +1702,13 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
       ) : dashView === "kanban" ? (
         <>
           <Panel title="Equipamentos por status" style={{ marginBottom: 16 }}>
-            <EquipamentosKanban inventario={inv} />
+            <EquipamentosKanban
+              inventario={inv}
+              onVerTodos={(status) => {
+                onFiltrarStatus(status);
+                setView("inventario");
+              }}
+            />
           </Panel>
           <Panel title="Chamados por status">
             <ChamadosKanban chamados={(state.chamados || []).filter((c) => unidadeDe(c) === unidadeAtiva)} onSelect={() => setView("chamados")} />
@@ -1706,20 +1735,9 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
       </div>
 
       <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <Panel title="Equipamentos por sala">
-          <div style={{ maxHeight: 280, overflow: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-              <tbody>
-                {porSala.slice(0, 15).map((s) => (
-                  <tr key={s.name} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
-                    <td style={{ padding: "7px 4px", color: COLORS.ink }}>{s.name}</td>
-                    <td style={{ padding: "7px 4px", textAlign: "right", fontWeight: 600, color: COLORS.ink }}>{s.value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {porSala.length > 15 && (
+        <Panel title="Equipamentos por sala (top 8)">
+          <BarChartHorizontal data={porSala.slice(0, 8).map((s) => ({ name: s.name, value: s.value }))} color={STATUS_COLORS["Em uso"]} />
+          {porSala.length > 8 && (
             <div style={{ marginTop: 10 }}>
               <Button variant="ghost" onClick={() => setView("relatorios")}>
                 Ver todas as salas
@@ -1796,7 +1814,19 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado }) {
   );
 }
 
-function EquipamentosKanban({ inventario }) {
+// Rótulo curto só pro cabeçalho da coluna do Kanban — o valor de verdade
+// (usado em filtros, backend etc.) continua sendo o texto completo em
+// STATUS_OPTIONS. Sem isso, "Precisa de manutenção" quebra em 2 linhas e
+// desalinha a altura das colunas em relação às outras.
+const STATUS_LABEL_CURTO = {
+  "Em uso": "Em uso",
+  "Em manutenção": "Em manut.",
+  "Precisa de manutenção": "Precisa manut.",
+  "Em estoque": "Em estoque",
+  "Descartado": "Descartado",
+};
+
+function EquipamentosKanban({ inventario, onVerTodos }) {
   const colunas = useMemo(() => {
     const map = {};
     STATUS_OPTIONS.forEach((s) => (map[s] = []));
@@ -1813,23 +1843,58 @@ function EquipamentosKanban({ inventario }) {
     <div style={{ display: "grid", gridTemplateColumns: `repeat(${STATUS_OPTIONS.length}, minmax(0,1fr))`, gap: 12 }}>
       {colunas.map((col) => (
         <div key={col.status}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: STATUS_COLORS[col.status], display: "inline-block", flexShrink: 0 }} />
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink }}>{col.status}</span>
-            <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{col.itens.length}</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              height: 30,
+              marginBottom: 10,
+              paddingBottom: 8,
+              borderBottom: `2px solid ${STATUS_COLORS[col.status]}`,
+            }}
+          >
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {STATUS_LABEL_CURTO[col.status] || col.status}
+            </span>
+            <span
+              style={{
+                marginLeft: "auto",
+                flexShrink: 0,
+                fontSize: 10.5,
+                fontWeight: 700,
+                padding: "1px 7px",
+                borderRadius: 999,
+                color: STATUS_COLORS[col.status],
+                background: STATUS_BG[col.status],
+              }}
+            >
+              {col.itens.length}
+            </span>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 150, overflow: "auto" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7, maxHeight: 190, overflow: "auto" }}>
             {col.itens.length === 0 ? (
               <div style={{ fontSize: 12, color: COLORS.inkSoft, padding: "8px 2px" }}>—</div>
             ) : (
               col.itens.slice(0, LIMITE).map((r) => (
-                <div key={r.id} style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 10 }}>
+                <div
+                  key={r.id}
+                  style={{
+                    background: COLORS.surface,
+                    border: `1px solid ${COLORS.line}`,
+                    borderLeft: `3px solid ${STATUS_COLORS[col.status]}`,
+                    borderRadius: 8,
+                    padding: "8px 10px",
+                    boxShadow: "0 1px 2px rgba(22,35,61,0.05)",
+                  }}
+                >
                   <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 600, color: COLORS.ink }}>
                     <CategoriaIcon categoria={r.categoria} color={COLORS.accent} />
                     {r.categoria}
                   </div>
-                  <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 2 }}>{r.sala || "Sem sala"}</div>
-                  <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 2, fontFamily: "ui-monospace, monospace" }}>{r.id}</div>
+                  <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 2 }}>
+                    {r.sala || "Sem sala"} · <span style={{ fontFamily: "ui-monospace, monospace" }}>{r.id}</span>
+                  </div>
                 </div>
               ))
             )}
@@ -1837,8 +1902,24 @@ function EquipamentosKanban({ inventario }) {
               <div style={{ fontSize: 11.5, color: COLORS.inkSoft, textAlign: "center", padding: "4px 0" }}>+{col.itens.length - LIMITE} mais</div>
             )}
           </div>
-          {col.itens.length > 3 && (
-            <div style={{ fontSize: 10.5, color: COLORS.inkSoft, textAlign: "center", marginTop: 4 }}>role para ver mais ↓</div>
+          {onVerTodos && col.itens.length > 0 && (
+            <button
+              onClick={() => onVerTodos(col.status)}
+              style={{
+                width: "100%",
+                marginTop: 8,
+                padding: "7px 4px",
+                fontSize: 11,
+                fontWeight: 700,
+                color: COLORS.ink,
+                background: COLORS.paper,
+                border: "none",
+                borderRadius: 6,
+                cursor: "pointer",
+              }}
+            >
+              Ver todos ({col.itens.length}) →
+            </button>
           )}
         </div>
       ))}
@@ -2080,7 +2161,7 @@ function EquipForm({ form, setForm, state, isNew, onAddCategoria, podeEditar = t
   );
 }
 
-function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro, podeEditar = true }) {
+function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsumePending, pendingCategoriaFiltro, onConsumeCategoriaFiltro, pendingStatusFiltro, onConsumeStatusFiltro, podeEditar = true }) {
   const [search, setSearch] = useState("");
   const [fCategoria, setFCategoria] = useState("");
   const [fSala, setFSala] = useState("");
@@ -2111,6 +2192,14 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
     if (onConsumeCategoriaFiltro) onConsumeCategoriaFiltro();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pendingCategoriaFiltro]);
+
+  useEffect(() => {
+    if (pendingStatusFiltro === null || pendingStatusFiltro === undefined) return;
+    setFStatus(pendingStatusFiltro);
+    setPage(1);
+    if (onConsumeStatusFiltro) onConsumeStatusFiltro();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingStatusFiltro]);
 
   function addCategoria(nome) {
     setState((prev) =>
@@ -4153,10 +4242,32 @@ function ChamadosKanban({ chamados, onSelect }) {
     <div className="grid-3" style={{ display: "grid", gridTemplateColumns: `repeat(${CHAMADO_STATUS_OPTIONS.length}, minmax(0,1fr))`, gap: 14 }}>
       {colunas.map((col) => (
         <div key={col.status}>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-            <span style={{ width: 8, height: 8, borderRadius: 999, background: CHAMADO_STATUS_COLORS[col.status], flexShrink: 0 }} />
-            <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink }}>{col.status}</span>
-            <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{col.itens.length}</span>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              height: 30,
+              marginBottom: 10,
+              paddingBottom: 8,
+              borderBottom: `2px solid ${CHAMADO_STATUS_COLORS[col.status]}`,
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{col.status}</span>
+            <span
+              style={{
+                marginLeft: "auto",
+                flexShrink: 0,
+                fontSize: 10.5,
+                fontWeight: 700,
+                padding: "1px 7px",
+                borderRadius: 999,
+                color: CHAMADO_STATUS_COLORS[col.status],
+                background: CHAMADO_STATUS_BG[col.status],
+              }}
+            >
+              {col.itens.length}
+            </span>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 560, overflow: "auto" }}>
             {col.itens.length === 0 ? (
@@ -4166,7 +4277,15 @@ function ChamadosKanban({ chamados, onSelect }) {
                 <div
                   key={c.id}
                   onClick={() => onSelect(c)}
-                  style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: 12, cursor: "pointer" }}
+                  style={{
+                    background: COLORS.surface,
+                    border: `1px solid ${COLORS.line}`,
+                    borderLeft: `3px solid ${CHAMADO_STATUS_COLORS[col.status]}`,
+                    borderRadius: 8,
+                    padding: "10px 12px",
+                    cursor: "pointer",
+                    boxShadow: "0 1px 2px rgba(22,35,61,0.05)",
+                  }}
                 >
                   <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>{c.assunto}</div>
                   {c.tipo && c.tipo !== "Problema técnico" && (
@@ -5546,6 +5665,7 @@ function App() {
     }
   });
   const [pendingCategoriaFiltro, setPendingCategoriaFiltro] = useState(null);
+  const [pendingStatusFiltro, setPendingStatusFiltro] = useState(null);
   const [unidadeAtiva, setUnidadeAtiva] = useState("colegio");
   const saveTimer = useRef(null);
 
@@ -5843,7 +5963,13 @@ function App() {
             <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
           )}
           {view === "dashboard" && allowed.has("dashboard") && (
-            <Dashboard state={state} setView={setView} unidadeAtiva={unidadeAtiva} onAbrirChamado={setChamadoAbertoId} />
+            <Dashboard
+              state={state}
+              setView={setView}
+              unidadeAtiva={unidadeAtiva}
+              onAbrirChamado={setChamadoAbertoId}
+              onFiltrarStatus={(status) => setPendingStatusFiltro(status)}
+            />
           )}
           {view === "inventario" && allowed.has("inventario") && (
             <Inventario
@@ -5854,6 +5980,8 @@ function App() {
               onConsumePending={() => setPendingPatrimonio(null)}
               pendingCategoriaFiltro={pendingCategoriaFiltro}
               onConsumeCategoriaFiltro={() => setPendingCategoriaFiltro(null)}
+              pendingStatusFiltro={pendingStatusFiltro}
+              onConsumeStatusFiltro={() => setPendingStatusFiltro(null)}
               podeEditar={podeEditar}
             />
           )}
