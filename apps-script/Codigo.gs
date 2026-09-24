@@ -483,11 +483,40 @@ function doGet(e) {
   return jsonOut(payload);
 }
 
-// Antes: sempre chamava readState() no topo, mesmo pra 'salvarTudo' e
-// 'salvarAdmins' — que sobrescrevem o estado sem nunca usar o que acabou
-// de ser lido. Isso tirava uma leitura completa da planilha em TODO
-// autosave (a ação mais frequente do app). Agora só lê quando precisa.
+// Toda ação de doPost segue o padrão "lê o estado inteiro -> muda um pedaço
+// -> escreve o estado inteiro de volta" (readState/writeState). Sem
+// nenhuma trava, duas pessoas mandando uma ação quase ao mesmo tempo (a
+// diferença de tempo entre a leitura de uma e a escrita da outra é só o
+// tempo de ida e volta até a planilha) fazem a segunda escrita apagar
+// silenciosamente o que a primeira tinha acabado de salvar — comprovado
+// num teste de concorrência: dois chamados abertos "ao mesmo tempo"
+// viraram um só, sem erro nenhum. Com poucas pessoas isso é raro; com
+// muita gente usando ao mesmo tempo deixa de ser raro. O LockService
+// serializa as execuções deste script (cada uma espera a sua vez em vez
+// de rodar em paralelo) só durante a ação em si — o resto do app
+// continua funcionando normalmente, só essa gravação específica espera.
 function doPost(e) {
+  const lock = LockService.getScriptLock();
+  let temLock = false;
+  try {
+    temLock = lock.tryLock(30000);
+  } catch (err) {
+    temLock = false;
+  }
+  if (!temLock) {
+    // Alguém mais ficou muito tempo segurando a trava (uso pesado
+    // simultâneo). Melhor avisar e deixar tentar de novo do que travar a
+    // execução até estourar o limite de tempo do Apps Script.
+    return jsonOut({ ok: false, error: 'Sistema ocupado, tente novamente em alguns segundos.' });
+  }
+  try {
+    return doPostComTrava(e);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function doPostComTrava(e) {
   const body = JSON.parse(e.postData.contents);
   const admin = findAdminBySecret(body.secret);
   const isAdmin = !!admin;
