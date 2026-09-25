@@ -110,8 +110,14 @@ function saveAdmins(list) {
 // linhas antigas de antes dessa coluna existir, e qualquer conta criada
 // direto por um admin) = true, pra não exigir aprovação de quem já estava
 // cadastrado ou foi criado pelo próprio admin.
+// Coluna "autorizadoAbreChamados" (7ª): só importa junto com tipo='autorizado'
+// — por padrão um "autorizado" é só visualização (Painel, Categorias, Salas,
+// Inventário), sem chamado nenhum. Marcando essa opção, ele continua só
+// visualização no resto, mas ganha a aba "Chamados" pra abrir e acompanhar
+// os PRÓPRIOS chamados (igual um solicitante comum) — ver authenticateSolicitante
+// e o ramo userNome de doGet. Em branco = false (comportamento de sempre).
 function getSolicitantes() {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados']);
   const data = sh.getDataRange().getValues();
   return data.slice(1).filter(function (r) { return r[0]; }).map(function (r) {
     const aprovadoEmBranco = r[5] === '' || r[5] === undefined || r[5] === null;
@@ -122,6 +128,7 @@ function getSolicitantes() {
       foto: String(r[3] || ''),
       email: String(r[4] || ''),
       aprovado: aprovadoEmBranco ? true : r[5] === true,
+      autorizadoAbreChamados: r[6] === true,
     };
   });
 }
@@ -142,10 +149,10 @@ function findSolicitante(identificador) {
 }
 
 function saveSolicitantes(list) {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 6).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 7).clearContent();
   }
   const rows = (list || []).map(function (s) {
     return [
@@ -155,10 +162,11 @@ function saveSolicitantes(list) {
       s.foto || '',
       s.email || '',
       s.aprovado === undefined ? true : !!s.aprovado,
+      !!s.autorizadoAbreChamados,
     ];
   });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 6).setValues(rows);
+    sh.getRange(2, 1, rows.length, 7).setValues(rows);
   }
 }
 
@@ -171,7 +179,7 @@ function atualizarFotoSolicitante(nome, novaFoto) {
   const alvo = String(nome || '').trim().toLowerCase();
   const atualizada = lista.map(function (s) {
     if (s.nome.trim().toLowerCase() !== alvo) return s;
-    return { nome: s.nome, senha: s.senha, tipo: s.tipo, foto: novaFoto || '', email: s.email, aprovado: s.aprovado };
+    return { nome: s.nome, senha: s.senha, tipo: s.tipo, foto: novaFoto || '', email: s.email, aprovado: s.aprovado, autorizadoAbreChamados: s.autorizadoAbreChamados };
   });
   saveSolicitantes(atualizada);
 }
@@ -189,17 +197,20 @@ function autenticarUsuarioLogin(nome, senha) {
 }
 
 // Retorna o registro do solicitante (com o nome como está cadastrado) se
-// nome+senha baterem, ele não for do tipo 'autorizado' E já estiver
-// aprovado, ou null. Usado pra autenticar quem pode abrir chamado e
-// responder — sem isso, doPost aceitava novoChamado/novaMensagem de
-// qualquer um que soubesse a URL pública do backend, sem checar login
-// algum. Um "autorizado" é só visualização: mesmo logado, não pode criar
-// chamado nem responder. Um cadastro ainda pendente de aprovação também não
-// consegue, mesmo sabendo a senha certa — mas não deveria nem conseguir
-// logar antes disso (ver doGet).
+// nome+senha baterem E já estiver aprovado, ou null. Usado pra autenticar
+// quem pode abrir chamado e responder — sem isso, doPost aceitava
+// novoChamado/novaMensagem de qualquer um que soubesse a URL pública do
+// backend, sem checar login algum. Um "autorizado" comum é só visualização:
+// mesmo logado, não pode criar chamado nem responder — a não ser que tenha
+// autorizadoAbreChamados marcado, aí ele pode abrir/acompanhar os PRÓPRIOS
+// chamados como um solicitante normal, só que continua sem poder editar o
+// resto (inventário, categorias etc.). Um cadastro ainda pendente de
+// aprovação também não consegue, mesmo sabendo a senha certa — mas não
+// deveria nem conseguir logar antes disso (ver doGet).
 function authenticateSolicitante(nome, senha) {
   const s = autenticarUsuarioLogin(nome, senha);
-  if (!s || s.tipo === 'autorizado' || s.aprovado === false) return null;
+  if (!s || s.aprovado === false) return null;
+  if (s.tipo === 'autorizado' && !s.autorizadoAbreChamados) return null;
   return s;
 }
 
@@ -720,15 +731,24 @@ function doGet(e) {
     if (usuario && usuario.aprovado === false) {
       payload = { ok: true, isAdmin: false, isUser: false, error: 'Seu cadastro ainda está aguardando aprovação de um administrador.' };
     } else if (usuario && usuario.tipo === 'autorizado') {
-      // Autorizado: entra como um usuário comum (não como admin), mas com
+      // Autorizado: entra como um usuário comum (não como admin), com
       // visão só-leitura de Painel/Categorias/Salas/Inventário — sem
-      // chamados dos outros, sem admins/solicitantes/histórico.
+      // admins/solicitantes/histórico. Por padrão também sem chamado nenhum;
+      // se autorizadoAbreChamados estiver marcado, ganha os PRÓPRIOS
+      // chamados (nunca os de outras pessoas), do mesmo jeito que um
+      // solicitante comum — ver o "alvo"/filtro logo abaixo, no ramo normal.
       const state = readState();
+      const podeAbrirChamados = !!usuario.autorizadoAbreChamados;
+      const alvoAutorizado = usuario.nome.trim().toLowerCase();
+      const chamadosDoAutorizado = podeAbrirChamados
+        ? listarChamados().filter(function (c) { return (c.criadoPor || '').trim().toLowerCase() === alvoAutorizado; })
+        : [];
       payload = {
         ok: true,
         isAdmin: false,
         isUser: true,
         isAutorizado: true,
+        podeAbrirChamados: podeAbrirChamados,
         nome: usuario.nome,
         foto: usuario.foto || '',
         state: {
@@ -736,7 +756,7 @@ function doGet(e) {
           areas: state.areas || [],
           responsaveis: state.responsaveis || [],
           inventario: state.inventario || [],
-          chamados: listarChamados()
+          chamados: chamadosDoAutorizado
         }
       };
     } else if (usuario) {
