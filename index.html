@@ -364,6 +364,16 @@ async function backendGetUser(nome, senha) {
   const url = BACKEND_URL + "?userNome=" + encodeURIComponent(nome) + "&userSenha=" + encodeURIComponent(senha || "");
   return jsonpRequestComRetry(url);
 }
+
+// Cadastro público (nome + email + senha escolhida pela própria pessoa).
+// Vai por GET/JSONP (não por backendPost) porque precisa de uma resposta de
+// verdade pra saber se o email já existe ou não — backendPost usa fetch em
+// modo no-cors (pra evitar CORS do Apps Script) e nunca consegue ler o que o
+// servidor respondeu, só se a requisição saiu.
+async function backendCadastro(nome, email, senha) {
+  const url = BACKEND_URL + "?action=cadastro&novoNome=" + encodeURIComponent(nome) + "&novoEmail=" + encodeURIComponent(email) + "&novoSenha=" + encodeURIComponent(senha || "");
+  return jsonpRequestComRetry(url);
+}
 async function backendPost(action, payload) {
   const tentar = () => fetch(BACKEND_URL, {
     method: "POST",
@@ -10685,10 +10695,17 @@ function LoginPublico({
   onLoggedIn,
   onAdminClick
 }) {
+  const [modo, setModo] = useState("login"); // "login" | "cadastro"
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
+  const [cadNome, setCadNome] = useState("");
+  const [cadEmail, setCadEmail] = useState("");
+  const [cadSenha, setCadSenha] = useState("");
+  const [cadBusy, setCadBusy] = useState(false);
+  const [cadErro, setCadErro] = useState("");
+  const [cadOk, setCadOk] = useState(false);
   async function entrar() {
     if (!nome.trim() || !senha.trim()) return setErro("Preencha nome e senha.");
     setBusy(true);
@@ -10708,6 +10725,30 @@ function LoginPublico({
       setErro("Não foi possível conectar (" + String(e && e.message || e) + ").");
     }
     setBusy(false);
+  }
+  function voltarParaLogin() {
+    setModo("login");
+    setCadNome("");
+    setCadEmail("");
+    setCadSenha("");
+    setCadErro("");
+    setCadOk(false);
+  }
+  async function cadastrar() {
+    if (!cadNome.trim() || !cadEmail.trim() || !cadSenha.trim()) return setCadErro("Preencha nome, email e senha.");
+    setCadBusy(true);
+    setCadErro("");
+    try {
+      const data = await backendCadastro(cadNome.trim(), cadEmail.trim(), cadSenha);
+      if (!data.ok) {
+        setCadErro(data.error || "Não foi possível concluir o cadastro.");
+      } else {
+        setCadOk(true);
+      }
+    } catch (e) {
+      setCadErro("Não foi possível conectar (" + String(e && e.message || e) + ").");
+    }
+    setCadBusy(false);
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "login-split",
@@ -10767,7 +10808,7 @@ function LoginPublico({
       width: "100%",
       maxWidth: 300
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, modo === "login" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 17,
       fontWeight: 700,
@@ -10779,12 +10820,12 @@ function LoginPublico({
       color: COLORS.inkSoft,
       marginBottom: 22
     }
-  }, "Entre com seu nome e senha de acesso"), /*#__PURE__*/React.createElement("div", {
+  }, "Entre com seu nome (ou email) e senha de acesso"), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: "left"
     }
   }, /*#__PURE__*/React.createElement(Field, {
-    label: "Nome"
+    label: "Nome ou email"
   }, /*#__PURE__*/React.createElement(TextInput, {
     value: nome,
     onChange: e => setNome(e.target.value),
@@ -10814,12 +10855,27 @@ function LoginPublico({
       marginTop: 4
     }
   }, busy ? "Aguarde..." : "Entrar"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => setModo("cadastro"),
+    style: {
+      display: "block",
+      width: "100%",
+      textAlign: "center",
+      marginTop: 14,
+      background: "none",
+      border: "none",
+      color: COLORS.accent,
+      fontSize: 12.5,
+      fontWeight: 600,
+      cursor: "pointer",
+      padding: 4
+    }
+  }, "N\xE3o tem conta? Cadastre-se"), /*#__PURE__*/React.createElement("button", {
     onClick: onAdminClick,
     style: {
       display: "block",
       width: "100%",
       textAlign: "center",
-      marginTop: 16,
+      marginTop: 4,
       background: "none",
       border: "none",
       color: COLORS.lineStrong,
@@ -10829,7 +10885,94 @@ function LoginPublico({
     },
     onMouseEnter: e => e.currentTarget.style.color = COLORS.inkSoft,
     onMouseLeave: e => e.currentTarget.style.color = COLORS.lineStrong
-  }, "\u2699 Acesso administrativo"))));
+  }, "\u2699 Acesso administrativo")) : cadOk ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
+      fontWeight: 700,
+      color: COLORS.ink
+    }
+  }, "Cadastro enviado!"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: COLORS.inkSoft,
+      lineHeight: 1.5,
+      marginTop: 10
+    }
+  }, "Um administrador vai revisar seu pedido e liberar seu acesso. Assim que for aprovado, voc\xEA j\xE1 consegue entrar com o email e a senha que acabou de cadastrar."), /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    onClick: voltarParaLogin,
+    style: {
+      width: "100%",
+      justifyContent: "center",
+      marginTop: 8
+    }
+  }, "Voltar para o login")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 17,
+      fontWeight: 700,
+      color: COLORS.ink
+    }
+  }, "Criar conta"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: COLORS.inkSoft,
+      marginBottom: 22
+    }
+  }, "Use seu email da escola \u2014 um administrador precisa aprovar antes de voc\xEA conseguir entrar"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/React.createElement(Field, {
+    label: "Nome"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    value: cadNome,
+    onChange: e => setCadNome(e.target.value),
+    placeholder: "Seu nome completo"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Email da escola"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    type: "email",
+    value: cadEmail,
+    onChange: e => setCadEmail(e.target.value),
+    placeholder: "voce@escola.com.br"
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Crie uma senha"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    type: "password",
+    value: cadSenha,
+    onChange: e => setCadSenha(e.target.value),
+    onKeyDown: e => e.key === "Enter" && cadastrar()
+  }))), cadErro && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: COLORS.danger,
+      fontSize: 12.5,
+      marginBottom: 12,
+      textAlign: "left"
+    }
+  }, cadErro), /*#__PURE__*/React.createElement(Button, {
+    variant: "primary",
+    onClick: cadastrar,
+    disabled: cadBusy,
+    style: {
+      width: "100%",
+      justifyContent: "center",
+      marginTop: 4
+    }
+  }, cadBusy ? "Aguarde..." : "Cadastrar"), /*#__PURE__*/React.createElement("button", {
+    onClick: voltarParaLogin,
+    style: {
+      display: "block",
+      width: "100%",
+      textAlign: "center",
+      marginTop: 14,
+      background: "none",
+      border: "none",
+      color: COLORS.lineStrong,
+      fontSize: 12.5,
+      cursor: "pointer",
+      padding: 4
+    }
+  }, "J\xE1 tem conta? Entrar")))));
 }
 function TopBarSolicitante({
   nome,
@@ -12203,6 +12346,7 @@ const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
 function emptyUsuarioForm() {
   return {
     nome: "",
+    email: "",
     senha: "",
     autorizado: false
   };
@@ -12234,6 +12378,7 @@ function Usuarios({
       original: u,
       form: {
         nome: u.nome,
+        email: u.email || "",
         senha: "",
         autorizado: u.tipo === "autorizado"
       }
@@ -12265,16 +12410,27 @@ function Usuarios({
   function save() {
     const f = modal.form;
     const nome = f.nome.trim();
+    const email = f.email.trim();
     if (!nome) return setError("Informe o nome.");
     if (modal.mode === "new" && !f.senha.trim()) return setError("Defina uma senha.");
     const dupNome = lista.some(u => u !== modal.original && u.nome.toLowerCase() === nome.toLowerCase());
     if (dupNome) return setError("Já existe um usuário com esse nome.");
+    const dupEmail = email && lista.some(u => u !== modal.original && (u.email || "").toLowerCase() === email.toLowerCase());
+    if (dupEmail) return setError("Já existe um usuário com esse email.");
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
+    // Cadastro feito por um admin aqui já nasce aprovado — a aprovação só
+    // existe pra quem se cadastra sozinho (ver "Cadastre-se" na tela de
+    // login pública). Editar um pendente por aqui, sem passar pelo botão
+    // "Aprovar", mantém o "aprovado" que já estava (não usa esse modal pra
+    // aprovar ninguém, de propósito, pra não ser um clique acidental).
+    const aprovado = modal.original ? modal.original.aprovado === undefined ? true : modal.original.aprovado : true;
     const novoUsuario = {
       nome,
+      email,
       senha: senhaFinal,
       tipo: f.autorizado ? "autorizado" : "solicitante",
-      foto: modal.original ? modal.original.foto || "" : ""
+      foto: modal.original ? modal.original.foto || "" : "",
+      aprovado
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -12290,6 +12446,15 @@ function Usuarios({
     setRemoveTarget(null);
     persistir(novaLista);
   }
+  function aprovar(u) {
+    const novaLista = lista.map(x => x === u ? {
+      ...x,
+      aprovado: true
+    } : x);
+    persistir(novaLista);
+  }
+  const pendentes = lista.filter(u => u.aprovado === false);
+  const aprovados = lista.filter(u => u.aprovado !== false);
   return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
@@ -12315,7 +12480,7 @@ function Usuarios({
       marginTop: 0,
       marginBottom: 16
     }
-  }, "Cadastro livre est\xE1 desativado \u2014 s\xF3 um administrador pode criar acesso. Cada usu\xE1rio entra com o nome e a senha cadastrados aqui, na mesma tela de login p\xFAblica (n\xE3o \xE9 um administrador). Por padr\xE3o ele abre e acompanha chamados; marcando \"Autorizado\", ele passa a s\xF3 visualizar Painel, Categorias, Salas e Invent\xE1rio, sem poder abrir chamado nem editar nada."), status && /*#__PURE__*/React.createElement("div", {
+  }, "Al\xE9m de um administrador criar acesso aqui direto, qualquer pessoa pode se cadastrar sozinha (nome, email e senha) na tela de login p\xFAblica \u2014 mas o cadastro s\xF3 fica ativo depois de aprovado aqui embaixo. Cada usu\xE1rio entra com o nome (ou email) e a senha cadastrados, na mesma tela de login p\xFAblica (n\xE3o \xE9 um administrador). Por padr\xE3o ele abre e acompanha chamados; marcando \"Autorizado\", ele passa a s\xF3 visualizar Painel, Categorias, Salas e Invent\xE1rio, sem poder abrir chamado nem editar nada."), status && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14,
       padding: "10px 12px",
@@ -12324,7 +12489,76 @@ function Usuarios({
       background: status.type === "ok" ? "#E3EEE9" : COLORS.dangerSoft,
       color: status.type === "ok" ? "#1F4D40" : COLORS.danger
     }
-  }, status.msg), /*#__PURE__*/React.createElement(Panel, null, lista.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
+  }, status.msg), pendentes.length > 0 && /*#__PURE__*/React.createElement(Panel, {
+    title: `Aguardando aprovação (${pendentes.length})`,
+    style: {
+      marginBottom: 16,
+      border: `1px solid ${COLORS.accent}`
+    }
+  }, /*#__PURE__*/React.createElement("table", {
+    style: {
+      width: "100%",
+      borderCollapse: "collapse",
+      fontSize: 13.5
+    }
+  }, /*#__PURE__*/React.createElement("thead", null, /*#__PURE__*/React.createElement("tr", {
+    style: {
+      borderBottom: `1px solid ${COLORS.lineStrong}`
+    }
+  }, /*#__PURE__*/React.createElement("th", {
+    style: {
+      textAlign: "left",
+      padding: "8px 6px",
+      color: COLORS.inkSoft,
+      fontSize: 12
+    }
+  }, "Nome"), /*#__PURE__*/React.createElement("th", {
+    style: {
+      textAlign: "left",
+      padding: "8px 6px",
+      color: COLORS.inkSoft,
+      fontSize: 12
+    }
+  }, "Email"), /*#__PURE__*/React.createElement("th", {
+    style: {
+      padding: "8px 6px"
+    }
+  }))), /*#__PURE__*/React.createElement("tbody", null, pendentes.map(u => /*#__PURE__*/React.createElement("tr", {
+    key: u.nome,
+    style: {
+      borderBottom: `1px solid ${COLORS.line}`
+    }
+  }, /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px",
+      color: COLORS.ink,
+      fontWeight: 600
+    }
+  }, u.nome), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px",
+      color: COLORS.inkSoft
+    }
+  }, u.email || "—"), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px",
+      textAlign: "right",
+      whiteSpace: "nowrap"
+    }
+  }, /*#__PURE__*/React.createElement(Button, {
+    variant: "primary",
+    icon: Check,
+    onClick: () => aprovar(u),
+    disabled: busy,
+    style: {
+      marginRight: 6
+    }
+  }, "Aprovar"), /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    icon: X,
+    onClick: () => setRemoveTarget(u),
+    disabled: busy
+  }, "Recusar"))))))), /*#__PURE__*/React.createElement(Panel, null, aprovados.length === 0 ? /*#__PURE__*/React.createElement(EmptyState, {
     text: "Nenhum usu\xE1rio cadastrado ainda."
   }) : /*#__PURE__*/React.createElement("table", {
     style: {
@@ -12350,11 +12584,18 @@ function Usuarios({
       color: COLORS.inkSoft,
       fontSize: 12
     }
+  }, "Email"), /*#__PURE__*/React.createElement("th", {
+    style: {
+      textAlign: "left",
+      padding: "8px 6px",
+      color: COLORS.inkSoft,
+      fontSize: 12
+    }
   }, "Acesso"), /*#__PURE__*/React.createElement("th", {
     style: {
       padding: "8px 6px"
     }
-  }))), /*#__PURE__*/React.createElement("tbody", null, lista.map(u => /*#__PURE__*/React.createElement("tr", {
+  }))), /*#__PURE__*/React.createElement("tbody", null, aprovados.map(u => /*#__PURE__*/React.createElement("tr", {
     key: u.nome,
     style: {
       borderBottom: `1px solid ${COLORS.line}`
@@ -12366,6 +12607,11 @@ function Usuarios({
       fontWeight: 600
     }
   }, u.nome), /*#__PURE__*/React.createElement("td", {
+    style: {
+      padding: "9px 6px",
+      color: COLORS.inkSoft
+    }
+  }, u.email || "—"), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "9px 6px"
     }
@@ -12421,6 +12667,18 @@ function Usuarios({
       form: {
         ...modal.form,
         nome: e.target.value
+      }
+    })
+  })), /*#__PURE__*/React.createElement(Field, {
+    label: "Email (opcional \u2014 d\xE1 pra entrar com ele tamb\xE9m)"
+  }, /*#__PURE__*/React.createElement(TextInput, {
+    type: "email",
+    value: modal.form.email,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        email: e.target.value
       }
     })
   })), /*#__PURE__*/React.createElement(Field, {
@@ -12489,7 +12747,7 @@ function Usuarios({
     onClick: save,
     disabled: busy
   }, "Salvar"))), removeTarget && /*#__PURE__*/React.createElement(Modal, {
-    title: "Excluir usu\xE1rio",
+    title: removeTarget.aprovado === false ? "Recusar cadastro" : "Excluir usuário",
     onClose: () => setRemoveTarget(null),
     width: 380
   }, /*#__PURE__*/React.createElement("p", {
@@ -12498,7 +12756,7 @@ function Usuarios({
       color: COLORS.ink,
       marginTop: 0
     }
-  }, "Tem certeza que deseja excluir o usu\xE1rio ", /*#__PURE__*/React.createElement("strong", null, removeTarget.nome), "? Ele n\xE3o vai mais conseguir entrar com essa senha."), /*#__PURE__*/React.createElement("div", {
+  }, removeTarget.aprovado === false ? /*#__PURE__*/React.createElement(React.Fragment, null, "Tem certeza que deseja recusar o cadastro de ", /*#__PURE__*/React.createElement("strong", null, removeTarget.nome), "? O pedido \xE9 removido e ele(a) n\xE3o vai conseguir entrar.") : /*#__PURE__*/React.createElement(React.Fragment, null, "Tem certeza que deseja excluir o usu\xE1rio ", /*#__PURE__*/React.createElement("strong", null, removeTarget.nome), "? Ele n\xE3o vai mais conseguir entrar com essa senha.")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "flex-end",
@@ -12511,7 +12769,7 @@ function Usuarios({
     variant: "danger",
     icon: Trash2,
     onClick: () => remove(removeTarget)
-  }, "Excluir"))));
+  }, removeTarget.aprovado === false ? "Recusar" : "Excluir"))));
 }
 const SECRET_STORAGE_KEY = "inventario-ti-secret";
 const USER_STORAGE_KEY = "inventario-ti-user";
