@@ -209,7 +209,7 @@ function registrarSnapshotMensal(state) {
     const jaTem = data.slice(1).some(function (r) { return mesDaLinha(r[0]) === mesAtual; });
     if (!jaTem) {
       const inv = state.inventario || [];
-      const cham = state.chamados || [];
+      const cham = listarChamados(); // só busca aqui (1x por mês), não em toda chamada
       sh.appendRow([
         mesAtual,
         inv.length,
@@ -291,6 +291,102 @@ function notificarNovoChamado(chamado) {
   }
 }
 
+// ---------- Chamados (linha própria por chamado, não mais dentro do AppState) ----------
+
+// Antes, todo chamado vivia dentro do mesmo bloco JSON gigante que guarda
+// inventário/categorias/salas/responsáveis (a aba "AppState") — então
+// qualquer ação de chamado, até só mudar um status, precisava ler e
+// reescrever esse bloco inteiro. Com o tempo, conforme o inventário cresce,
+// isso fica mais lento — e com muita gente mexendo em chamado ao mesmo
+// tempo (a trava do LockService serializa tudo), quanto mais tempo cada
+// ação leva, mais tempo as próximas pessoas da fila esperam. Agora cada
+// chamado é uma linha própria na aba "Chamados" (coluna A = id, pra achar
+// rápido; coluna B = o chamado inteiro em JSON) — mudar um chamado só
+// lê/escreve a linha dele, não o resto do app. A trava continua protegendo
+// exatamente do mesmo jeito, só que fica ocupada por menos tempo em cada
+// ação.
+function encontrarLinhaChamado_(sh, chamadoId) {
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) return -1;
+  const ids = sh.getRange(2, 1, lastRow - 1, 1).getValues();
+  for (let i = 0; i < ids.length; i++) {
+    if (String(ids[i][0]) === String(chamadoId)) return i + 2; // +2: pula o cabeçalho, base 1
+  }
+  return -1;
+}
+
+function listarChamados() {
+  const sh = getOrCreateSheet('Chamados', ['id', 'dados']);
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) return [];
+  const rows = sh.getRange(2, 1, lastRow - 1, 2).getValues();
+  const out = [];
+  for (let i = 0; i < rows.length; i++) {
+    if (!rows[i][0]) continue;
+    try {
+      out.push(JSON.parse(rows[i][1]));
+    } catch (e) {
+      // linha corrompida (não deveria acontecer) — ignora em vez de quebrar a lista inteira
+    }
+  }
+  return out;
+}
+
+function buscarChamadoPorId_(chamadoId) {
+  const sh = getOrCreateSheet('Chamados', ['id', 'dados']);
+  const linha = encontrarLinhaChamado_(sh, chamadoId);
+  if (linha === -1) return null;
+  const valor = sh.getRange(linha, 2, 1, 1).getValues()[0][0];
+  try {
+    return JSON.parse(valor);
+  } catch (e) {
+    return null;
+  }
+}
+
+function salvarChamado_(chamado) {
+  const sh = getOrCreateSheet('Chamados', ['id', 'dados']);
+  const linha = encontrarLinhaChamado_(sh, chamado.id);
+  const json = JSON.stringify(chamado);
+  if (linha === -1) {
+    sh.appendRow([chamado.id, json]);
+  } else {
+    sh.getRange(linha, 1, 1, 2).setValues([[chamado.id, json]]);
+  }
+}
+
+function excluirChamadoDaPlanilha_(chamadoId) {
+  const sh = getOrCreateSheet('Chamados', ['id', 'dados']);
+  const linha = encontrarLinhaChamado_(sh, chamadoId);
+  if (linha !== -1) sh.deleteRow(linha);
+}
+
+// Execução manual (uma vez só, pelo editor do Apps Script) pra mover os
+// chamados que hoje estão dentro do bloco da AppState pra essa aba própria.
+// Lê o bloco antigo diretamente (sem passar por readState(), que já não
+// devolve mais o campo chamados) pra garantir que pega os dados de antes da
+// migração mesmo depois do código novo estar publicado.
+function migrarChamadosParaAbaPropria() {
+  const sh = getOrCreateSheet('AppState', ['data']);
+  const lastRow = sh.getLastRow();
+  if (lastRow < 2) {
+    Logger.log('Nada pra migrar: AppState vazio.');
+    return;
+  }
+  const values = sh.getRange(2, 1, lastRow - 1, 1).getValues();
+  const combined = values.map(function (r) { return r[0]; }).join('');
+  let antigo;
+  try {
+    antigo = JSON.parse(combined);
+  } catch (e) {
+    Logger.log('Não consegui ler o AppState pra migrar: ' + e);
+    return;
+  }
+  const chamados = antigo.chamados || [];
+  chamados.forEach(function (c) { salvarChamado_(c); });
+  Logger.log('Migração concluída: ' + chamados.length + ' chamado(s) movido(s) pra aba própria "Chamados".');
+}
+
 // ---------- Firebase / Firestore (sincronização ao vivo dos Chamados) ----------
 
 // A planilha (AppState/readState/writeState) continua sendo a fonte da
@@ -340,8 +436,7 @@ function excluirChamadoNoFirestore_(chamadoId) {
 // chamados que já existem na planilha pro Firestore, na hora de ligar a
 // sincronização — sem isso, só chamados novos apareceriam lá.
 function migrarChamadosParaFirestore() {
-  const state = readState();
-  const chamados = state.chamados || [];
+  const chamados = listarChamados();
   let ok = 0;
   chamados.forEach(function (c) {
     sincronizarChamadoNoFirestore_(c);
@@ -352,24 +447,34 @@ function migrarChamadosParaFirestore() {
 
 // ---------- Estado do app (inventário, categorias, etc.) ----------
 
+// Não inclui mais "chamados" — eles vivem na própria aba "Chamados" (ver
+// listarChamados/salvarChamado_/etc acima). Se o bloco salvo aqui ainda
+// tiver um campo "chamados" de antes da migração, ele é descartado: quem
+// precisar dos chamados usa listarChamados().
 function readState() {
   const sh = getOrCreateSheet('AppState', ['data']);
   const lastRow = sh.getLastRow();
-  const defaults = { categorias: [], areas: [], responsaveis: [], inventario: [], chamados: [] };
+  const defaults = { categorias: [], areas: [], responsaveis: [], inventario: [] };
   if (lastRow < 2) return defaults;
   const values = sh.getRange(2, 1, lastRow - 1, 1).getValues();
   const combined = values.map(function (r) { return r[0]; }).join('');
   if (!combined) return defaults;
   try {
-    return JSON.parse(combined);
+    const parsed = JSON.parse(combined);
+    delete parsed.chamados;
+    return parsed;
   } catch (e) {
     return defaults;
   }
 }
 
+// Por segurança, remove "chamados" antes de gravar mesmo que alguém passe
+// por engano — chamados nunca devem ser persistidos aqui.
 function writeState(obj) {
   const sh = getOrCreateSheet('AppState', ['data']);
-  const json = JSON.stringify(obj);
+  const paraGravar = Object.assign({}, obj);
+  delete paraGravar.chamados;
+  const json = JSON.stringify(paraGravar);
   const CHUNK = 45000;
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
@@ -394,7 +499,6 @@ const ESTADO_CAMPO_PARA_SECAO = {
   areas: 'areas',
   responsaveis: 'responsaveis',
   inventario: 'inventario',
-  chamados: 'chamados',
 };
 
 // Antes: salvarTudo só checava "é um admin válido" — um admin com acesso
@@ -409,24 +513,21 @@ const ESTADO_CAMPO_PARA_SECAO = {
 // consegue mudar seção nenhuma por aqui — vira, na prática, um no-op.
 // "chamados" nunca passa por aqui, nem pro master: chamados têm ações
 // próprias (novoChamado, novaMensagem, mudarStatusChamado, excluirChamado)
-// que sempre leem o estado fresco da planilha na hora, em vez de confiar na
-// cópia que o navegador de quem está logado guardou no login. Antes disso,
-// um admin com a aba aberta há um tempo, ao salvar qualquer outra coisa
-// (mesmo sem nada a ver com chamados), sobrescrevia TODOS os chamados com
-// essa cópia antiga — comprovado em teste, 20 chamados novos apagados de
-// uma vez só. Isso vale até pro master, que antes tinha as escritas
-// aceitas sem filtro nenhum.
+// e aba própria (ver seção "Chamados" acima), que sempre leem/escrevem o
+// registro fresco na hora, em vez de confiar na cópia que o navegador de
+// quem está logado guardou no login. Antes disso, um admin com a aba aberta
+// há um tempo, ao salvar qualquer outra coisa (mesmo sem nada a ver com
+// chamados), sobrescrevia TODOS os chamados com essa cópia antiga —
+// comprovado em teste, 20 chamados novos apagados de uma vez só. Isso vale
+// até pro master, que antes tinha as escritas aceitas sem filtro nenhum.
 function filtrarEstadoPorPermissao(novoEstado, admin) {
   const isMaster = admin && admin.permissoes === 'todas';
   const secoesPermitidas = isMaster ? null : String((admin && admin.permissoes) || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
   const atual = readState();
   const resultado = {};
   for (const chave in novoEstado) {
+    if (chave === 'chamados') continue; // nunca passa por aqui — ver comentário acima
     const secao = ESTADO_CAMPO_PARA_SECAO[chave];
-    if (secao === 'chamados') {
-      resultado[chave] = atual[chave];
-      continue;
-    }
     const podeEscreverSecao = isMaster || !!(admin && admin.editar);
     const secaoPermitida = isMaster || (secao && secoesPermitidas.indexOf(secao) !== -1);
     if (secaoPermitida && podeEscreverSecao) {
@@ -475,7 +576,7 @@ function doGet(e) {
       editar: !!admin.editar,
       podeAbrirChamados: !!admin.podeAbrirChamados,
       podeResponderChamados: !!admin.podeResponderChamados,
-      state: state,
+      state: Object.assign({}, state, { chamados: listarChamados() }),
       // Inclui a senha (como já fazemos pra solicitantes) porque o frontend
       // (Administradores.save()) usa modal.original.senha pra manter a senha
       // de quem já existe quando o campo "nova senha" fica em branco. Sem
@@ -516,13 +617,13 @@ function doGet(e) {
           areas: state.areas || [],
           responsaveis: state.responsaveis || [],
           inventario: state.inventario || [],
-          chamados: state.chamados || []
+          chamados: listarChamados()
         }
       };
     } else if (usuario) {
       const state = readState();
       const alvo = userNome.trim().toLowerCase();
-      const meusChamados = (state.chamados || []).filter(function (c) {
+      const meusChamados = listarChamados().filter(function (c) {
         return (c.criadoPor || '').trim().toLowerCase() === alvo;
       });
       payload = {
@@ -637,14 +738,11 @@ function doPostComTrava(e) {
     if (!adminPodeAbrirChamados && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
-    const state = readState();
     if (solicitante) {
       body.chamado.criadoPor = solicitante.nome;
       body.chamado.solicitante = solicitante.nome;
     }
-    state.chamados = state.chamados || [];
-    state.chamados.push(body.chamado);
-    writeState(state);
+    salvarChamado_(body.chamado);
     notificarNovoChamado(body.chamado);
     sincronizarChamadoNoFirestore_(body.chamado);
     return jsonOut({ ok: true });
@@ -655,9 +753,7 @@ function doPostComTrava(e) {
     if (!adminPodeResponderChamados && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
-    const state = readState();
-    const chamados = state.chamados || [];
-    const chamado = chamados.filter(function (c) { return c.id === body.chamadoId; })[0];
+    const chamado = buscarChamadoPorId_(body.chamadoId);
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
@@ -670,7 +766,7 @@ function doPostComTrava(e) {
     const mensagem = body.mensagem || {};
     mensagem.autor = adminPodeResponderChamados ? 'ti' : 'solicitante';
     chamado.mensagens.push(mensagem);
-    writeState(state);
+    salvarChamado_(chamado);
     sincronizarChamadoNoFirestore_(chamado);
     return jsonOut({ ok: true });
   }
@@ -683,19 +779,18 @@ function doPostComTrava(e) {
   // aba aberta por um tempo, ao salvar qualquer outra coisa (ex: editar um
   // equipamento), acabava sobrescrevendo TODOS os chamados com essa cópia
   // antiga — comprovado em teste, 20 chamados novos apagados de uma vez.
-  // Agora essas duas ações leem o estado fresco na hora, igual
+  // Agora essas duas ações leem o registro fresco na hora, igual
   // novoChamado/novaMensagem já faziam, e nunca dependem do autosave geral.
   if (body.action === 'mudarStatusChamado') {
     if (!adminPodeResponderChamados) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
-    const state = readState();
-    const chamado = (state.chamados || []).filter(function (c) { return c.id === body.chamadoId; })[0];
+    const chamado = buscarChamadoPorId_(body.chamadoId);
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
     chamado.status = body.status;
-    writeState(state);
+    salvarChamado_(chamado);
     sincronizarChamadoNoFirestore_(chamado);
     return jsonOut({ ok: true });
   }
@@ -704,9 +799,7 @@ function doPostComTrava(e) {
     if (!adminPodeResponderChamados) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
-    const state = readState();
-    state.chamados = (state.chamados || []).filter(function (c) { return c.id !== body.chamadoId; });
-    writeState(state);
+    excluirChamadoDaPlanilha_(body.chamadoId);
     excluirChamadoNoFirestore_(body.chamadoId);
     return jsonOut({ ok: true });
   }
