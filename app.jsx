@@ -4549,7 +4549,7 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
       const data = await backendGetUser(nome.trim(), senha);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
       if (data.isUser) {
-        onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado, data.foto || "");
+        onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado, data.foto || "", !!data.podeAbrirChamados);
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
       }
@@ -4793,7 +4793,7 @@ function novoChamadoSolicitanteForm() {
   return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
-function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange }) {
+function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange, embedded = false }) {
   const chamados = state.chamados || [];
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(chamados.length === 0);
@@ -4887,9 +4887,9 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
   const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div style={{ minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      <TopBarSolicitante nome={userAuth.nome} foto={userAuth.foto} onFotoChange={onFotoChange} onLogout={onLogout} />
-      <div style={{ padding: "14px 24px 16px", maxWidth: 1160, margin: "0 auto" }}>
+    <div style={embedded ? {} : { minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+      {!embedded && <TopBarSolicitante nome={userAuth.nome} foto={userAuth.foto} onFotoChange={onFotoChange} onLogout={onLogout} />}
+      <div style={embedded ? {} : { padding: "14px 24px 16px", maxWidth: 1160, margin: "0 auto" }}>
         <div
           className="welcome-banner-solicitante"
           style={{
@@ -5569,7 +5569,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
 const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
 
 function emptyUsuarioForm() {
-  return { nome: "", email: "", senha: "", autorizado: false };
+  return { nome: "", email: "", senha: "", autorizado: false, autorizadoAbreChamados: false };
 }
 
 function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
@@ -5590,7 +5590,11 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
   }
 
   function openEdit(u) {
-    setModal({ mode: "edit", original: u, form: { nome: u.nome, email: u.email || "", senha: "", autorizado: u.tipo === "autorizado" } });
+    setModal({
+      mode: "edit",
+      original: u,
+      form: { nome: u.nome, email: u.email || "", senha: "", autorizado: u.tipo === "autorizado", autorizadoAbreChamados: !!u.autorizadoAbreChamados },
+    });
     setError("");
   }
 
@@ -5633,6 +5637,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
       tipo: f.autorizado ? "autorizado" : "solicitante",
       foto: modal.original ? modal.original.foto || "" : "",
       aprovado,
+      autorizadoAbreChamados: f.autorizado && !!f.autorizadoAbreChamados,
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -5747,6 +5752,21 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
                     >
                       {u.tipo === "autorizado" ? "autorizado · só visualização" : "abre chamados"}
                     </span>
+                    {u.tipo === "autorizado" && u.autorizadoAbreChamados && (
+                      <span
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          padding: "1px 7px",
+                          borderRadius: 999,
+                          color: COLORS.inkSoft,
+                          background: COLORS.paper,
+                          marginLeft: 6,
+                        }}
+                      >
+                        + abre chamados
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                     <button onClick={() => openEdit(u)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
@@ -5780,13 +5800,30 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
               checked={!!modal.form.autorizado}
               onChange={(e) => setModal({ ...modal, form: { ...modal.form, autorizado: e.target.checked } })}
             />
-            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Autorizado (só visualização — sem abrir chamados)</span>
+            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Autorizado (só visualização)</span>
           </label>
-          <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: modal.form.autorizado ? 8 : 12 }}>
             {modal.form.autorizado
-              ? "Esse usuário só visualiza Painel, Categorias, Salas e Inventário. Não abre chamado, não responde e não edita nada."
+              ? "Esse usuário só visualiza Painel, Categorias, Salas e Inventário, sem editar nada."
               : "Desmarcado: esse usuário entra normalmente pra abrir e acompanhar seus chamados."}
           </p>
+          {modal.form.autorizado && (
+            <>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 22, marginBottom: 4, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={!!modal.form.autorizadoAbreChamados}
+                  onChange={(e) => setModal({ ...modal, form: { ...modal.form, autorizadoAbreChamados: e.target.checked } })}
+                />
+                <span style={{ fontSize: 13.5, color: COLORS.ink }}>Também pode abrir chamados</span>
+              </label>
+              <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginLeft: 22, marginBottom: 12 }}>
+                {modal.form.autorizadoAbreChamados
+                  ? "Ganha a aba Chamados, pra abrir e acompanhar os PRÓPRIOS chamados — continua sem editar o resto."
+                  : "Desmarcado: continua sem chamado nenhum, só visualização no resto."}
+              </p>
+            </>
+          )}
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
             <Button variant="ghost" onClick={() => setModal(null)}>
@@ -6131,10 +6168,17 @@ function App() {
     }
   }
 
-  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado, foto) {
+  function aplicarLoginUsuario(userCreds, estadoUsuario, isAutorizado, foto, podeAbrirChamados) {
     setAuth(
       isAutorizado
-        ? { isAdmin: false, isAutorizado: true, nome: userCreds.nome, permissoes: AUTORIZADO_PERMISSOES, editar: false }
+        ? {
+            isAdmin: false,
+            isAutorizado: true,
+            nome: userCreds.nome,
+            permissoes: AUTORIZADO_PERMISSOES + (podeAbrirChamados ? ",chamados" : ""),
+            editar: false,
+            podeAbrirChamados: !!podeAbrirChamados,
+          }
         : { isAdmin: false }
     );
     setUserAuth({ ...userCreds, foto: foto || "" });
@@ -6191,7 +6235,7 @@ function App() {
         const data = await backendGetUser(savedUser.nome, savedUser.senha || "");
         if (!data.ok) throw new Error(data.error || "Erro desconhecido");
         if (data.isUser) {
-          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state, !!data.isAutorizado, data.foto || "");
+          aplicarLoginUsuario({ nome: data.nome, senha: savedUser.senha }, data.state, !!data.isAutorizado, data.foto || "", !!data.podeAbrirChamados);
           setLoaded(true);
           return;
         }
@@ -6396,9 +6440,8 @@ function App() {
           }}
         />
         <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
-          {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados", "importar"].includes(view) && (
-            <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />
-          )}
+          {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados", "importar"].includes(view) &&
+            !(view === "chamados" && auth.isAutorizado) && <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />}
           {view === "dashboard" && allowed.has("dashboard") && (
             <Dashboard
               state={state}
@@ -6436,7 +6479,7 @@ function App() {
           )}
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
-          {view === "chamados" && allowed.has("chamados") && (
+          {view === "chamados" && allowed.has("chamados") && auth.isAdmin && (
             <Chamados
               state={state}
               setState={setState}
@@ -6449,11 +6492,14 @@ function App() {
               fotosSolicitantes={fotosSolicitantes}
             />
           )}
+          {view === "chamados" && allowed.has("chamados") && auth.isAutorizado && (
+            <ChamadosSolicitante state={state} setState={setState} userAuth={userAuth} onLogout={logoutUsuario} onFotoChange={atualizarMinhaFoto} embedded />
+          )}
           {view === "importar" && allowed.has("importar") && <Importar state={state} setState={setState} unidadeAtiva={unidadeAtiva} secret={secret} podeEditar={podeEditar} />}
           {view === "usuarios" && isMaster && <Usuarios solicitantes={usuarios} secret={secret} onSolicitantesChanged={setUsuarios} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
-        {view !== "chamados" && allowed.has("chamados") && (
+        {auth.isAdmin && view !== "chamados" && allowed.has("chamados") && (
           <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} secret={secret} podeResponderChamados={podeResponderChamados} responderSoProprios={responderSoProprios} meuNome={auth.nome} fotosSolicitantes={fotosSolicitantes} />
         )}
       </div>
