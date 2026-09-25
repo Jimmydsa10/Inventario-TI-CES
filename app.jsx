@@ -250,6 +250,22 @@ async function backendGetUser(nome, senha) {
   return jsonpRequestComRetry(url);
 }
 
+// Login único da tela pública: manda os mesmos nome+senha tanto como
+// possível admin (secret=senha, adminNome=nome) quanto como possível
+// solicitante/autorizado (userNome=nome, userSenha=senha) na MESMA
+// requisição — o backend já tenta admin primeiro e só cai pro outro
+// caminho se não bater (ver doGet), então isso resolve os dois casos sem
+// precisar de uma tela ou botão separado pra "acesso administrativo".
+async function backendLoginUnificado(nome, senha) {
+  const url =
+    BACKEND_URL +
+    "?secret=" + encodeURIComponent(senha) +
+    "&adminNome=" + encodeURIComponent(nome) +
+    "&userNome=" + encodeURIComponent(nome) +
+    "&userSenha=" + encodeURIComponent(senha);
+  return jsonpRequestComRetry(url);
+}
+
 // Cadastro público (nome + email + senha escolhida pela própria pessoa).
 // Vai por GET/JSONP (não por backendPost) porque precisa de uma resposta de
 // verdade pra saber se o email já existe ou não — backendPost usa fetch em
@@ -4530,7 +4546,7 @@ function ErrorScreen({ msg, detail }) {
   );
 }
 
-function LoginPublico({ onLoggedIn, onAdminClick }) {
+function LoginPublico({ onLoggedIn, onLoggedInAdmin }) {
   const [modo, setModo] = useState("login"); // "login" | "cadastro"
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
@@ -4549,9 +4565,11 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
     setBusy(true);
     setErro("");
     try {
-      const data = await backendGetUser(nome.trim(), senha);
+      const data = await backendLoginUnificado(nome.trim(), senha);
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
-      if (data.isUser) {
+      if (data.isAdmin) {
+        onLoggedInAdmin(data, senha);
+      } else if (data.isUser) {
         onLoggedIn({ nome: data.nome, senha }, data.state, !!data.isAutorizado, data.foto || "", !!data.podeAbrirChamados);
       } else {
         setErro(data.error || "Nome ou senha incorretos.");
@@ -4648,26 +4666,6 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
                 }}
               >
                 Não tem conta? Cadastre-se
-              </button>
-
-              <button
-                onClick={onAdminClick}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "center",
-                  marginTop: 4,
-                  background: "none",
-                  border: "none",
-                  color: COLORS.lineStrong,
-                  fontSize: 11.5,
-                  cursor: "pointer",
-                  padding: 4,
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
-                onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.lineStrong)}
-              >
-                ⚙ Acesso administrativo
               </button>
             </>
           ) : cadOk ? (
@@ -6112,11 +6110,6 @@ function App() {
   const [loadErrorDetail, setLoadErrorDetail] = useState(null);
   const [view, setView] = useState("dashboard");
   const [chamadoAbertoId, setChamadoAbertoId] = useState(null);
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [loginNome, setLoginNome] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
-  const [loginBusy, setLoginBusy] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [pendingPatrimonio, setPendingPatrimonio] = useState(() => {
     try {
@@ -6291,30 +6284,6 @@ function App() {
     return cancelar;
   }, [auth && auth.isAdmin]);
 
-  async function tentarLogin() {
-    if (!loginNome.trim() || !loginPassword.trim()) {
-      setLoginError("Preencha o nome de usuário e a senha.");
-      return;
-    }
-    setLoginBusy(true);
-    setLoginError("");
-    try {
-      const data = await backendGet(loginPassword, loginNome.trim());
-      if (!data.ok) throw new Error(data.error || "Erro desconhecido");
-      if (data.isAdmin) {
-        aplicarLoginAdmin(data, loginPassword);
-        setLoginOpen(false);
-        setLoginNome("");
-        setLoginPassword("");
-      } else {
-        setLoginError("Nome de usuário ou senha incorretos. Confira com quem cadastrou os administradores.");
-      }
-    } catch (e) {
-      setLoginError("Não foi possível conectar (" + String((e && e.message) || e) + "). Verifique sua internet e tente de novo.");
-    }
-    setLoginBusy(false);
-  }
-
   function logout() {
     try {
       localStorage.removeItem(SECRET_STORAGE_KEY);
@@ -6335,59 +6304,11 @@ function App() {
   }
 
   if (!auth.isAdmin && !auth.isAutorizado) {
-    const adminModal = loginOpen && (
-      <Modal
-        title="Entrar como administrador"
-        onClose={() => {
-          setLoginOpen(false);
-          setLoginError("");
-          setLoginNome("");
-          setLoginPassword("");
-        }}
-        width={360}
-      >
-        <Field label="Nome de usuário">
-          <TextInput
-            value={loginNome}
-            onChange={(e) => setLoginNome(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
-            autoFocus
-          />
-        </Field>
-        <Field label="Senha">
-          <TextInput
-            type="password"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
-          />
-        </Field>
-        {loginError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{loginError}</div>}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setLoginOpen(false);
-              setLoginError("");
-              setLoginNome("");
-              setLoginPassword("");
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button variant="primary" icon={Check} onClick={tentarLogin} disabled={loginBusy}>
-            {loginBusy ? "Entrando..." : "Entrar"}
-          </Button>
-        </div>
-      </Modal>
-    );
-
     if (!userAuth) {
       return (
         <>
           <style>{RESPONSIVE_CSS}</style>
-          <LoginPublico onLoggedIn={aplicarLoginUsuario} onAdminClick={() => setLoginOpen(true)} />
-          {adminModal}
+          <LoginPublico onLoggedIn={aplicarLoginUsuario} onLoggedInAdmin={aplicarLoginAdmin} />
         </>
       );
     }
@@ -6396,7 +6317,6 @@ function App() {
       <>
         <style>{RESPONSIVE_CSS}</style>
         <ChamadosSolicitante state={state} setState={setState} userAuth={userAuth} onLogout={logoutUsuario} onFotoChange={atualizarMinhaFoto} />
-        {adminModal}
       </>
     );
   }
