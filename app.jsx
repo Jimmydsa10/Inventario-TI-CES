@@ -5018,8 +5018,13 @@ const SECTION_LABELS = {
   importar: "Importar/Exportar",
 };
 
+// Chamados vem pré-marcado (abrir + responder + só os próprios) pra todo
+// admin restrito novo — pedido explícito: qualquer administrador criado daqui
+// pra frente (menos o de acesso total, que não precisa) já nasce só podendo
+// mexer nos chamados que ele mesmo abrir, sem precisar lembrar de marcar
+// manualmente toda vez.
 function emptyAdminForm() {
-  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false, podeAbrirChamados: false, podeResponderChamados: false, responderSoProprios: false };
+  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false, podeAbrirChamados: true, podeResponderChamados: true, responderSoProprios: true };
 }
 
 function Administradores({ admins, secret, onAdminsChanged }) {
