@@ -675,11 +675,22 @@ function doGet(e) {
   }
 
   const secret = p.secret || '';
+  const adminNome = p.adminNome || '';
   const userNome = p.userNome || '';
   const userSenha = p.userSenha || '';
 
   const admins = secret ? getAdmins() : null;
-  const admin = findAdminBySecret(secret, admins);
+  let admin = findAdminBySecret(secret, admins);
+  // adminNome só vem preenchido no login de verdade (tela "Entrar como
+  // administrador"), pra exigir nome de usuário + senha, os dois batendo com
+  // o MESMO administrador — não só a senha sozinha, que antes bastava pra
+  // entrar em qualquer conta cuja senha alguém soubesse, mesmo sem saber de
+  // quem era. Uma sessão restaurada ao recarregar a página (ver
+  // carregarInicial no frontend) manda só o secret, sem adminNome — continua
+  // funcionando normal, sem pedir login de novo a cada F5.
+  if (admin && adminNome && admin.nome.trim().toLowerCase() !== adminNome.trim().toLowerCase()) {
+    admin = null;
+  }
 
   if (admin) {
     const isMaster = admin.permissoes === 'todas';

@@ -237,8 +237,11 @@ async function jsonpRequestComRetry(url) {
   }
 }
 
-async function backendGet(secret) {
-  const url = BACKEND_URL + (secret ? "?secret=" + encodeURIComponent(secret) : "");
+async function backendGet(secret, adminNome) {
+  const params = [];
+  if (secret) params.push("secret=" + encodeURIComponent(secret));
+  if (adminNome) params.push("adminNome=" + encodeURIComponent(adminNome));
+  const url = BACKEND_URL + (params.length ? "?" + params.join("&") : "");
   return jsonpRequestComRetry(url);
 }
 
@@ -6110,6 +6113,7 @@ function App() {
   const [view, setView] = useState("dashboard");
   const [chamadoAbertoId, setChamadoAbertoId] = useState(null);
   const [loginOpen, setLoginOpen] = useState(false);
+  const [loginNome, setLoginNome] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
@@ -6288,17 +6292,22 @@ function App() {
   }, [auth && auth.isAdmin]);
 
   async function tentarLogin() {
+    if (!loginNome.trim() || !loginPassword.trim()) {
+      setLoginError("Preencha o nome de usuário e a senha.");
+      return;
+    }
     setLoginBusy(true);
     setLoginError("");
     try {
-      const data = await backendGet(loginPassword);
+      const data = await backendGet(loginPassword, loginNome.trim());
       if (!data.ok) throw new Error(data.error || "Erro desconhecido");
       if (data.isAdmin) {
         aplicarLoginAdmin(data, loginPassword);
         setLoginOpen(false);
+        setLoginNome("");
         setLoginPassword("");
       } else {
-        setLoginError("Senha incorreta. Confira com quem cadastrou os administradores.");
+        setLoginError("Nome de usuário ou senha incorretos. Confira com quem cadastrou os administradores.");
       }
     } catch (e) {
       setLoginError("Não foi possível conectar (" + String((e && e.message) || e) + "). Verifique sua internet e tente de novo.");
@@ -6332,17 +6341,25 @@ function App() {
         onClose={() => {
           setLoginOpen(false);
           setLoginError("");
+          setLoginNome("");
           setLoginPassword("");
         }}
         width={360}
       >
-        <Field label="Senha de administrador">
+        <Field label="Nome de usuário">
+          <TextInput
+            value={loginNome}
+            onChange={(e) => setLoginNome(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
+            autoFocus
+          />
+        </Field>
+        <Field label="Senha">
           <TextInput
             type="password"
             value={loginPassword}
             onChange={(e) => setLoginPassword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && tentarLogin()}
-            autoFocus
           />
         </Field>
         {loginError && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{loginError}</div>}
@@ -6352,6 +6369,7 @@ function App() {
             onClick={() => {
               setLoginOpen(false);
               setLoginError("");
+              setLoginNome("");
               setLoginPassword("");
             }}
           >
