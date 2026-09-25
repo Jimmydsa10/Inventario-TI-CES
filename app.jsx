@@ -3846,7 +3846,7 @@ function novoChamadoForm(unidadeAtiva) {
   return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
-function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = true, podeResponderChamados = true, fotosSolicitantes = {} }) {
+function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = true, podeResponderChamados = true, responderSoProprios = false, meuNome = "", fotosSolicitantes = {} }) {
   const [selectedId, setSelectedId] = useState(null);
   const [novoMode, setNovoMode] = useState(false);
   const [form, setForm] = useState(novoChamadoForm(unidadeAtiva));
@@ -3858,6 +3858,17 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
   const scrollRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
+
+  // Quando responderSoProprios está ligado, o admin só pode responder (ou
+  // mudar status/excluir) os chamados que ELE MESMO abriu — chamados
+  // abertos por um solicitante direto, ou por outro admin, ficam só pra
+  // visualização. O backend também bloqueia isso (é a proteção de verdade);
+  // aqui é só pra não mostrar um botão que vai dar erro.
+  function podeMexerNesseChamado(chamado) {
+    if (!podeResponderChamados) return false;
+    if (!responderSoProprios) return true;
+    return chamado && chamado.abertoPorAdmin === meuNome;
+  }
 
   const chamados = useMemo(() => (state.chamados || []).filter((c) => unidadeDe(c) === unidadeAtiva), [state.chamados, unidadeAtiva]);
   const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
@@ -3918,7 +3929,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
   }
 
   async function enviarResposta() {
-    if (!podeResponderChamados) return;
+    if (!podeMexerNesseChamado(selecionado)) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
     const mensagem = { autor: "ti", texto, data: new Date().toISOString() };
@@ -3939,7 +3950,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
   }
 
   async function mudarStatus(status) {
-    if (!podeResponderChamados || !selecionado) return;
+    if (!selecionado || !podeMexerNesseChamado(selecionado)) return;
     setBusy(true);
     setErro("");
     try {
@@ -3956,7 +3967,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
   }
 
   async function excluirChamado(chamado) {
-    if (!podeResponderChamados) return;
+    if (!podeMexerNesseChamado(chamado)) return;
     setBusy(true);
     setErro("");
     try {
@@ -4058,7 +4069,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
                     <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
                       {c.assunto} {c.tipo && c.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={c.tipo} />}
                     </div>
-                    {podeResponderChamados && (
+                    {podeMexerNesseChamado(c) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -4207,7 +4218,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
                   <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
                     {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
                   </div>
-                  {podeResponderChamados && (
+                  {podeMexerNesseChamado(selecionado) && (
                     <button
                       onClick={() => setDeleteTarget(selecionado)}
                       style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "6px 9px", flexShrink: 0 }}
@@ -4259,7 +4270,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
                   })}
                 </div>
 
-                {podeResponderChamados && (
+                {podeMexerNesseChamado(selecionado) && (
                   <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
                     <TextInput
                       value={replyText}
@@ -4289,7 +4300,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
                 ))}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, color: COLORS.inkSoft, marginBottom: 4 }}>Status</div>
-                  <Select disabled={!podeResponderChamados || busy} value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
+                  <Select disabled={!podeMexerNesseChamado(selecionado) || busy} value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
                     {CHAMADO_STATUS_OPTIONS.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -5008,7 +5019,7 @@ const SECTION_LABELS = {
 };
 
 function emptyAdminForm() {
-  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false, podeAbrirChamados: false, podeResponderChamados: false };
+  return { nome: "", senha: "", acessoTotal: true, secoes: {}, editar: false, podeAbrirChamados: false, podeResponderChamados: false, responderSoProprios: false };
 }
 
 function Administradores({ admins, secret, onAdminsChanged }) {
@@ -5044,6 +5055,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
         editar: !!a.editar,
         podeAbrirChamados: a.podeAbrirChamados !== undefined ? !!a.podeAbrirChamados : !!a.editar,
         podeResponderChamados: a.podeResponderChamados !== undefined ? !!a.podeResponderChamados : !!a.editar,
+        responderSoProprios: !!a.responderSoProprios,
       },
     });
     setError("");
@@ -5085,6 +5097,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
       editar: f.acessoTotal || !!f.editar,
       podeAbrirChamados: f.acessoTotal || (temChamados && !!f.podeAbrirChamados),
       podeResponderChamados: f.acessoTotal || (temChamados && !!f.podeResponderChamados),
+      responderSoProprios: temChamados && !!f.podeResponderChamados && !!f.responderSoProprios,
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -5197,6 +5210,21 @@ function Administradores({ admins, secret, onAdminsChanged }) {
                               responde chamados
                             </span>
                           )}
+                          {a.podeResponderChamados && a.responderSoProprios && (
+                            <span
+                              style={{
+                                marginLeft: 6,
+                                fontSize: 11,
+                                fontWeight: 700,
+                                padding: "1px 7px",
+                                borderRadius: 999,
+                                color: COLORS.inkSoft,
+                                background: COLORS.paper,
+                              }}
+                            >
+                              só os próprios
+                            </span>
+                          )}
                         </>
                       )}
                     </>
@@ -5289,7 +5317,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
                     />
                     <span style={{ fontSize: 13, color: COLORS.ink }}>Pode abrir chamados</span>
                   </label>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: modal.form.podeResponderChamados ? 8 : 0, cursor: "pointer" }}>
                     <input
                       type="checkbox"
                       checked={!!modal.form.podeResponderChamados}
@@ -5297,6 +5325,16 @@ function Administradores({ admins, secret, onAdminsChanged }) {
                     />
                     <span style={{ fontSize: 13, color: COLORS.ink }}>Pode responder chamados</span>
                   </label>
+                  {modal.form.podeResponderChamados && (
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 24, cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={!!modal.form.responderSoProprios}
+                        onChange={(e) => setModal({ ...modal, form: { ...modal.form, responderSoProprios: e.target.checked } })}
+                      />
+                      <span style={{ fontSize: 13, color: COLORS.ink }}>Só responde os chamados que ela mesma abriu</span>
+                    </label>
+                  )}
                 </div>
               )}
             </div>
@@ -5538,7 +5576,7 @@ function LoadingScreen() {
 
 const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
 
-function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeResponderChamados = true, fotosSolicitantes = {} }) {
+function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeResponderChamados = true, responderSoProprios = false, meuNome = "", fotosSolicitantes = {} }) {
   const [texto, setTexto] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
@@ -5555,6 +5593,12 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeRe
   );
   const selecionado = abertos.find((c) => c.id === abertoId) || null;
 
+  function podeMexerNesseChamado(chamado) {
+    if (!podeResponderChamados) return false;
+    if (!responderSoProprios) return true;
+    return chamado && chamado.abertoPorAdmin === meuNome;
+  }
+
   function toggleCollapsed() {
     setCollapsed((prev) => {
       const next = !prev;
@@ -5566,7 +5610,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeRe
   }
 
   async function enviarResposta() {
-    if (!podeResponderChamados) return;
+    if (!podeMexerNesseChamado(selecionado)) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
     const mensagem = { autor: "ti", texto: valor, data: new Date().toISOString() };
@@ -5684,7 +5728,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeRe
             );
           })}
         </div>
-        {podeResponderChamados && (
+        {podeMexerNesseChamado(selecionado) && (
           <div style={{ padding: 12, borderTop: `1px solid ${COLORS.line}` }}>
             {erro && <div style={{ color: COLORS.danger, fontSize: 12, marginBottom: 6 }}>{erro}</div>}
             <div style={{ display: "flex", gap: 8 }}>
@@ -5791,6 +5835,7 @@ function App() {
       editar: !!data.editar,
       podeAbrirChamados: data.podeAbrirChamados,
       podeResponderChamados: data.podeResponderChamados,
+      responderSoProprios: data.responderSoProprios,
     });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
@@ -6048,6 +6093,7 @@ function App() {
   const podeEditar = isMaster || !!auth.editar;
   const podeAbrirChamados = isMaster || (auth.podeAbrirChamados !== undefined ? !!auth.podeAbrirChamados : !!auth.editar);
   const podeResponderChamados = isMaster || (auth.podeResponderChamados !== undefined ? !!auth.podeResponderChamados : !!auth.editar);
+  const responderSoProprios = !isMaster && !!auth.responderSoProprios;
 
   return (
     <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
@@ -6124,6 +6170,8 @@ function App() {
               secret={secret}
               podeAbrirChamados={podeAbrirChamados}
               podeResponderChamados={podeResponderChamados}
+              responderSoProprios={responderSoProprios}
+              meuNome={auth.nome}
               fotosSolicitantes={fotosSolicitantes}
             />
           )}
@@ -6132,7 +6180,7 @@ function App() {
           {view === "administradores" && isMaster && <Administradores admins={admins} secret={secret} onAdminsChanged={setAdmins} />}
         </main>
         {view !== "chamados" && allowed.has("chamados") && (
-          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} secret={secret} podeResponderChamados={podeResponderChamados} fotosSolicitantes={fotosSolicitantes} />
+          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} secret={secret} podeResponderChamados={podeResponderChamados} responderSoProprios={responderSoProprios} meuNome={auth.nome} fotosSolicitantes={fotosSolicitantes} />
         )}
       </div>
     </div>

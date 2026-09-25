@@ -26,13 +26,19 @@ function getOrCreateSheet(name, header) {
 // chamado existente (mudar status, excluir, mandar mensagem). Em branco
 // (inclusive linhas antigas de antes dessas colunas existirem) herda o valor
 // de "editar", pra não mudar o comportamento de quem já estava cadastrado.
+// Coluna "responderSoProprios" (7ª): só importa junto com podeResponderChamados
+// true — restringe esse admin a responder/mudar status/excluir só os
+// chamados que ELE MESMO abriu (ver "abertoPorAdmin" nos chamados e o uso
+// dessa flag em doPostComTrava), sem mexer nos chamados de outras pessoas ou
+// de outros admins. Em branco = false (comportamento de sempre: responde
+// qualquer chamado). Nunca vale pra master, que sempre tem acesso completo.
 function getAdmins() {
-  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar', 'podeAbrirChamados', 'podeResponderChamados']);
+  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar', 'podeAbrirChamados', 'podeResponderChamados', 'responderSoProprios']);
   const data = sh.getDataRange().getValues();
   const rows = data.slice(1).filter(function (r) { return r[0] || r[1]; });
   if (rows.length === 0) {
-    sh.appendRow(['Administrador', 'mude-esta-senha-123', 'todas', true, true, true]);
-    return [{ nome: 'Administrador', senha: 'mude-esta-senha-123', permissoes: 'todas', editar: true, podeAbrirChamados: true, podeResponderChamados: true }];
+    sh.appendRow(['Administrador', 'mude-esta-senha-123', 'todas', true, true, true, false]);
+    return [{ nome: 'Administrador', senha: 'mude-esta-senha-123', permissoes: 'todas', editar: true, podeAbrirChamados: true, podeResponderChamados: true, responderSoProprios: false }];
   }
   return rows.map(function (r) {
     const editar = r[3] === true;
@@ -45,6 +51,7 @@ function getAdmins() {
       editar: editar,
       podeAbrirChamados: abrirEmBranco ? editar : r[4] === true,
       podeResponderChamados: responderEmBranco ? editar : r[5] === true,
+      responderSoProprios: r[6] === true,
     };
   });
 }
@@ -61,10 +68,10 @@ function findAdminBySecret(secret, adminsList) {
 }
 
 function saveAdmins(list) {
-  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar', 'podeAbrirChamados', 'podeResponderChamados']);
+  const sh = getOrCreateSheet('Admins', ['nome', 'senha', 'permissoes', 'editar', 'podeAbrirChamados', 'podeResponderChamados', 'responderSoProprios']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 6).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 7).clearContent();
   }
   // Se quem chamou (frontend atual, sempre manda os dois campos; uma
   // chamada externa/antiga pode não mandar) não informar
@@ -74,10 +81,10 @@ function saveAdmins(list) {
   const rows = list.map(function (a) {
     const abrir = a.podeAbrirChamados === undefined ? !!a.editar : !!a.podeAbrirChamados;
     const responder = a.podeResponderChamados === undefined ? !!a.editar : !!a.podeResponderChamados;
-    return [a.nome, a.senha, a.permissoes, !!a.editar, abrir, responder];
+    return [a.nome, a.senha, a.permissoes, !!a.editar, abrir, responder, !!a.responderSoProprios];
   });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 6).setValues(rows);
+    sh.getRange(2, 1, rows.length, 7).setValues(rows);
   }
 }
 
@@ -576,6 +583,7 @@ function doGet(e) {
       editar: !!admin.editar,
       podeAbrirChamados: !!admin.podeAbrirChamados,
       podeResponderChamados: !!admin.podeResponderChamados,
+      responderSoProprios: !!admin.responderSoProprios,
       state: Object.assign({}, state, { chamados: listarChamados() }),
       // Inclui a senha (como já fazemos pra solicitantes) porque o frontend
       // (Administradores.save()) usa modal.original.senha pra manter a senha
@@ -592,6 +600,7 @@ function doGet(e) {
           editar: !!a.editar,
           podeAbrirChamados: !!a.podeAbrirChamados,
           podeResponderChamados: !!a.podeResponderChamados,
+          responderSoProprios: !!a.responderSoProprios,
         };
       }) : [],
       solicitantes: isMaster ? solicitantesList : [],
@@ -695,6 +704,16 @@ function doPostComTrava(e) {
   // vez do "editar" geral — mesmo critério do filtrarEstadoPorPermissao.
   const adminPodeAbrirChamados = isAdmin && (isMaster || admin.podeAbrirChamados);
   const adminPodeResponderChamados = isAdmin && (isMaster || admin.podeResponderChamados);
+  // Restringe um admin (nunca o master) a só responder/mudar status/excluir
+  // os chamados que ELE MESMO abriu (campo "abertoPorAdmin", marcado em
+  // novoChamado abaixo) — pra alguém tipo recepção, que abre chamado pra
+  // outras pessoas, poder acompanhar os próprios sem mexer nas conversas de
+  // outros admins ou dos solicitantes que abriram direto.
+  const adminResponderSoProprios = isAdmin && !isMaster && !!admin.responderSoProprios;
+  function podeMexerNesseChamado_(chamado) {
+    if (!adminResponderSoProprios) return true;
+    return chamado && chamado.abertoPorAdmin === admin.nome;
+  }
 
   if (isAdmin && body.action === 'salvarTudo') {
     const estadoFiltrado = filtrarEstadoPorPermissao(body.state, admin);
@@ -741,6 +760,11 @@ function doPostComTrava(e) {
     if (solicitante) {
       body.chamado.criadoPor = solicitante.nome;
       body.chamado.solicitante = solicitante.nome;
+    } else if (isAdmin) {
+      // Marca quem abriu quando é um admin abrindo direto (ex: recepção
+      // atendendo alguém pessoalmente) — é o que permite restringir esse
+      // admin a só responder os próprios chamados (responderSoProprios).
+      body.chamado.abertoPorAdmin = admin.nome;
     }
     salvarChamado_(body.chamado);
     notificarNovoChamado(body.chamado);
@@ -762,6 +786,9 @@ function doPostComTrava(e) {
       if (dono !== solicitante.nome.trim().toLowerCase()) {
         return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
       }
+    }
+    if (isAdmin && !podeMexerNesseChamado_(chamado)) {
+      return jsonOut({ ok: false, error: 'Você só pode responder aos chamados que você mesma abriu' });
     }
     const mensagem = body.mensagem || {};
     mensagem.autor = adminPodeResponderChamados ? 'ti' : 'solicitante';
@@ -789,6 +816,9 @@ function doPostComTrava(e) {
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
+    if (!podeMexerNesseChamado_(chamado)) {
+      return jsonOut({ ok: false, error: 'Você só pode mudar o status dos chamados que você mesma abriu' });
+    }
     chamado.status = body.status;
     salvarChamado_(chamado);
     sincronizarChamadoNoFirestore_(chamado);
@@ -798,6 +828,12 @@ function doPostComTrava(e) {
   if (body.action === 'excluirChamado') {
     if (!adminPodeResponderChamados) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
+    if (adminResponderSoProprios) {
+      const chamado = buscarChamadoPorId_(body.chamadoId);
+      if (!podeMexerNesseChamado_(chamado)) {
+        return jsonOut({ ok: false, error: 'Você só pode excluir os chamados que você mesma abriu' });
+      }
     }
     excluirChamadoDaPlanilha_(body.chamadoId);
     excluirChamadoNoFirestore_(body.chamadoId);
