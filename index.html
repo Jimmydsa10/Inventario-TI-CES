@@ -9695,6 +9695,8 @@ function Chamados({
   secret,
   podeAbrirChamados = true,
   podeResponderChamados = true,
+  responderSoProprios = false,
+  meuNome = "",
   fotosSolicitantes = {}
 }) {
   const [selectedId, setSelectedId] = useState(null);
@@ -9708,6 +9710,17 @@ function Chamados({
   const scrollRef = useRef(null);
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
+
+  // Quando responderSoProprios está ligado, o admin só pode responder (ou
+  // mudar status/excluir) os chamados que ELE MESMO abriu — chamados
+  // abertos por um solicitante direto, ou por outro admin, ficam só pra
+  // visualização. O backend também bloqueia isso (é a proteção de verdade);
+  // aqui é só pra não mostrar um botão que vai dar erro.
+  function podeMexerNesseChamado(chamado) {
+    if (!podeResponderChamados) return false;
+    if (!responderSoProprios) return true;
+    return chamado && chamado.abertoPorAdmin === meuNome;
+  }
   const chamados = useMemo(() => (state.chamados || []).filter(c => unidadeDe(c) === unidadeAtiva), [state.chamados, unidadeAtiva]);
   const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
   const selecionado = chamados.find(c => c.id === selectedId) || null;
@@ -9775,7 +9788,7 @@ function Chamados({
     setBusy(false);
   }
   async function enviarResposta() {
-    if (!podeResponderChamados) return;
+    if (!podeMexerNesseChamado(selecionado)) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
     const mensagem = {
@@ -9806,7 +9819,7 @@ function Chamados({
     setBusy(false);
   }
   async function mudarStatus(status) {
-    if (!podeResponderChamados || !selecionado) return;
+    if (!selecionado || !podeMexerNesseChamado(selecionado)) return;
     setBusy(true);
     setErro("");
     try {
@@ -9829,7 +9842,7 @@ function Chamados({
     setBusy(false);
   }
   async function excluirChamado(chamado) {
-    if (!podeResponderChamados) return;
+    if (!podeMexerNesseChamado(chamado)) return;
     setBusy(true);
     setErro("");
     try {
@@ -9978,7 +9991,7 @@ function Chamados({
     }
   }, c.assunto, " ", c.tipo && c.tipo !== "Problema técnico" && /*#__PURE__*/React.createElement(TipoChamadoBadge, {
     tipo: c.tipo
-  })), podeResponderChamados && /*#__PURE__*/React.createElement("button", {
+  })), podeMexerNesseChamado(c) && /*#__PURE__*/React.createElement("button", {
     onClick: e => {
       e.stopPropagation();
       setDeleteTarget(c);
@@ -10253,7 +10266,7 @@ function Chamados({
     }
   }, selecionado.assunto, " ", /*#__PURE__*/React.createElement(TipoChamadoBadge, {
     tipo: selecionado.tipo
-  })), podeResponderChamados && /*#__PURE__*/React.createElement("button", {
+  })), podeMexerNesseChamado(selecionado) && /*#__PURE__*/React.createElement("button", {
     onClick: () => setDeleteTarget(selecionado),
     style: {
       background: "#fff",
@@ -10347,7 +10360,7 @@ function Chamados({
         marginLeft: 4
       }
     }, formatDateTime(m.data))));
-  })), podeResponderChamados && /*#__PURE__*/React.createElement("div", {
+  })), podeMexerNesseChamado(selecionado) && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 14,
       borderTop: `1px solid ${COLORS.line}`,
@@ -10411,7 +10424,7 @@ function Chamados({
       marginBottom: 4
     }
   }, "Status"), /*#__PURE__*/React.createElement(Select, {
-    disabled: !podeResponderChamados || busy,
+    disabled: !podeMexerNesseChamado(selecionado) || busy,
     value: selecionado.status,
     onChange: e => mudarStatus(e.target.value),
     style: {
@@ -11619,7 +11632,8 @@ function emptyAdminForm() {
     secoes: {},
     editar: false,
     podeAbrirChamados: false,
-    podeResponderChamados: false
+    podeResponderChamados: false,
+    responderSoProprios: false
   };
 }
 function Administradores({
@@ -11658,7 +11672,8 @@ function Administradores({
         secoes,
         editar: !!a.editar,
         podeAbrirChamados: a.podeAbrirChamados !== undefined ? !!a.podeAbrirChamados : !!a.editar,
-        podeResponderChamados: a.podeResponderChamados !== undefined ? !!a.podeResponderChamados : !!a.editar
+        podeResponderChamados: a.podeResponderChamados !== undefined ? !!a.podeResponderChamados : !!a.editar,
+        responderSoProprios: !!a.responderSoProprios
       }
     });
     setError("");
@@ -11703,7 +11718,8 @@ function Administradores({
       permissoes,
       editar: f.acessoTotal || !!f.editar,
       podeAbrirChamados: f.acessoTotal || temChamados && !!f.podeAbrirChamados,
-      podeResponderChamados: f.acessoTotal || temChamados && !!f.podeResponderChamados
+      podeResponderChamados: f.acessoTotal || temChamados && !!f.podeResponderChamados,
+      responderSoProprios: temChamados && !!f.podeResponderChamados && !!f.responderSoProprios
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -11827,7 +11843,17 @@ function Administradores({
       color: COLORS.accent,
       background: COLORS.accentSoft
     }
-  }, "responde chamados")))), /*#__PURE__*/React.createElement("td", {
+  }, "responde chamados"), a.podeResponderChamados && a.responderSoProprios && /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: 6,
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "1px 7px",
+      borderRadius: 999,
+      color: COLORS.inkSoft,
+      background: COLORS.paper
+    }
+  }, "s\xF3 os pr\xF3prios")))), /*#__PURE__*/React.createElement("td", {
     style: {
       padding: "9px 6px",
       textAlign: "right",
@@ -12020,6 +12046,7 @@ function Administradores({
       display: "flex",
       alignItems: "center",
       gap: 8,
+      marginBottom: modal.form.podeResponderChamados ? 8 : 0,
       cursor: "pointer"
     }
   }, /*#__PURE__*/React.createElement("input", {
@@ -12037,7 +12064,30 @@ function Administradores({
       fontSize: 13,
       color: COLORS.ink
     }
-  }, "Pode responder chamados")))), error && /*#__PURE__*/React.createElement("div", {
+  }, "Pode responder chamados")), modal.form.podeResponderChamados && /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      marginLeft: 24,
+      cursor: "pointer"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!modal.form.responderSoProprios,
+    onChange: e => setModal({
+      ...modal,
+      form: {
+        ...modal.form,
+        responderSoProprios: e.target.checked
+      }
+    })
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: COLORS.ink
+    }
+  }, "S\xF3 responde os chamados que ela mesma abriu")))), error && /*#__PURE__*/React.createElement("div", {
     style: {
       color: COLORS.danger,
       fontSize: 13,
@@ -12417,6 +12467,8 @@ function ChamadosDock({
   onAbrirChange,
   secret,
   podeResponderChamados = true,
+  responderSoProprios = false,
+  meuNome = "",
   fotosSolicitantes = {}
 }) {
   const [texto, setTexto] = useState("");
@@ -12431,6 +12483,11 @@ function ChamadosDock({
   });
   const abertos = useMemo(() => (state.chamados || []).filter(c => c.status === "Aberto" || c.status === "Em andamento"), [state.chamados]);
   const selecionado = abertos.find(c => c.id === abertoId) || null;
+  function podeMexerNesseChamado(chamado) {
+    if (!podeResponderChamados) return false;
+    if (!responderSoProprios) return true;
+    return chamado && chamado.abertoPorAdmin === meuNome;
+  }
   function toggleCollapsed() {
     setCollapsed(prev => {
       const next = !prev;
@@ -12441,7 +12498,7 @@ function ChamadosDock({
     });
   }
   async function enviarResposta() {
-    if (!podeResponderChamados) return;
+    if (!podeMexerNesseChamado(selecionado)) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
     const mensagem = {
@@ -12664,7 +12721,7 @@ function ChamadosDock({
           marginLeft: 3
         }
       }, formatDateTime(m.data))));
-    })), podeResponderChamados && /*#__PURE__*/React.createElement("div", {
+    })), podeMexerNesseChamado(selecionado) && /*#__PURE__*/React.createElement("div", {
       style: {
         padding: 12,
         borderTop: `1px solid ${COLORS.line}`
@@ -12870,7 +12927,8 @@ function App() {
       permissoes: data.permissoes || "todas",
       editar: !!data.editar,
       podeAbrirChamados: data.podeAbrirChamados,
-      podeResponderChamados: data.podeResponderChamados
+      podeResponderChamados: data.podeResponderChamados,
+      responderSoProprios: data.responderSoProprios
     });
     setAdmins(data.admins || []);
     setUsuarios(data.solicitantes || []);
@@ -13139,6 +13197,7 @@ function App() {
   const podeEditar = isMaster || !!auth.editar;
   const podeAbrirChamados = isMaster || (auth.podeAbrirChamados !== undefined ? !!auth.podeAbrirChamados : !!auth.editar);
   const podeResponderChamados = isMaster || (auth.podeResponderChamados !== undefined ? !!auth.podeResponderChamados : !!auth.editar);
+  const responderSoProprios = !isMaster && !!auth.responderSoProprios;
   return /*#__PURE__*/React.createElement("div", {
     style: {
       minHeight: 640,
@@ -13253,6 +13312,8 @@ function App() {
     secret: secret,
     podeAbrirChamados: podeAbrirChamados,
     podeResponderChamados: podeResponderChamados,
+    responderSoProprios: responderSoProprios,
+    meuNome: auth.nome,
     fotosSolicitantes: fotosSolicitantes
   }), view === "importar" && allowed.has("importar") && /*#__PURE__*/React.createElement(Importar, {
     state: state,
@@ -13275,6 +13336,8 @@ function App() {
     onAbrirChange: setChamadoAbertoId,
     secret: secret,
     podeResponderChamados: podeResponderChamados,
+    responderSoProprios: responderSoProprios,
+    meuNome: auth.nome,
     fotosSolicitantes: fotosSolicitantes
   })));
 }
