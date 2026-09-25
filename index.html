@@ -17,6 +17,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+<!-- Firebase (só usado pra leitura ao vivo dos Chamados quando o admin está
+     logado — ver assinarChamadosAoVivo em app.jsx). Opcional por natureza:
+     se algum desses <script> falhar em carregar (ex: sem internet), o app
+     continua funcionando normalmente, sem sincronização ao vivo. -->
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore-compat.js"></script>
+<script>
+  window.FIREBASE_CONFIG = {
+    apiKey: "AIzaSyAaM_vKWaZ1WdmJE_pQhTN5W4_hFuBImyk",
+    authDomain: "inventario-ti-ces.firebaseapp.com",
+    projectId: "inventario-ti-ces",
+    storageBucket: "inventario-ti-ces.firebasestorage.app",
+    messagingSenderId: "176073028154",
+    appId: "1:176073028154:web:d9cd61ddbf7ca7a78b7b03"
+  };
+</script>
+
 <style>
   html, body { margin: 0; padding: 0; background: #F7F5EF; }
   * { box-sizing: border-box; }
@@ -372,6 +390,62 @@ async function backendPost(action, payload) {
   } catch (e) {
     throw new Error("Falha ao enviar dados para o backend: " + (e && e.message || e));
   }
+}
+
+// ---------- Firebase / Firestore (leitura ao vivo dos chamados, só pro admin) ----------
+
+// Sem isso, a tela de Chamados do admin só atualiza quando ele mesmo faz
+// alguma ação ou recarrega a página — o resto do estado (Categorias, Salas
+// etc.) já era assim, mas pra chamados isso é o problema real: com a escola
+// toda usando o app, um chamado novo de outra pessoa só aparecia depois de
+// um F5 manual. window.FIREBASE_CONFIG e o SDK (compat, via <script> no
+// index.html) são opcionais de propósito — se não estiverem presentes (app
+// ainda não configurado, ou CDN bloqueado), a função simplesmente não faz
+// nada e o app continua funcionando do jeito que já funcionava antes.
+let firebaseAppPromise = null;
+function getFirebaseApp_() {
+  if (typeof window === "undefined" || !window.firebase || !window.FIREBASE_CONFIG) return null;
+  if (!firebaseAppPromise) {
+    firebaseAppPromise = (async () => {
+      const app = window.firebase.apps && window.firebase.apps.length ? window.firebase.apps[0] : window.firebase.initializeApp(window.FIREBASE_CONFIG);
+      await window.firebase.auth().signInAnonymously();
+      return app;
+    })().catch(err => {
+      firebaseAppPromise = null;
+      throw err;
+    });
+  }
+  return firebaseAppPromise;
+}
+
+// Retorna uma função pra cancelar a assinatura (chamar no cleanup do
+// useEffect / no logout). onChange recebe a lista inteira de chamados toda
+// vez que algo muda no Firestore (documento novo, editado ou removido).
+function assinarChamadosAoVivo(onChange) {
+  let cancelado = false;
+  let unsubscribeSnapshot = null;
+  const appPromise = getFirebaseApp_();
+  if (!appPromise) {
+    // Firebase não configurado (sem window.firebase e/ou window.FIREBASE_CONFIG):
+    // não tenta nada, app segue no jeito de sempre (leitura via doGet).
+    return () => {};
+  }
+  appPromise.then(() => {
+    if (cancelado) return;
+    unsubscribeSnapshot = window.firebase.firestore().collection("chamados").onSnapshot(snapshot => {
+      const lista = snapshot.docs.map(d => d.data());
+      onChange(lista);
+    }, () => {
+      // erro de permissão/rede: mantém o app funcionando com o que já tinha carregado
+    });
+  }).catch(() => {
+    // Firebase não configurado ou indisponível: sem sincronização ao vivo,
+    // o app segue funcionando normalmente (leitura via doGet, como sempre foi).
+  });
+  return () => {
+    cancelado = true;
+    if (unsubscribeSnapshot) unsubscribeSnapshot();
+  };
 }
 const LOGO_DATA_URL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAIAAABt+uBvAAAyAUlEQVR42tW9d5xdV3Uvvtbe+5R7br93+oymSBr1LkuyLbnIwtgYl0DAlBgI5r0AAQN5QD55JO/FLwGSQB4kIYRfEhIglASHYmxs3LBs2ViyrV6sNhrNaPrM7fW0vdfvjzMzHsuSLAlDeOczKp+ZO/ec8z2rfNda370vEhH86g6Csu3UbNdXquq4QEBAVdvjDHXBheCCM4EMGQKAVAoINM64YL5UBKQLEXzH1DRNcMEZ/NoPfL0AIgCc+b8vVa5SHc2Wq44DBIRgGbohhGVoYVM3NU0TjCEqAOmruudVbbdctwtVu1StF2t2ue6U63bd8V0pHc/niIbGBWPxsNkYj7SnE52NiaZE1BCCMfx/AKBZaBzPz5VrI9lisWYbmrAMPWqZqVgoahi64MGLFVHVdvPVeqZYHS+UxvPlqUK56niO5/lSEZEnVdjQY5apiAAgEQ4lIiFDCEXk+VIXPBIyYpaRCIfmtzRYhvb/hgXVXG9oKj+UKUolWxLxlmQkHg6Zmph9ge35+UptolA5M5UfyhSmiuW642uCh3QtFQ41xMLpWLg5EW5JxTmioWmh17pzRcQQf3NdbNZqao53eiIzka8CwryGRHs6Pvepur7MlmvDmcLgZG40VyzX3bChN8bDLcloUyKailjpaNjUxblOQDP/vvLyEBEAfi3Q/LIWpIiGM4Xjw1OcY3dzuqMhoc8EUSKou95YvnRydGpwMlepO5ZpLGhOL+poaoqHLUN/xfsoAgBAuASLIHo55P2KwbpMgKqO+9KZ8Wy51tWY7G5Oh+ZYQdl2zkzljw9NjOXL0ZDZno4vaG3obkqeBW5ghDhtEqB8OXxg3+DO5/xCUSMKh61wNGrE4lwTRKA1NupNTUYqFUqmUNPwnGD9apASl/E72VLtwOkRIfiGhfPSsfDs9+uuNziZPzo8MZ4rp6KhN6xZ1NmYDOnarFfOgAIMEV55O8gwnG6ItrS9tP/gmV073YkJ4Tgxw4iHrZAmrGRKS8TRCqtINNq7KL16VWz+Aqu5yYzF9VAIf5VIXbIFnZksHB+ZbIiHl7Q3zYZSX6mxbOnQ4NhEodwYj6zqbmtPxzhjgbHgTOi4mEMqlR8ZObZjR9+OHaP79+dOHDdcN67rccEjQugIzDAoFHI1PbRwYXzZ8tTylcneBS1LlxmWNQsUvn4YXRpApyeyR89MdDenetubtCDiEJRt59jIxLGhyZCuXdE7r7spNetHeAnIABEBEbKX2eDo8ePHnt5x6LFHz+zZ4+WylpRpK5QOhaKcGwwVkS1lTWjY1pZYuar7+q2dGzfG29qEpk3D9HpY0yUAdHoyd2xoYn5LekFrg5ixjtFcaf+p4arjLu9s6W1rNDRxFmm89AQ5fUGz0FYLhdFjx17avv2l7dtH9u31C4WEYTRFwo2hUMzQdcZcqQr1ukylqa2tfcuWhVu3dq5dp5vm62JNFwvQVLFyYGCsLRVb1N4oGAMiT6lTo5kjQ+MRQ7+itzMIRq+veZNSRMT4NMksZzKHHn/i4KOPnNy5szg4GJKqKWq1RcIp07QMQxJVFeUR7Wis64Zty2+7rXv9OqEb02n1cq/qogAqVOt7+4Yb45El85o0zgP6c2RofGgyv7AtvbyzlTM2/dh/FfXcK13Ps+2BAwcOP/HE3gceHDmwXzhOcyzaHo00WqGIroMQNWRjtZrf1NR69ZYr7ryzZ/36AOu5zvt6AuT6ct+pYUW0en67pWsAULWdgwNjmVJ1ZXfrbMT5dRxENAepqYGBXffdd+CRRwZ278FyqT0e64hHGw3D1DQMhUoAQ5UqNbeu/Z13r3/LW2ONjZcXlV4boCNnJsbzxTXzO9JRCwAqtrO/f6TueOsXzktFrV9/eQ1EiojNwFQYG9v30EM7vvWt/l27Qkp2JRPzIpGEoRshU4asCdcbKldbrr5660c+smDDhssIAvzee++9QDGRKVWPj0z2NKXb0jFErNreoYGxmu1uXNyVjITgv+RARMRpawIwo9GedetWbNsWa27OZjMDg2eK9RrnQgfUPS9m6PFoZPjY0QNPPW0mEs0LF3IhSKmLx+i8AAGAlOqloUldY4vaG3XBHc8/MjRhu/763nlxy4T/2iOAaQapcDK5ePPm5Vu3CsvqP35ieGxcIphCaL5vKpVOJqu53O7HH3Ndr2vtWmEYF4/RuQEKzGc4WxiYyi1qa0pFLaVU31imYjure9rilkm/mnh82UgFNxxJp1ds29a+bFlmcrK/r69at01dMwE030tFY75j79/xTN22561aZYTDv5QFIYAn5b5Tw5ahL2pvEowNThamipVl81oS4RD85qAzt8gPSg3Elt7e5TfcoEVih3fvzuRyIV23ONd8Lx4Ok5R7n3oqNzm1aPNmPRS6mHh0XhcbyRYGJvK97U2NsXCmXBvO5Luakk3xCPzGHoHTARCRFY8v3rIl3tY2cOLEmdOnDV2LCE0oGTV033GO7t3nAyzYuFHo+mtidG6AFNGRMxNK0bLOFgA6NZZNRqyuhsSvsxHzywBFSjHOu1av7lixYnhg4PTRY6YmIpquKxXWdceuH969h5vGgg0bZ1noxQIUIJot1w4OjHY1JzvS8aFMQSqa35LmF+yZExEB/IZ8BQ8SARq6unq3bBnu7z954GBY16K6rjMM6Vo+Xzh24GBDT0/HsmUXNiJ2rvgDY/myL6klGSvXnGLV7kjHZ5vKF3hu7DfpaybHqZYFC+768pfnv/mWY1OZrOMQYlzXe9NJmpx4+MtfHj5yBPFCZPAcP/N8+fj+kwrUdSsWTORLnPHupuRrBrMDg7kz2arGGcH5T3ahFu7cl9Br/gad9xToK5WOGOt70rrgQECkkLGJ/v7v3XNPZvvPV7e3xzXhSnkiXzhaKF35/vff9dd/bUaj56tFxFmNYEQo1u2pUmVxe1Pd8RxP9jQnzoFOACti0AZDhK889tJ3nz6pG8KX6mLuhACQCIAIOaFGwAEISBEAIgNABIXkIfkAQMjOh9ZZ3+SM+b68eknL9++5Ph3lCogxRkTN8+ffce+93xkfO33q1LKWJp3z9khkslrbe//9y7dtu+rOO89nAeLVZ8sUa1LKmGUUqrVYyDjXaOUcxbHt+nbNtZJWzDKAgCEwBARkCDz4DwOcaSciAAMCFMRNoWqGN2S4p5gsCaEBoPRdxSzH6HHEPI8nUDmgPAVIAESkAIhAERCRBFAKAEASKQAgcD1/cjRfcVw6K2wTzd+w4Y7Pfu4nn/jEaD7f1ZCK6lpnIr53dPypr399yZbNybb2cwYj8eqnMZ4vmprGGVekGl6d10kBMqeWBSIj3PByMGOInC1b2r54YRNIMgTqjGkMdY4aYzpHjaPGmMZQQxAMGA8ZVEzVtyer2w1vTHKL6Y0TdYuAtYRdZQ9xdchj8YJ1fS5yYx1blLJ9pTwFniJPkSuVp8iT5CpylfKkciVJwIlM6eGpMnuVtSEAEa288caRu+/e9Zd/kbLtmGk2hszmcLhv584DP3v0+g/cfVE9aUU0VaxqgitScStk6to50KmMHX3mi+1L39IYvgZmGsFEQESGxq2QjlIZnOmc6Qw1BrrgOkONoclR50znyLmetne05r+hoW2nrq6Z76LY6opvfvuRI7my89FbV7YkhFs8aNn7U5UdPaVHJqLvmgzf6inwlO9Ksn3lKXIluaT0ACOpNEk+gKFrBKDoHEkEiJgQW+6+e+rY0eEHHljcbESE1haNjI9P7HnggbW3vjne3PxqI2JnBYtMqVKybVPXBGPxsIGvRqc6cvDR/17OHIk2LD5PZAEgYgiMgSGYZWphQ0RMETE1XeNBWmjOf6tz/E9dfeFI8xcm05/AhjfWZPQ/fzHQEQ9v6mn68c7BqTITDdfmGj481PLFsrWtNfM37ZkvMlUB4BrHiKlFTBEJCUvXDME5Ip8OiwQXSBGIQBRrbLzmgx+Czs5cuaxxlgoZSdPs27VzYO/eufO4c1kQASDkynXb8TWNh3QR1vU5PyNAVhx/fuC5T+X7n21b92kz0nRO1iA4MuRKKenBRLFWqTogiSOETdGWCnc1hZfU/6Wh9u+THX9Sjd0a1gWSt//U8JMHhhc3xz64dZFlin97tu9bjx++amnrVUtaRKK9bn1Uxda2jf3veLV8Iv5Hp3PqzGSxYvseESI3QyIaCUkCwZEj469JZYk6161bePsdfV/7akqpiKY3hkNHM5kjTz65fNs2oetntR/FWRGoXHPqrhvStXg49LIjEwGy4thzg8//saocjicT6fYrzo03w1LZfumlkUyu6nm+lGTpYkVPWhf8xSNZUxc689caY8t7P1jlVxvZyeGp0t5TU3FTu3n1vJtWtcfDOgHceeWClmT4p3uHHt4zuKIzNb814bFlodrHBw88tavyooPhSs2Z35Y0Te1g30ix5jCGmsYTcWvh/GZNIFygw4VIRELXN9511/DPf5473deUSKZDIS2bP/zzn990zz3pzs6zvEzMxUcqmipVACBumWFz1nwUIMsNPTm0+88j0QQ3Ogslmeq4Zo5vvyL7R0x9xaKWWt0dGc2PjJc4Z4Yu1i5suu2q+Y7tZ4u1kUz7sxk303cipPHmeOi29V2bFjZ2psMIOF6sA0LE1K9d2ra0I/Vi/9Te09mnD4/UbC8W7kg1/rdti8PNaStk6pmyfaA/owluCNGYDnd2JGOxkDC0fKF+4XooiJdNvb1L3/bbx/7vX6ekjOl63DAyA6f7du1Kd3ae9evirAhtu56hieZEhCHO9ChZ5vRPz+z+fDzRkIjx3OBpI/VWYabPx+MMg4e0cHtTbHlPIwcYHS/0ncne/8zJ+W3xm9b3bFjSss6THEhjzOA8FhKWLkApnyBm8p/tH/clvf2q+VXHj1r6DavaNy9rK9Y925eeIp+AcZapuNsPDO3vmwxb+tWrOjraEsCZJ8mWyiPKF+qvWaoFvZGF27ad+I9/r02MW4aRDIemiqWhQ4c2vYoQibkU0Xa9QrUeDZkxK5iZKGQ8M/Do4IufiyfTiYjnTj6Vz5XnrbyFC+2c0x1EAAKlSEmlgGkcF3c1rO1tyuRquw4O/uMDz9+xZeXG3jQDsHShczw+UvjBc6cGJ4tL2pNblrY+9dJ4tuQgY0eGc3tPTcbD5tuuXriiOx0WrOz4DOHYSOX7T+7XDP2mTfM7WxO2lFVH2lJJpaSii+w4BxA0LljYdu11k9/5dqtpxgyDpBo7edIulcxYbG4YEnNDtOP5pZq9tLPF0jUCxRjPj/xi8IU/j8aiSavm55+fmKzVYJGVWg6AQPRqC8KAcQAElRAiSEmO47ekI3dtW1Dd95mvP3p0JHv7NUuSBzOVAwPZvpHCtcva3rd1Zd9o5se7+h89OFKue6W6fesV3f/7zs0HBib+6fEjXU3xNfPT85qih4crP3/2yXd3Pdy45e9cjJZtx5fTTwUB8OJHO4hEZFhW97XXjf30Qem5EV3XAUqZTL1UMmOxuU/+laUGUDhkdjYmEQGAFcd39z/3J5alpSI2lV4oFJyhMWhb++ZIav45yfTL5RC+DBYicQRPIrpnbmjeY107/59OVA+eHIpFYu1x/ke/vW51Rwgqx6/s6HnXVdf9+X/uzVTsz75zY9KSldzxJVfOv6K36f4X+neeyD+8Z8gj7V0bzdvDx47Unh8x38iRkCHSzIkupY8XGFH31VcfW7O2/NR2Kxy2OC+MjGRHRpIdHeeNQdW6mwybrYkIAFayx44//UlTlNNRCyu7yzV3YAji3Xes2PqnXIQuQDfOwUWQMfDm57+gl490d/3+R5eudSd39YROJua9SbJ0JbfXGv1Ced49oYbNn/mt1YggNK1SOqOG/qbacFdj8oYP37SkPvKTk6UGTG9s8m3WPzY/++fZ5mUVbALyXnGuSxSqRFKpeddcc+rFFwQpy9Qr+Xw1lztfuwMBwPVVMmwmIpbnFE6/8FeCio3pELf3uI4zOkEYXbVi671GKA6kzvew6JV/EwAAeWi0lb8fcfsK1nqsn9Y4rDB+nqw8lKsq2/V5+RfILYiucX3FOEPGHFcqo430Zq3whOva2ZoyK8+sxm+HDcLqqYq+VIl4R/nbEsQ0LQVQlwzONPdPLVqsIhHw/UDlJz3v3AAFThEPG/NbG0k6p1/4Unlse2ODobkHybezRcxVoouv+V+ptjUBn76w9QRVeVB8+KBH3Zc6y9/tS31mNPqeiH3AKj6hZR8pxt8qtUbwxln1gB+/xsWwL/26r2xfeUr6ILzYVlY7ivWjIKxC8t1QecksPBKx9xSsLccbPt9cf7yp9pgP+qzYiIAUXIIUIwjpjYsXmx3zpFIm58p1Xdu+UMOsMR7ubk6N9z001fefjY0pU/WhrNRcNj5FzUvf277k1oAxXvi0auZyCRQRILmLSl8pG8tGwm8th9Yzf6pz9ON1a305+gZSHivvR3fStjZ4klwpPUWuIkcpV/qOtYZQE+Xnyber1tpi8t3tk/8nUnumZGzIGFdNhG9ZXPo7TWUlMKJgOn0ZVgShZCrc3S0RBWNISkl5AYCIIavmTg7s+Uo45MWMKSZzUvHJjMLY2t6NHxaaeRGPJbCb4HKVB2ZX9b64f/xo7FMoyyV9ZSZym+kNFqK3uRhVflkUn5JGp6P3eL7t+OT40vGl4ynHc2zWaEe38PIe5UxKxfPRN2n+ZElfk7Wu4X7hWORjHo/1lv9ZkjHT6gAFoC4apIAx6laodcNGKTRGQR/qvC1XAgDpVQf2/n9U60vHJJcjgFitq1xZtC37nUTz8gtlrjl+rQgUkSLlkR6RpxfXv3k8/Htl1knKR7+geyOShZKF76A7Ts6IVj9cjW6zKeRI3+WaKwxXGJ7QXCJPUc3awr1xqPdL5aWyX0fyNZnlXkaS8km8FPlYl/tQk/uMh6ZSSilSdClqp4AJIyYXLFC6AUpxzpAHZS9V3ZpUag5ABAA4Nfh0pv/BZAINHEcgpTBfIGatbF98O8BF+beCAB1QhJJwRe0fi3xxn/lWUBUP9GT18Zhz4KXWbzB3rH3kD6LZb/s8WTY3+spxPVU5dKC0/YnS9ifKe3e7ddeVTsVYZOvzY7nvtQ1/NFx+5mjz1xTTGks/lIqBskfFlYP6LauqXxOy6AMLAp+6JC9DBIBwc3Ni8SIppaYbmmEAgCe9xw7+fKo8NQMQESC69dzQoW+YvBANVRnYCGg7VKob81a9L5qeDxc38w96MQTSAXOB+2Cbv2tX+H8GkAl/orXyo5HIb09YN59o/orNEo1Tf4PKVm7elb7jqOI/fzXz0Q9kPvr+wpe/UM+XPSLlZIlUKvctdKdOtHxlInzHmej7087TIfeEBxxVfa/1MYa03P6WS6YkpYjUpcehUDIZam6RUnLBA3Wa5/u/OLpzODs6AxAiAEycfLg8+mwi6htYRAACLJWJRZY3LdiGyC+ShxGRIukqPSYHr7D/YY/x4RzrBmm7SrRWfwxAp627yC9WePtE5K11Yyn4+eahDzef+f1Q7vtCTYFhgm5xLFn5+xuGPt06+AFun7T17qnob5W0ZeBnxswb6rytq/wNpXxFvk3WLuPjy70fdHg7HAoppdSlKAqDDpGVSoXb2mzXNaJRMxYDAI54JjOyf+BgABABgFOdHD/5E5OXoyGHoQQAqaBUhlB6fSy98JIUPB6hJNzk/kOe9RwWd3C/4JBheafa7YdPW3fWIC6VlLIerewomeuPtn/nTMNnqrxDK7/AvCkIBJ9+XlRetCEykvjw8bZvjMfvsmovkp/zFLqSn7TuTnoHU/bzDoWYKp/hG/rEG6/2vsqp4gG/DFUzIopEwkNMtLSm2tsBQAEVa8WjI8ch6J0DQH50d3F0RzwGOq8DACKzbWWrcKJ1IxfmxYvHFJFDRq//WLvcv137pK+Yr0CSv6D23RprHTBuJlW1lRDOGcs9NBnaVoHGnLHldMOfnWr+vxVjJZKP5Nna/IGmz/Y3/cVk+E1VbJgyr9f9Md055hAHWRvT1o/oW3vq9zFZcImDcp4S9wDQGu8+W+oyiKZwKWwIINLezqJRMxYxIxEAGC2M908MHh/pU0oyQJR+ffL041xlwqbLcFr3Xq0DMzube64PyvqLPJ8kVEoqUM+I3xuDXlA1jzTLO53wjx82fteWuvR9TxH62SJfnhHrfL/m+VXfK/p+VSk5q5DyZd33Cr5XlV65wHpy2lr0Mp6vXKWU7x433m7JsYR7yJWClFOl6FP8I3WykFwp8TKkgCg0yUWyozOcTgNAoVZ0lZuv5scKkwIAqoUz2cHtYVPN9siUIscFI77YjDRe0pkUESj3CG3VQRhU8YkBySpEXzR/P8vX6aruMCaknxEr87FVHJFLTyFjCrlCbcZQFYCr0FdMkZKkJOnHoh+SCnzyfWKS3BzO221+NAedkqSvOJPVU7TeYeuIfHVZCyv0RCLU3Jzq7Ay03ZOVKQ/dYq04khsVAFAc2+eW+5oaQfBpKab0yfUx0XqFpkfg0mTg5ClApbj0fGBIiCArPFmHBtO3PWTAgRhTyAQDjsARORJTxFwvpGaGvQpcz/M9X/m+JFBAUoFU4BN5SvkKSFVP41UeKaV8X5GnQClfSZBIUl0OQKF0Ot7d3bFq1bSyJT/soeNIt1ArClIyP/YiymrIRBYMcRCkBM8XRqQdGb8kDa0ikKRAEWeIRKgUcK7npjpefFIoxRgyAMaQIbBgnD891GcoPT4+jJwTEMtPGT/7sWaFA+ZHAbeaZqEkCZQCIjm68qp8a7cvla/AUyCJfAIJl5HoARlLdXW19PYCgO3aE+WJeCyam8yNZEeF71Wq+X6NgaEj4HQdJSWAiOih1By92cUBBORJQkVcEQIiJ0XIc5nuB76t2XXCC3YmkBFjAMAzE7EfffvVL8FXaApUId442drtK/IV+Io8RRJBXqKPBe9phK2VN94YSacBIFvJDRWGDENTID3pCaeasyujug6C44zGHaQCpiXNSDNcomxeKvIVoSKmFAIgIHHlKyKGhEgXtsSXf4rnpF1n3bqvwJPkE3hKBeNWBSAvtWZFBIBIMtV79VVGJAIAE+XJieqEYYjgAkS9OOTVMlFjWogwp1WCwTzukg5J4BExIqYAkUCB8skD9PUQKgCGF4Cbe+70pB2Z0nW6oBYEFXmMuYqUVD6RT+ArkgDeZQVpMx6fraVGiqNVVeF8miEK6dukXM5hdn3sZbUNZgEiXxIqCpKRYkrzZTHZ9OI77hGkOAvEO8ACCUOgZQAAxpjndTx2X/TUUQCot3cP3XSnF42BlAqQCNQ0R5+JQUBSUaaj1/dlEKR9UgFAUl3mtRMQIvpKnpw8CUzRzDRLECIiMDz7yV7ekovAxRiRDwyBFKAkKhuR8sotDIEzFICcIWcoEDhHTXCOiIJrdq3xxe0xegkAnEh8cv2WeqoJfKkIfAApVQCNlBTYi1SKXE/6nqfAI5IqEC+Af7kABaGkWCseHjtCXJJSwVJIMdPCmRv/ABFA2dKrXlIDM3AxRyrw/HK96lUdp+56ri89Cb6PM9q4QIvGGQrODF1wRD2kpw3sLtWaEIlIen41V3TQYEqqYK1mMJ4kQEWMiBFN9wwYC4QvElACKAb+TLPu8o7jEydydoZrzPN9JBSMCwCSiqR6ORgTAmcg3axdGbsYUkpACJgMa8CwMFEoTuScqi09UlL6ngfAhMZx7soxIgKQvvQ9qYIOBWKYqyuy5QUMiSBfrD329LFydFJDImTpdKSpMUaIKkCJSCFTAEqRJPCV8qTypPKlkoSFiTy4fipsRgzt0sTcCEqp5/p2lvyiYfJa3U6Fk62pVqGHklyLed4IqZnaHoAzQHC9eibQLFwglQUDa8axszEKnJVyJStiClO3YlooYmqCWxHTCpsaR8GZYMiCiZoix3brVUdJJT1ZqbvcrpvjGhExRNfxRkayeeGAkgDQrwtdE3PPjzMdZSLAafkoEoBmmQwRfNXVGDZ17islLm6FT9A568+cPjR2SOiolKrbTspIpCMpYcU6RKipXjyqCIPBPwFxARqX1dxx6TlcMy+c6gPTWNgcMwRjEatt3UJdYxxBAHAEwZEDMEUMARkyQMGZEBiNhxkDhsgBmKZpnp3qi6lhAoRY3Np41eJCOE6epwCL+erkeN7zZLDqgGaXv5JCRMZYtDllhE2plB63CmNFyFYXtcYvdQpEAHuG9o3VRo2YVnVq5UptUXO6s7FDaGbMCDdXMuB6oPPp1wrONKaKE887tSkrPi9wogvTl57GaDSkFVxZzZWq0kepvGodiZBAOo5X96T0A2akacKwdNM0OEdENA0tFLdM6a+rO8hQKTJMfd7ClnSiEZVSiHbdrZTrvlQSSElSRDLIZUQSQBJoVgg07krlK+UMZMyQNr85evF5RpFiyAq14s7Tu9AghWTXHc/2FzbNb443CaFbybYrcv0/rNVl2HzZeE0TiqWB0sQBKz7vwmcK1rsvaIomI2ZmND++u6A8H4iUlNPUYnrscLZoODBMhqgYs5R33VSBMaZIVcv1w7tPFiIZAcA0HoqEQrEwE4wjoM44YxzAl8rzpJKSpMqPTdmlmu9Lr+7UJ6styfDilhgAXOTGHsHd7ex//tjUESMiHGkXSzWLh69evAkBBQA2dGw6JRpK5YlUHGbF4paFlM1kh59p7r0Fkb1mCouGtKXtib6Rgl93wLFRCBHSIVArc8YQX+bGOK0YnI7wUkkCQSqAjDGsVerH9x7P8zCAAsaNkGGGTeQcMZBCYtBvl75Uni9J+XVH2h4gcMsC0ttTVk9jFC5OyRA4x2R56qHDDylNAud2zSvmKw3hhnXz10yPnhPNy+NtV+bHftLsQLAIDIF0jYUMVRjZUc33RVKLLlyyBqd505qOB14YELGoMGNa2Aq3NQmNC8a44EHhHpSpHJEFFDEwIiUJmO7bsQefUznJkOmm1tzTyrQIU1IReLbr1Bzp+bOoIgEhME0Iy2RCMyyLADBsgmb6p6c2zG8wNH6xTSECQHjy2FMn8ieicavil+pVp1ioXbtia3fjvAAgMsKpjmVvOzL8ZLFUsQxkjAhAcBWPwkhm32T/I+FU72tUUQAAcOOK9mTUKAKLrOjRTC1gI8SQiBTOyIIRgyKNARILOKqGnAuXIRcASEoZ0XD3puWpWAMq6Utybdup2p7jKUWBDDig1KBrLBwioQXJXiqqHB8mxNvWdsLFrSwMos/xseP3H7rftIRCz/W8fK7Mlbh1/c1xK05EgXgB2xfdNHz4uvHxnybiLGxS4MBhCw3ujBz5TtP8myOpRRccOiMAtCVDm5e0/HRXvztR8JiU41NUrWEgGMc5Behszw+nlSAKmYWqki0gQ5Dge15hIl+sM0aKEEEItEJ6xCICGfBDRRLAl8qtub5fk1JJKZUrnbHCwvb4FT3pi0ztDFm+Wvj7p/9xyp1oTCVztaxdc8fHMld2X3XN0qtn1R0IRGaksXvd+/c/+OxkpjCvlQmuAMDUKRHDsczekSPfWbT5T5Gx8zkaIkhFIV2895oFjx8YtvuGWTVLnhfovefQw2nGTXPKcwSQiJKkV60hIHBwipXBp1+cEmEOChjjIUNYIaYJAKQZBSIBKU/5lapy3KAUUNE0EP/gtiVN8dBrbp4T2FfdrX9z57cOZw+0NjSUvJLje+PjeZOs9299z7z0tK5czE5h2xffMjXwgfFDX4pGIBVHhsQZRMNQLMuRI/+WnnddQ/c2gPPqOhhDRfRb67uvXX7y8RcGuRYC1wHGkHNgDAUHTTAueCTMTZ0FGR6n+wZSKr1eFUdMqs34BRIGJarvewXHzRenwZWv0HFMkw+GEI4qny3rSb/3moWvWWcEdanju19/9hs/OvKjec0tHrk1t1bK10aHp9654c5b173xLH0QEpHQzCWbP1qcPDA4/IShs2iIAME0KBnH0YnBUy/8VTi5MBTvOh+rDr6lCfbZt6977sRkrYqsPQaNUR6NMcE541xwxpALwYVgnCFDjoAITJEiMJyaNrodskREIh5NX7MJwgmmlO/7frEifZ+IZN2WxTL5HgGQUkGBTwjgkdKiJOEzt69qir2G+QR24fjO13d8498PfK+9uQUEFSqFetU5fXp0UeOiP7j192NWbDaEiTlcgCLJ7jU3//Xu+z8wOLxnQSczTaVxiIWpFsPM4ON9uz6/bNuXubDO72ioiDYuaPz8O9Z//F9/oZSGkaQXD3NA8n1yHUTwbRtdF10XpUIg5IIJBqZJSFKqYDEcIJMhU0WiRJIAWCIZlBMIxIKyPijEpJKkqOqwgXGVq33kthW/s3kBnR8dAgriTsWp/v32r/3o8A962ueFDH20PG7b7uDpSeEa/+s9f7ime9XcAC9eYQSk0m2r19361X0PfXBg+EB3Jw/p0jQgESPbw5HD/6KF0kuu/ewFqjOGqAg+dtOy8UL9L+7bg6fGOHOwmCUlfakAAUiBL8GXoBQAIWOIqDTNQ/KzeUQEZH6pVHr6uYIZ4UqRpqEZIiEAgKwQpdNKaCqwHc7B9sRIxs9U3nnD4i/dtZHOP/FRpBAYQ+yb6P/i41/aN7V3QUeXoevjlTHbdoYGJyvZ+mfu+PQdV9xyXp30dFeYVGPnpnW3/fPeBz8wMHioex4LmRS1yHHB9+TA7i/pZmr+xk/OrDk4r699/h3rTY3fe99u35eaz6GUR98hxqYljDPJjKQPAMpxFXnke9Nv4Hl+dkpiBYBozouBITCOCEIp4hpFUp4R923vA7es+Nv3btIFP6dlB8mBIVOkHj74+Fee/sqUP766a7kCNVYerdnO0OBkZqx8zxs/dM8tHzI086zZ7NlLMhERQFmxjlTntWNnjuUn+k0TTJMLoZRC1/WzQ89J30533RBY3KuvKPgGAVy/tKW3LXFouDhVVioaF5oAz0YiJIVSIilUwZckUrrytzjj81QFACZZ6Bd6Sx0FAwKi6V9RcvpvKTEU8yJNksx0IvRn797wuXdcYQhOr2LOUskAGkQ8OdH3uYf+8l92/4sV01bMW1r1quOV8WrNGegfy09UP3XLx/74rZ+yDOvV7OncqxGD5Xf18sTRHZ/N932tLSVTKV6zZSaPxTJ5HvRu/pMFV/8fRHYBchQEy9F87RPf3PXgviG7bPMIh6a4ilqgC5AEvo+OjdWKqtetevWPTj16dXEAgA6FWz+/4OapSJpZJoUjZJggOHAOvo9Vm0/kvZKHpnHD8pa/eveG9T0NQHAWOlJJAhJMAMBQbuSHe3/03T3fU7q7qG1h0kpMVMbz9Xy15Jw4eYZq/I9/61OfuPUjGtfOWZOfd7kmkUJkBHDm0H+cef7ekDze3ASeZJkClKvK86BjxXsXX/8lzUzP2BGeDyMAePTAyN8+cvhne4dBKWiIsaYExcNkmUAYSEJ1t/Ynj3518+ndQHCwbclnb/pYNtYQrIIAJHRcLFQpU6RMCRz/yuUtH3vT8ndeNT9ICwhIoKYFyHNw+sXJnduP73jwyAMVKC1o7ZqX6qh5tfHKeLlWzU6WTvUNd8a7v/zez912xS2zrPocEeOCcojpKFMtDJ189s9qQ99MRXwmoFDj5Yqy69TQuXHpDV+JtWwEACJ5zinIzNpNIIIf7R74+0eOPHV4FFwJqYiu+VQpgCGkFTEM/Y/23bdl5DAAHWxY8Ln178wR59UKOC6aERctyFUAaGlPwydvXfX2TT2xkDb7zmfl9bJdvX/fA48cfuTQ5ME6Vha393akOojUVHUiVytUis7AwGh+qnzL6pu/9L7P97YuuHBR8tq7v8ze+UT/EyN7P0+F7YKDK3m5ztyap0VivVfdO2/NR5DpRDKYlZ6zmc/ZtNJ4x7Hxv3zwwLMvjTm5Khqg2zmq5Cy39oe1wxv8HAAd5bEvWCsmRZRZcTfSqDyGkdD63qb/ccvy29d1hQ0BAL4iwXCW15zJDuWrhRcGXvz+7h9m61MOq5smX9iyoCnW6Ct/qjaVrxYr5drYaHb4zMTSlmWfvv3j773unZxxqSRnF5puXdQGS4G7BeYwdvS7k0f+rjb1AgG4inmuUj60LL5t/qY/jrVsgtmFba8y12BwzGeaND87OPzNp/seOjBcLdmA0iqNfzyz85bycQb0nNX5xcZrJmMdwHRhim1LW3/3+t53XtkzizXObLoY+MUzJ5/78Hc/MlmfSMbj6XiiMZZOhhOWbnnKn6pM5quFcqk2NVEcGZ1qCjXdvfU9H7vlQy2J5gu41SUDNGfVGACgW8/lzjw+tO/LlakXPI8AQPlgRlItS97as+leI9w+bXeA54zfQds0uMMX+6fu29X/zR39mUI97pbWeOMaycNa07iesiLG2zbMu/u6xVf1NumCBb3guTEmsJ2BzJm7vvm7LOwtaOnWuS7Jt33H8Z1SvVyolPPZ8sR41q2plkjLB2+8+y0bb13c1gsAUil+ce3qi7Sg2Q24iEgyJgBASW/s+A/Hjn2vOLG7khvjAjhCNNXStf6TDT13hBK9czA9B3+TitjM7R4dyX/18aM/PTQxOFwEpVLN0ZuWNn7kxqWbFzXPTJmnHeqsiqHqVD9x3yeH7IHV3SsGcgNlt1J36tVqrVypZ6eK2VyxyWpa3r7sTatv/O9veF/MigGALyXDQDZxUarLy9mJUylJRMimrzk78mJ26LnBw/+eH3te54ASEi2t7Yvf1r7yg6Hk8rnc4axkRwCkCGcCbN9Y8YcvDLhSvWl1xxULGmeVSohn38i0cJzo3gc/+2jfz65bsnnfmQODU0P1qlerOG5dOrZ77eLNt6y7aX3P6utXXDPzSBQCsEvcyey1Acrmy5lcKRq1NMEBIBaxjHNtT1srT1by/aPHHx7re8SrD/m1cSscaZ6/pWfdH4QbVmmhlrMy4wXCE1zc9pTfePo7H/m3P4hHIqTQdf2kETc1a0FTz5vW3Hjlog1djfNSkeTZZitVoVRVRFKpcqUei4SaGxKXD1Bgxrv2nPjSP/3k4ImhZEMsFDaWLexYuajTNDUGiAhXrl60sLMZQM1KrqX06qXx4ROPTQ3+nNyJwvAzicZ5bUve3th1Q6z1OuTGBdRps9fCz99wDyLrzw489tF//fSy1iVNsUZPetevuOaqRRu7GztD+iuWAwxPZH+x76TjegDgef7xwbH9RwdrtlMqVluS8f9x9603X7fmwvPF17CgAKOxidwX/+H+b/zn9kK5ApY+My4gIFq/unfTyoW3X79+0+oFiUjorKjsuc5o32PkF7zKKa82Gk70aEYk3X2rEek6H7e8yCHfntP7s+XsG1ZuPWcaKlVrh08O/eiJ3bsPndqx5xh53nSBzTkosnT9zps2/eHv3bF0Ycfr4GJKUbAz+iNP7vnc3/7wuQMnjbBhRkwmUBGVKrZ0vcamZFdr+gNv2bph1YJF3a3R6RWd/nRDbhqsml8fI+VpZoJxg+vxc+09c8lgSSURMeAyrucfPz126MSZf/7Rk8dPj49NZJGxdDJi6povVaXqeLa7rLvtnve+6T1vuVYIfjG7dl9UkFaKguH64PDk3339oe8/8OxIrqhbuhk2hS4YYt1xXc8npRKx8G3Xr1u7dP7apV3rl/WETO3VCrFgUnap6pG5rdqgezX7hr6UR/qGf7H/xPH+0fuf3D00luWcWabekIyFTF1KVSrXcvly1DTesm3DR95z86qlXQCglLqYgH0JWWzWlJ5+7vDf/+vDP3tqX9V1zJilh3RNF5wzpcj1/FK1BgALO1t6O1sW97S++82bmxsSkZCRiofPSmFzeqd0wXHJOWZcpUq9WKlW6+5//Oy5fUcH+ocmD58cAkXxeDgZDSfi4ahl2K7M5EuTkwWQdMXSnk/c/eY337BO08Ql7cJ7aWl+Zh81sG33Oz946pvf3/7CwT6PlBE2dEvXdKFpggumCOp1p1JzOMd0PBqxjLVLe65es6i9KZlKhONRq70p1fJa6eOsI1+qDo5mipVqvlQbn8q/cOjUzv19pVo9Wyi7rh+LWs2pWDxmWYaOiLW6O5EpTGZKTt1Zu6jzd26/5r2/fV06FZv7mF+3NP9qUyeaNs7h0ewPf/rcP33nsROnx3wlNcvQLF3XNc3UDEPogvuK6rbrup4nlfQlIsQjVkMqOr+jeeG85uBzNZChJkRXa3pJT3tTOsYQc6Xq8dNjp4bGHdcnUr4k35dD49njA6PZQiVbKEulOOeGpoUtvSERTcUjIdMgokrVzuRKmXw5ly9zBR2NyXfeevX77ty6eH773EDxOvOg88M0/SiO9Q3/+KHnH3jk+b2H+13P45bBdKGHNE0Xuq4ZhiYE55wBkVTKc6XjeXXHsx1XzXGzeMRqSETDloEAdcfLFsr5UlUqQgBCYACGroVDhhUyIiHTCumWqeu6xhB8X1Vtp1ipZ3Plcrler9Q54LIF7W++bt07bt+8ZkXPZUPzSwH0MqMlCGAam8h/9wfbH3/64I7nj9ieDwioCd3Suca44Jqm6bowDE3XhKYFAw4kAKWUJFBKeZ50fS8g20IIUxO6rmmCCSEEZ7rGOWcMGSIoSY7v1Wy3XLErNbtWcypV2607qEBDduWa3huuWv6ut1zb29OK0wXtL/UBE6/D52rMTQeTU4Wndx5+eudLjz+9f3Q8XymUQBfM1LgumGAoeDCr1zWmCS40IQQTjHHOOWOCI+eCMQwQDzTbAeuVknzfdz3f8Tzb8R3H9TwpPd+zPXC8cDTcnIpds2HZts0rtmxc1tPVPHthiL/sp2+8fh9dM8fpbNsbHss+s/Pwjx/eNTaZP3F6rFQsB7YBgjHGUEMuBDIM9q0ChgwBA31VUBLP/FEKiJSSJKWUviKlSBFIAl+GLbO3q6W9KbV1y4o3v2FDW3MyFrV+SYf6FQI063RK0eyOi75Up06Pvbjv5Mn+0f4zEy/sPTE8mgUGni8924VZeS2b3qQBgpAzq9imGb2dIs3UdSFIUWMqumndooWdLV0dTZvW9y5d1KlrfLbUQobsv/ZTES4+Np31GIvlWv/g+NRU0XH9k/0jjz21r1JzfF/WbY9muiKvHpGYQdgS4porl65ZOT9kGOlkZEF3SyoZPSeVfd3vBX+1H591HrAIoFCoSKU8z7cdT51H3IwIpqHpukBk8Zgl5mwrGnj0rwiUucf/D7jUrJM91w6lAAAAAElFTkSuQmCC";
 const SEED_INVENTORY = [{
@@ -9618,6 +9692,7 @@ function Chamados({
   state,
   setState,
   unidadeAtiva,
+  secret,
   podeAbrirChamados = true,
   podeResponderChamados = true,
   fotosSolicitantes = {}
@@ -9631,6 +9706,8 @@ function Chamados({
   const [fotoBusyAdmin, setFotoBusyAdmin] = useState(false);
   const fotoInputRefAdmin = useRef(null);
   const scrollRef = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const [erro, setErro] = useState("");
   const chamados = useMemo(() => (state.chamados || []).filter(c => unidadeDe(c) === unidadeAtiva), [state.chamados, unidadeAtiva]);
   const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
   const selecionado = chamados.find(c => c.id === selectedId) || null;
@@ -9657,7 +9734,7 @@ function Chamados({
     setSelectedId(null);
     setForm(novoChamadoForm(unidadeAtiva));
   }
-  function enviarNovoChamado() {
+  async function enviarNovoChamado() {
     if (!podeAbrirChamados) return;
     const texto = form.texto.trim();
     if (!texto) return;
@@ -9677,51 +9754,108 @@ function Chamados({
         data: new Date().toISOString()
       }]
     };
-    setState(prev => ({
-      ...prev,
-      chamados: [...(prev.chamados || []), chamado]
-    }));
-    setNovoMode(false);
-    setForm(novoChamadoForm(unidadeAtiva));
-    setSelectedId(chamado.id);
+    setBusy(true);
+    setErro("");
+    try {
+      const res = await backendPost("novoChamado", {
+        chamado,
+        secret
+      });
+      if (!res.ok) throw new Error(res.error || "Erro ao abrir chamado");
+      setState(prev => ({
+        ...prev,
+        chamados: [...(prev.chamados || []), chamado]
+      }));
+      setNovoMode(false);
+      setForm(novoChamadoForm(unidadeAtiva));
+      setSelectedId(chamado.id);
+    } catch (e) {
+      setErro("Não foi possível abrir o chamado. Tente novamente.");
+    }
+    setBusy(false);
   }
-  function enviarResposta() {
+  async function enviarResposta() {
     if (!podeResponderChamados) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
-    setState(prev => ({
-      ...prev,
-      chamados: prev.chamados.map(c => c.id === selecionado.id ? {
-        ...c,
-        mensagens: [...c.mensagens, {
-          autor: "ti",
-          texto,
-          data: new Date().toISOString()
-        }]
-      } : c)
-    }));
-    setReplyText("");
+    const mensagem = {
+      autor: "ti",
+      texto,
+      data: new Date().toISOString()
+    };
+    setBusy(true);
+    setErro("");
+    try {
+      const res = await backendPost("novaMensagem", {
+        chamadoId: selecionado.id,
+        mensagem,
+        secret
+      });
+      if (!res.ok) throw new Error(res.error || "Erro ao enviar mensagem");
+      setState(prev => ({
+        ...prev,
+        chamados: prev.chamados.map(c => c.id === selecionado.id ? {
+          ...c,
+          mensagens: [...c.mensagens, mensagem]
+        } : c)
+      }));
+      setReplyText("");
+    } catch (e) {
+      setErro("Não foi possível enviar. Tente novamente.");
+    }
+    setBusy(false);
   }
-  function mudarStatus(status) {
-    if (!podeResponderChamados) return;
-    setState(prev => ({
-      ...prev,
-      chamados: prev.chamados.map(c => c.id === selecionado.id ? {
-        ...c,
-        status
-      } : c)
-    }));
+  async function mudarStatus(status) {
+    if (!podeResponderChamados || !selecionado) return;
+    setBusy(true);
+    setErro("");
+    try {
+      const res = await backendPost("mudarStatusChamado", {
+        chamadoId: selecionado.id,
+        status,
+        secret
+      });
+      if (!res.ok) throw new Error(res.error || "Erro ao mudar status");
+      setState(prev => ({
+        ...prev,
+        chamados: prev.chamados.map(c => c.id === selecionado.id ? {
+          ...c,
+          status
+        } : c)
+      }));
+    } catch (e) {
+      setErro("Não foi possível mudar o status. Tente novamente.");
+    }
+    setBusy(false);
   }
-  function excluirChamado(chamado) {
+  async function excluirChamado(chamado) {
     if (!podeResponderChamados) return;
-    setState(prev => ({
-      ...prev,
-      chamados: prev.chamados.filter(c => c.id !== chamado.id)
-    }));
-    if (selectedId === chamado.id) setSelectedId(null);
+    setBusy(true);
+    setErro("");
+    try {
+      const res = await backendPost("excluirChamado", {
+        chamadoId: chamado.id,
+        secret
+      });
+      if (!res.ok) throw new Error(res.error || "Erro ao excluir chamado");
+      setState(prev => ({
+        ...prev,
+        chamados: prev.chamados.filter(c => c.id !== chamado.id)
+      }));
+      if (selectedId === chamado.id) setSelectedId(null);
+    } catch (e) {
+      setErro("Não foi possível excluir o chamado. Tente novamente.");
+    }
     setDeleteTarget(null);
+    setBusy(false);
   }
-  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement("div", null, erro && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: COLORS.danger,
+      fontSize: 13,
+      marginBottom: 10
+    }
+  }, erro), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       justifyContent: "space-between",
@@ -10081,7 +10215,8 @@ function Chamados({
   }, "Cancelar"), /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Send,
-    onClick: enviarNovoChamado
+    onClick: enviarNovoChamado,
+    disabled: busy || !form.texto.trim()
   }, "Abrir chamado"))) : !selecionado ? /*#__PURE__*/React.createElement(EmptyState, {
     text: "Selecione um chamado \xE0 esquerda ou abra um novo."
   }) : /*#__PURE__*/React.createElement("div", {
@@ -10230,7 +10365,8 @@ function Chamados({
   }), /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     icon: Send,
-    onClick: enviarResposta
+    onClick: enviarResposta,
+    disabled: busy
   }, "Enviar"))), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 220,
@@ -10275,7 +10411,7 @@ function Chamados({
       marginBottom: 4
     }
   }, "Status"), /*#__PURE__*/React.createElement(Select, {
-    disabled: !podeResponderChamados,
+    disabled: !podeResponderChamados || busy,
     value: selecionado.status,
     onChange: e => mudarStatus(e.target.value),
     style: {
@@ -10318,7 +10454,8 @@ function Chamados({
   }, "Cancelar"), /*#__PURE__*/React.createElement(Button, {
     variant: "danger",
     icon: Trash2,
-    onClick: () => excluirChamado(deleteTarget)
+    onClick: () => excluirChamado(deleteTarget),
+    disabled: busy
   }, "Excluir"))));
 }
 function ChamadosKanban({
@@ -12278,10 +12415,13 @@ function ChamadosDock({
   setState,
   abertoId,
   onAbrirChange,
+  secret,
   podeResponderChamados = true,
   fotosSolicitantes = {}
 }) {
   const [texto, setTexto] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [erro, setErro] = useState("");
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem(DOCK_COLLAPSED_STORAGE_KEY) === "1";
@@ -12300,22 +12440,36 @@ function ChamadosDock({
       return next;
     });
   }
-  function enviarResposta() {
+  async function enviarResposta() {
     if (!podeResponderChamados) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
-    setState(prev => ({
-      ...prev,
-      chamados: prev.chamados.map(c => c.id === selecionado.id ? {
-        ...c,
-        mensagens: [...c.mensagens, {
-          autor: "ti",
-          texto: valor,
-          data: new Date().toISOString()
-        }]
-      } : c)
-    }));
-    setTexto("");
+    const mensagem = {
+      autor: "ti",
+      texto: valor,
+      data: new Date().toISOString()
+    };
+    setBusy(true);
+    setErro("");
+    try {
+      const res = await backendPost("novaMensagem", {
+        chamadoId: selecionado.id,
+        mensagem,
+        secret
+      });
+      if (!res.ok) throw new Error(res.error || "Erro ao enviar mensagem");
+      setState(prev => ({
+        ...prev,
+        chamados: prev.chamados.map(c => c.id === selecionado.id ? {
+          ...c,
+          mensagens: [...c.mensagens, mensagem]
+        } : c)
+      }));
+      setTexto("");
+    } catch (e) {
+      setErro("Não foi possível enviar. Tente novamente.");
+    }
+    setBusy(false);
   }
   if (!selecionado && abertos.length === 0) return null;
   if (collapsed) {
@@ -12513,7 +12667,16 @@ function ChamadosDock({
     })), podeResponderChamados && /*#__PURE__*/React.createElement("div", {
       style: {
         padding: 12,
-        borderTop: `1px solid ${COLORS.line}`,
+        borderTop: `1px solid ${COLORS.line}`
+      }
+    }, erro && /*#__PURE__*/React.createElement("div", {
+      style: {
+        color: COLORS.danger,
+        fontSize: 12,
+        marginBottom: 6
+      }
+    }, erro), /*#__PURE__*/React.createElement("div", {
+      style: {
         display: "flex",
         gap: 8
       }
@@ -12529,8 +12692,9 @@ function ChamadosDock({
     }), /*#__PURE__*/React.createElement(Button, {
       variant: "primary",
       icon: Send,
-      onClick: enviarResposta
-    }, "Enviar")));
+      onClick: enviarResposta,
+      disabled: busy
+    }, "Enviar"))));
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "chamados-dock",
@@ -12849,6 +13013,22 @@ function App() {
     }, 600);
     return () => clearTimeout(saveTimer.current);
   }, [state, loaded, auth, secret]);
+
+  // Enquanto o admin está logado, os chamados passam a vir ao vivo do
+  // Firestore (se configurado) em vez de só na hora do login — é o que faz
+  // um chamado aberto por outra pessoa aparecer sozinho, sem precisar
+  // recarregar a página. Se o Firebase não estiver configurado, essa
+  // assinatura simplesmente não faz nada (ver assinarChamadosAoVivo).
+  useEffect(() => {
+    if (!auth || !auth.isAdmin) return;
+    const cancelar = assinarChamadosAoVivo(chamadosAoVivo => {
+      setState(prev => prev ? {
+        ...prev,
+        chamados: chamadosAoVivo
+      } : prev);
+    });
+    return cancelar;
+  }, [auth && auth.isAdmin]);
   async function tentarLogin() {
     setLoginBusy(true);
     setLoginError("");
@@ -13070,6 +13250,7 @@ function App() {
     state: state,
     setState: setState,
     unidadeAtiva: unidadeAtiva,
+    secret: secret,
     podeAbrirChamados: podeAbrirChamados,
     podeResponderChamados: podeResponderChamados,
     fotosSolicitantes: fotosSolicitantes
@@ -13092,6 +13273,7 @@ function App() {
     setState: setState,
     abertoId: chamadoAbertoId,
     onAbrirChange: setChamadoAbertoId,
+    secret: secret,
     podeResponderChamados: podeResponderChamados,
     fotosSolicitantes: fotosSolicitantes
   })));

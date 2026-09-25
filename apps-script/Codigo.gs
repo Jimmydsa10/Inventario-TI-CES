@@ -291,6 +291,65 @@ function notificarNovoChamado(chamado) {
   }
 }
 
+// ---------- Firebase / Firestore (sincronização ao vivo dos Chamados) ----------
+
+// A planilha (AppState/readState/writeState) continua sendo a fonte da
+// verdade dos chamados — nada muda em como eles são abertos, respondidos
+// ou protegidos pela trava. A única coisa nova: depois de cada gravação
+// bem-sucedida na planilha, o mesmo chamado é replicado pro Firestore, que
+// é o banco que a tela do admin escuta em tempo real (sem precisar
+// recarregar a página pra ver um chamado novo). Se o Firestore ainda não
+// foi configurado (faltam as 3 propriedades do script) ou se a chamada
+// falhar por qualquer motivo, a sincronização é simplesmente pulada — ela
+// nunca pode impedir a gravação principal na planilha, que é o que
+// realmente importa.
+function getFirestore_() {
+  const props = PropertiesService.getScriptProperties();
+  const email = props.getProperty('FIREBASE_CLIENT_EMAIL');
+  const chavePrivada = props.getProperty('FIREBASE_PRIVATE_KEY');
+  const projectId = props.getProperty('FIREBASE_PROJECT_ID');
+  if (!email || !chavePrivada || !projectId) return null;
+  // O valor colado no Script Properties tem "\n" literais (duas letras,
+  // barra e "n") em vez de quebra de linha de verdade — a biblioteca
+  // precisa da chave no formato PEM real.
+  const chaveFormatada = chavePrivada.replace(/\\n/g, '\n');
+  return FirestoreApp.getFirestore(email, chaveFormatada, projectId);
+}
+
+function sincronizarChamadoNoFirestore_(chamado) {
+  try {
+    const db = getFirestore_();
+    if (!db || !chamado || !chamado.id) return;
+    db.updateDocument('chamados/' + chamado.id, chamado, true); // true = cria o documento se ainda não existir
+  } catch (err) {
+    Logger.log('Falha ao sincronizar chamado ' + (chamado && chamado.id) + ' com o Firestore: ' + err);
+  }
+}
+
+function excluirChamadoNoFirestore_(chamadoId) {
+  try {
+    const db = getFirestore_();
+    if (!db || !chamadoId) return;
+    db.deleteDocument('chamados/' + chamadoId);
+  } catch (err) {
+    Logger.log('Falha ao excluir chamado ' + chamadoId + ' do Firestore: ' + err);
+  }
+}
+
+// Execução manual (uma vez só, pelo editor do Apps Script) pra copiar os
+// chamados que já existem na planilha pro Firestore, na hora de ligar a
+// sincronização — sem isso, só chamados novos apareceriam lá.
+function migrarChamadosParaFirestore() {
+  const state = readState();
+  const chamados = state.chamados || [];
+  let ok = 0;
+  chamados.forEach(function (c) {
+    sincronizarChamadoNoFirestore_(c);
+    ok++;
+  });
+  Logger.log('Migração concluída: ' + ok + ' chamado(s) copiado(s) pro Firestore.');
+}
+
 // ---------- Estado do app (inventário, categorias, etc.) ----------
 
 function readState() {
@@ -348,23 +407,29 @@ const ESTADO_CAMPO_PARA_SECAO = {
 // ignorada, não rejeitada por inteiro, pra não quebrar o autosave de quem só
 // mexeu no que pode). Um admin restrito sem permissão de escrita não
 // consegue mudar seção nenhuma por aqui — vira, na prática, um no-op.
-// "chamados" é especial: em vez do "editar" geral, usa podeAbrirChamados OU
-// podeResponderChamados (abrir chamado novo e responder/mudar status/excluir
-// um existente chegam aqui juntos, dentro do mesmo array — ver Chamados no
-// frontend, que já esconde os botões de cada ação conforme a permissão
-// específica; aqui é só o gate de "pode escrever nessa seção ou não").
+// "chamados" nunca passa por aqui, nem pro master: chamados têm ações
+// próprias (novoChamado, novaMensagem, mudarStatusChamado, excluirChamado)
+// que sempre leem o estado fresco da planilha na hora, em vez de confiar na
+// cópia que o navegador de quem está logado guardou no login. Antes disso,
+// um admin com a aba aberta há um tempo, ao salvar qualquer outra coisa
+// (mesmo sem nada a ver com chamados), sobrescrevia TODOS os chamados com
+// essa cópia antiga — comprovado em teste, 20 chamados novos apagados de
+// uma vez só. Isso vale até pro master, que antes tinha as escritas
+// aceitas sem filtro nenhum.
 function filtrarEstadoPorPermissao(novoEstado, admin) {
   const isMaster = admin && admin.permissoes === 'todas';
-  if (isMaster) return novoEstado;
-  const secoesPermitidas = String((admin && admin.permissoes) || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
+  const secoesPermitidas = isMaster ? null : String((admin && admin.permissoes) || '').split(',').map(function (s) { return s.trim().toLowerCase(); });
   const atual = readState();
   const resultado = {};
   for (const chave in novoEstado) {
     const secao = ESTADO_CAMPO_PARA_SECAO[chave];
-    const podeEscreverSecao = secao === 'chamados'
-      ? !!(admin && (admin.podeAbrirChamados || admin.podeResponderChamados))
-      : !!(admin && admin.editar);
-    if (secao && secoesPermitidas.indexOf(secao) !== -1 && podeEscreverSecao) {
+    if (secao === 'chamados') {
+      resultado[chave] = atual[chave];
+      continue;
+    }
+    const podeEscreverSecao = isMaster || !!(admin && admin.editar);
+    const secaoPermitida = isMaster || (secao && secoesPermitidas.indexOf(secao) !== -1);
+    if (secaoPermitida && podeEscreverSecao) {
       resultado[chave] = novoEstado[chave];
     } else if (Object.prototype.hasOwnProperty.call(atual, chave)) {
       resultado[chave] = atual[chave];
@@ -581,6 +646,7 @@ function doPostComTrava(e) {
     state.chamados.push(body.chamado);
     writeState(state);
     notificarNovoChamado(body.chamado);
+    sincronizarChamadoNoFirestore_(body.chamado);
     return jsonOut({ ok: true });
   }
 
@@ -605,6 +671,43 @@ function doPostComTrava(e) {
     mensagem.autor = adminPodeResponderChamados ? 'ti' : 'solicitante';
     chamado.mensagens.push(mensagem);
     writeState(state);
+    sincronizarChamadoNoFirestore_(chamado);
+    return jsonOut({ ok: true });
+  }
+
+  // mudarStatusChamado/excluirChamado: antes, essas duas ações do admin
+  // (mudar status, excluir chamado) só mexiam no "state" local do
+  // navegador e dependiam do autosave geral (salvarTudo) pra persistir —
+  // o mesmo autosave que manda o ESTADO INTEIRO de volta, inclusive a
+  // cópia de chamados de quando o admin abriu a página. Um admin com a
+  // aba aberta por um tempo, ao salvar qualquer outra coisa (ex: editar um
+  // equipamento), acabava sobrescrevendo TODOS os chamados com essa cópia
+  // antiga — comprovado em teste, 20 chamados novos apagados de uma vez.
+  // Agora essas duas ações leem o estado fresco na hora, igual
+  // novoChamado/novaMensagem já faziam, e nunca dependem do autosave geral.
+  if (body.action === 'mudarStatusChamado') {
+    if (!adminPodeResponderChamados) {
+      return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
+    const state = readState();
+    const chamado = (state.chamados || []).filter(function (c) { return c.id === body.chamadoId; })[0];
+    if (!chamado) {
+      return jsonOut({ ok: false, error: 'Chamado não encontrado' });
+    }
+    chamado.status = body.status;
+    writeState(state);
+    sincronizarChamadoNoFirestore_(chamado);
+    return jsonOut({ ok: true });
+  }
+
+  if (body.action === 'excluirChamado') {
+    if (!adminPodeResponderChamados) {
+      return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
+    const state = readState();
+    state.chamados = (state.chamados || []).filter(function (c) { return c.id !== body.chamadoId; });
+    writeState(state);
+    excluirChamadoNoFirestore_(body.chamadoId);
     return jsonOut({ ok: true });
   }
 
