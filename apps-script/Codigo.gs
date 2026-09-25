@@ -792,6 +792,10 @@ function doPostComTrava(e) {
     }
     const mensagem = body.mensagem || {};
     mensagem.autor = adminPodeResponderChamados ? 'ti' : 'solicitante';
+    // Nome de quem respondeu de verdade (nunca o que o cliente mandou) —
+    // antes toda resposta de admin aparecia só como "Administrador" pra
+    // todo mundo, sem dar pra saber QUAL admin respondeu.
+    mensagem.nome = adminPodeResponderChamados ? admin.nome : solicitante.nome;
     chamado.mensagens.push(mensagem);
     salvarChamado_(chamado);
     sincronizarChamadoNoFirestore_(chamado);
