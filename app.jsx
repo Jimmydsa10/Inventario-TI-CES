@@ -247,6 +247,23 @@ async function backendGetUser(nome, senha) {
   return jsonpRequestComRetry(url);
 }
 
+// Cadastro público (nome + email + senha escolhida pela própria pessoa).
+// Vai por GET/JSONP (não por backendPost) porque precisa de uma resposta de
+// verdade pra saber se o email já existe ou não — backendPost usa fetch em
+// modo no-cors (pra evitar CORS do Apps Script) e nunca consegue ler o que o
+// servidor respondeu, só se a requisição saiu.
+async function backendCadastro(nome, email, senha) {
+  const url =
+    BACKEND_URL +
+    "?action=cadastro&novoNome=" +
+    encodeURIComponent(nome) +
+    "&novoEmail=" +
+    encodeURIComponent(email) +
+    "&novoSenha=" +
+    encodeURIComponent(senha || "");
+  return jsonpRequestComRetry(url);
+}
+
 async function backendPost(action, payload) {
   const tentar = () =>
     fetch(BACKEND_URL, {
@@ -4511,10 +4528,18 @@ function ErrorScreen({ msg, detail }) {
 }
 
 function LoginPublico({ onLoggedIn, onAdminClick }) {
+  const [modo, setModo] = useState("login"); // "login" | "cadastro"
   const [nome, setNome] = useState("");
   const [senha, setSenha] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
+
+  const [cadNome, setCadNome] = useState("");
+  const [cadEmail, setCadEmail] = useState("");
+  const [cadSenha, setCadSenha] = useState("");
+  const [cadBusy, setCadBusy] = useState(false);
+  const [cadErro, setCadErro] = useState("");
+  const [cadOk, setCadOk] = useState(false);
 
   async function entrar() {
     if (!nome.trim() || !senha.trim()) return setErro("Preencha nome e senha.");
@@ -4532,6 +4557,32 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
       setErro("Não foi possível conectar (" + String((e && e.message) || e) + ").");
     }
     setBusy(false);
+  }
+
+  function voltarParaLogin() {
+    setModo("login");
+    setCadNome("");
+    setCadEmail("");
+    setCadSenha("");
+    setCadErro("");
+    setCadOk(false);
+  }
+
+  async function cadastrar() {
+    if (!cadNome.trim() || !cadEmail.trim() || !cadSenha.trim()) return setCadErro("Preencha nome, email e senha.");
+    setCadBusy(true);
+    setCadErro("");
+    try {
+      const data = await backendCadastro(cadNome.trim(), cadEmail.trim(), cadSenha);
+      if (!data.ok) {
+        setCadErro(data.error || "Não foi possível concluir o cadastro.");
+      } else {
+        setCadOk(true);
+      }
+    } catch (e) {
+      setCadErro("Não foi possível conectar (" + String((e && e.message) || e) + ").");
+    }
+    setCadBusy(false);
   }
 
   return (
@@ -4557,43 +4608,117 @@ function LoginPublico({ onLoggedIn, onAdminClick }) {
 
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 28 }}>
         <div style={{ width: "100%", maxWidth: 300 }}>
-          <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Bem-vindo(a)</div>
-          <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Entre com seu nome e senha de acesso</div>
+          {modo === "login" ? (
+            <>
+              <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Bem-vindo(a)</div>
+              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Entre com seu nome (ou email) e senha de acesso</div>
 
-          <div style={{ textAlign: "left" }}>
-            <Field label="Nome">
-              <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
-            </Field>
-            <Field label="Senha">
-              <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
-            </Field>
-          </div>
+              <div style={{ textAlign: "left" }}>
+                <Field label="Nome ou email">
+                  <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
+                </Field>
+                <Field label="Senha">
+                  <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
+                </Field>
+              </div>
 
-          {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
+              {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
 
-          <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
-            {busy ? "Aguarde..." : "Entrar"}
-          </Button>
+              <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+                {busy ? "Aguarde..." : "Entrar"}
+              </Button>
 
-          <button
-            onClick={onAdminClick}
-            style={{
-              display: "block",
-              width: "100%",
-              textAlign: "center",
-              marginTop: 16,
-              background: "none",
-              border: "none",
-              color: COLORS.lineStrong,
-              fontSize: 11.5,
-              cursor: "pointer",
-              padding: 4,
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
-            onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.lineStrong)}
-          >
-            ⚙ Acesso administrativo
-          </button>
+              <button
+                onClick={() => setModo("cadastro")}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "center",
+                  marginTop: 14,
+                  background: "none",
+                  border: "none",
+                  color: COLORS.accent,
+                  fontSize: 12.5,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  padding: 4,
+                }}
+              >
+                Não tem conta? Cadastre-se
+              </button>
+
+              <button
+                onClick={onAdminClick}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "center",
+                  marginTop: 4,
+                  background: "none",
+                  border: "none",
+                  color: COLORS.lineStrong,
+                  fontSize: 11.5,
+                  cursor: "pointer",
+                  padding: 4,
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = COLORS.inkSoft)}
+                onMouseLeave={(e) => (e.currentTarget.style.color = COLORS.lineStrong)}
+              >
+                ⚙ Acesso administrativo
+              </button>
+            </>
+          ) : cadOk ? (
+            <>
+              <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Cadastro enviado!</div>
+              <p style={{ fontSize: 13, color: COLORS.inkSoft, lineHeight: 1.5, marginTop: 10 }}>
+                Um administrador vai revisar seu pedido e liberar seu acesso. Assim que for aprovado, você já consegue entrar com o email e a senha que acabou de cadastrar.
+              </p>
+              <Button variant="ghost" onClick={voltarParaLogin} style={{ width: "100%", justifyContent: "center", marginTop: 8 }}>
+                Voltar para o login
+              </Button>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Criar conta</div>
+              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Use seu email da escola — um administrador precisa aprovar antes de você conseguir entrar</div>
+
+              <div style={{ textAlign: "left" }}>
+                <Field label="Nome">
+                  <TextInput value={cadNome} onChange={(e) => setCadNome(e.target.value)} placeholder="Seu nome completo" />
+                </Field>
+                <Field label="Email da escola">
+                  <TextInput type="email" value={cadEmail} onChange={(e) => setCadEmail(e.target.value)} placeholder="voce@escola.com.br" />
+                </Field>
+                <Field label="Crie uma senha">
+                  <TextInput type="password" value={cadSenha} onChange={(e) => setCadSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && cadastrar()} />
+                </Field>
+              </div>
+
+              {cadErro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{cadErro}</div>}
+
+              <Button variant="primary" onClick={cadastrar} disabled={cadBusy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
+                {cadBusy ? "Aguarde..." : "Cadastrar"}
+              </Button>
+
+              <button
+                onClick={voltarParaLogin}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "center",
+                  marginTop: 14,
+                  background: "none",
+                  border: "none",
+                  color: COLORS.lineStrong,
+                  fontSize: 12.5,
+                  cursor: "pointer",
+                  padding: 4,
+                }}
+              >
+                Já tem conta? Entrar
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -5444,7 +5569,7 @@ function Administradores({ admins, secret, onAdminsChanged }) {
 const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
 
 function emptyUsuarioForm() {
-  return { nome: "", senha: "", autorizado: false };
+  return { nome: "", email: "", senha: "", autorizado: false };
 }
 
 function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
@@ -5465,7 +5590,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
   }
 
   function openEdit(u) {
-    setModal({ mode: "edit", original: u, form: { nome: u.nome, senha: "", autorizado: u.tipo === "autorizado" } });
+    setModal({ mode: "edit", original: u, form: { nome: u.nome, email: u.email || "", senha: "", autorizado: u.tipo === "autorizado" } });
     setError("");
   }
 
@@ -5486,13 +5611,29 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
   function save() {
     const f = modal.form;
     const nome = f.nome.trim();
+    const email = f.email.trim();
     if (!nome) return setError("Informe o nome.");
     if (modal.mode === "new" && !f.senha.trim()) return setError("Defina uma senha.");
     const dupNome = lista.some((u) => u !== modal.original && u.nome.toLowerCase() === nome.toLowerCase());
     if (dupNome) return setError("Já existe um usuário com esse nome.");
+    const dupEmail = email && lista.some((u) => u !== modal.original && (u.email || "").toLowerCase() === email.toLowerCase());
+    if (dupEmail) return setError("Já existe um usuário com esse email.");
 
     const senhaFinal = f.senha.trim() ? f.senha.trim() : modal.original ? modal.original.senha : "";
-    const novoUsuario = { nome, senha: senhaFinal, tipo: f.autorizado ? "autorizado" : "solicitante", foto: modal.original ? modal.original.foto || "" : "" };
+    // Cadastro feito por um admin aqui já nasce aprovado — a aprovação só
+    // existe pra quem se cadastra sozinho (ver "Cadastre-se" na tela de
+    // login pública). Editar um pendente por aqui, sem passar pelo botão
+    // "Aprovar", mantém o "aprovado" que já estava (não usa esse modal pra
+    // aprovar ninguém, de propósito, pra não ser um clique acidental).
+    const aprovado = modal.original ? (modal.original.aprovado === undefined ? true : modal.original.aprovado) : true;
+    const novoUsuario = {
+      nome,
+      email,
+      senha: senhaFinal,
+      tipo: f.autorizado ? "autorizado" : "solicitante",
+      foto: modal.original ? modal.original.foto || "" : "",
+      aprovado,
+    };
     let novaLista;
     if (modal.mode === "new") {
       novaLista = [...lista, novoUsuario];
@@ -5509,6 +5650,14 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
     persistir(novaLista);
   }
 
+  function aprovar(u) {
+    const novaLista = lista.map((x) => (x === u ? { ...x, aprovado: true } : x));
+    persistir(novaLista);
+  }
+
+  const pendentes = lista.filter((u) => u.aprovado === false);
+  const aprovados = lista.filter((u) => u.aprovado !== false);
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
@@ -5519,7 +5668,7 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
       </div>
 
       <p style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 0, marginBottom: 16 }}>
-        Cadastro livre está desativado — só um administrador pode criar acesso. Cada usuário entra com o nome e a senha cadastrados aqui, na mesma tela de login pública (não é um administrador). Por padrão ele abre e acompanha chamados; marcando "Autorizado", ele passa a só visualizar Painel, Categorias, Salas e Inventário, sem poder abrir chamado nem editar nada.
+        Além de um administrador criar acesso aqui direto, qualquer pessoa pode se cadastrar sozinha (nome, email e senha) na tela de login pública — mas o cadastro só fica ativo depois de aprovado aqui embaixo. Cada usuário entra com o nome (ou email) e a senha cadastrados, na mesma tela de login pública (não é um administrador). Por padrão ele abre e acompanha chamados; marcando "Autorizado", ele passa a só visualizar Painel, Categorias, Salas e Inventário, sem poder abrir chamado nem editar nada.
       </p>
 
       {status && (
@@ -5537,22 +5686,54 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
         </div>
       )}
 
+      {pendentes.length > 0 && (
+        <Panel title={`Aguardando aprovação (${pendentes.length})`} style={{ marginBottom: 16, border: `1px solid ${COLORS.accent}` }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
+            <thead>
+              <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Email</th>
+                <th style={{ padding: "8px 6px" }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendentes.map((u) => (
+                <tr key={u.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
+                  <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{u.nome}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{u.email || "—"}</td>
+                  <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
+                    <Button variant="primary" icon={Check} onClick={() => aprovar(u)} disabled={busy} style={{ marginRight: 6 }}>
+                      Aprovar
+                    </Button>
+                    <Button variant="ghost" icon={X} onClick={() => setRemoveTarget(u)} disabled={busy}>
+                      Recusar
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Panel>
+      )}
+
       <Panel>
-        {lista.length === 0 ? (
+        {aprovados.length === 0 ? (
           <EmptyState text="Nenhum usuário cadastrado ainda." />
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
                 <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Nome</th>
+                <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Email</th>
                 <th style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontSize: 12 }}>Acesso</th>
                 <th style={{ padding: "8px 6px" }}></th>
               </tr>
             </thead>
             <tbody>
-              {lista.map((u) => (
+              {aprovados.map((u) => (
                 <tr key={u.nome} style={{ borderBottom: `1px solid ${COLORS.line}` }}>
                   <td style={{ padding: "9px 6px", color: COLORS.ink, fontWeight: 600 }}>{u.nome}</td>
+                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{u.email || "—"}</td>
                   <td style={{ padding: "9px 6px" }}>
                     <span
                       style={{
@@ -5587,6 +5768,9 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
           <Field label="Nome">
             <TextInput value={modal.form.nome} onChange={(e) => setModal({ ...modal, form: { ...modal.form, nome: e.target.value } })} />
           </Field>
+          <Field label="Email (opcional — dá pra entrar com ele também)">
+            <TextInput type="email" value={modal.form.email} onChange={(e) => setModal({ ...modal, form: { ...modal.form, email: e.target.value } })} />
+          </Field>
           <Field label={modal.mode === "new" ? "Senha" : "Nova senha (deixe em branco para manter a atual)"}>
             <TextInput type="text" value={modal.form.senha} onChange={(e) => setModal({ ...modal, form: { ...modal.form, senha: e.target.value } })} placeholder={modal.mode === "new" ? "" : "••••••••"} />
           </Field>
@@ -5616,16 +5800,24 @@ function Usuarios({ solicitantes, secret, onSolicitantesChanged }) {
       )}
 
       {removeTarget && (
-        <Modal title="Excluir usuário" onClose={() => setRemoveTarget(null)} width={380}>
+        <Modal title={removeTarget.aprovado === false ? "Recusar cadastro" : "Excluir usuário"} onClose={() => setRemoveTarget(null)} width={380}>
           <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
-            Tem certeza que deseja excluir o usuário <strong>{removeTarget.nome}</strong>? Ele não vai mais conseguir entrar com essa senha.
+            {removeTarget.aprovado === false ? (
+              <>
+                Tem certeza que deseja recusar o cadastro de <strong>{removeTarget.nome}</strong>? O pedido é removido e ele(a) não vai conseguir entrar.
+              </>
+            ) : (
+              <>
+                Tem certeza que deseja excluir o usuário <strong>{removeTarget.nome}</strong>? Ele não vai mais conseguir entrar com essa senha.
+              </>
+            )}
           </p>
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
             <Button variant="ghost" onClick={() => setRemoveTarget(null)}>
               Cancelar
             </Button>
             <Button variant="danger" icon={Trash2} onClick={() => remove(removeTarget)}>
-              Excluir
+              {removeTarget.aprovado === false ? "Recusar" : "Excluir"}
             </Button>
           </div>
         </Modal>

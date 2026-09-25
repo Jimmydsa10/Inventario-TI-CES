@@ -100,33 +100,65 @@ function saveAdmins(list) {
 // (ver Avatar no frontend). Só o próprio usuário altera a própria foto, pela
 // action 'atualizarFotoUsuario' — nunca escrita pelo salvarSolicitantes do
 // master, que preserva o que já estava (ver Usuarios no frontend).
+// Coluna "email" (5ª): só preenchida por quem se cadastrou sozinho (ver
+// cadastrarSolicitanteComTrava_ abaixo) — conta admin-created continuam sem
+// email, e tudo bem. Serve como identificador alternativo de login (ver
+// findSolicitante), além do nome.
+// Coluna "aprovado" (6ª): true = pode entrar normalmente. false = cadastro
+// pendente, só um admin aprovando em Usuários libera o login (ver
+// autenticarUsuarioLogin/authenticateSolicitante). Em branco (inclusive
+// linhas antigas de antes dessa coluna existir, e qualquer conta criada
+// direto por um admin) = true, pra não exigir aprovação de quem já estava
+// cadastrado ou foi criado pelo próprio admin.
 function getSolicitantes() {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado']);
   const data = sh.getDataRange().getValues();
   return data.slice(1).filter(function (r) { return r[0]; }).map(function (r) {
-    return { nome: String(r[0] || ''), senha: String(r[1] || ''), tipo: String(r[2] || 'solicitante') || 'solicitante', foto: String(r[3] || '') };
+    const aprovadoEmBranco = r[5] === '' || r[5] === undefined || r[5] === null;
+    return {
+      nome: String(r[0] || ''),
+      senha: String(r[1] || ''),
+      tipo: String(r[2] || 'solicitante') || 'solicitante',
+      foto: String(r[3] || ''),
+      email: String(r[4] || ''),
+      aprovado: aprovadoEmBranco ? true : r[5] === true,
+    };
   });
 }
 
-function findSolicitante(nome) {
-  const alvo = String(nome || '').trim().toLowerCase();
+// Busca por nome OU email (case-insensitive) — quem se cadastra sozinho
+// entra com o email; quem foi cadastrado por um admin continua entrando com
+// o nome, como sempre.
+function findSolicitante(identificador) {
+  const alvo = String(identificador || '').trim().toLowerCase();
   if (!alvo) return null;
   const lista = getSolicitantes();
   for (let i = 0; i < lista.length; i++) {
-    if (lista[i].nome.trim().toLowerCase() === alvo) return lista[i];
+    const s = lista[i];
+    if (s.nome.trim().toLowerCase() === alvo) return s;
+    if (s.email && s.email.trim().toLowerCase() === alvo) return s;
   }
   return null;
 }
 
 function saveSolicitantes(list) {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado']);
   const lastRow = sh.getLastRow();
   if (lastRow >= 2) {
-    sh.getRange(2, 1, lastRow - 1, 4).clearContent();
+    sh.getRange(2, 1, lastRow - 1, 6).clearContent();
   }
-  const rows = (list || []).map(function (s) { return [s.nome, s.senha, s.tipo === 'autorizado' ? 'autorizado' : 'solicitante', s.foto || '']; });
+  const rows = (list || []).map(function (s) {
+    return [
+      s.nome,
+      s.senha,
+      s.tipo === 'autorizado' ? 'autorizado' : 'solicitante',
+      s.foto || '',
+      s.email || '',
+      s.aprovado === undefined ? true : !!s.aprovado,
+    ];
+  });
   if (rows.length > 0) {
-    sh.getRange(2, 1, rows.length, 4).setValues(rows);
+    sh.getRange(2, 1, rows.length, 6).setValues(rows);
   }
 }
 
@@ -139,13 +171,16 @@ function atualizarFotoSolicitante(nome, novaFoto) {
   const alvo = String(nome || '').trim().toLowerCase();
   const atualizada = lista.map(function (s) {
     if (s.nome.trim().toLowerCase() !== alvo) return s;
-    return { nome: s.nome, senha: s.senha, tipo: s.tipo, foto: novaFoto || '' };
+    return { nome: s.nome, senha: s.senha, tipo: s.tipo, foto: novaFoto || '', email: s.email, aprovado: s.aprovado };
   });
   saveSolicitantes(atualizada);
 }
 
 // Autentica só nome+senha, sem olhar o tipo — usado no LOGIN (ramo userNome
-// de doGet), onde tanto solicitante quanto autorizado podem entrar.
+// de doGet), onde tanto solicitante quanto autorizado podem entrar. Devolve
+// o registro mesmo se aprovado=false (quem chama decide o que fazer com
+// isso — ver o ramo userNome em doGet, que dá uma mensagem específica pra
+// cadastro pendente em vez de "senha incorreta").
 function autenticarUsuarioLogin(nome, senha) {
   const s = findSolicitante(nome);
   if (!s) return null;
@@ -154,15 +189,78 @@ function autenticarUsuarioLogin(nome, senha) {
 }
 
 // Retorna o registro do solicitante (com o nome como está cadastrado) se
-// nome+senha baterem E ele não for do tipo 'autorizado', ou null. Usado pra
-// autenticar quem pode abrir chamado e responder — sem isso, doPost aceitava
-// novoChamado/novaMensagem de qualquer um que soubesse a URL pública do
-// backend, sem checar login algum. Um "autorizado" é só visualização: mesmo
-// logado, não pode criar chamado nem responder.
+// nome+senha baterem, ele não for do tipo 'autorizado' E já estiver
+// aprovado, ou null. Usado pra autenticar quem pode abrir chamado e
+// responder — sem isso, doPost aceitava novoChamado/novaMensagem de
+// qualquer um que soubesse a URL pública do backend, sem checar login
+// algum. Um "autorizado" é só visualização: mesmo logado, não pode criar
+// chamado nem responder. Um cadastro ainda pendente de aprovação também não
+// consegue, mesmo sabendo a senha certa — mas não deveria nem conseguir
+// logar antes disso (ver doGet).
 function authenticateSolicitante(nome, senha) {
   const s = autenticarUsuarioLogin(nome, senha);
-  if (!s || s.tipo === 'autorizado') return null;
+  if (!s || s.tipo === 'autorizado' || s.aprovado === false) return null;
   return s;
+}
+
+// ---------- Cadastro público de solicitante ----------
+//
+// Antes, só um admin podia criar acesso de solicitante (em Usuários). Agora
+// qualquer pessoa pode se cadastrar sozinha direto na tela de login (nome +
+// email + senha escolhida por ela) — mas a conta nasce com aprovado=false e
+// não consegue entrar até um administrador aprovar em Usuários. Roda dentro
+// do doGet (não do doPost) porque o cadastro precisa de uma resposta de
+// verdade pro navegador saber se o email já existe ou não (doPost, por usar
+// fetch em modo no-cors pra evitar problema de CORS do Apps Script, nunca
+// consegue ler a resposta — só sabe se a requisição saiu, não o que o
+// servidor respondeu). Isso só é seguro por causa do LockService em
+// cadastrarSolicitanteComTrava_: sem a trava, duas pessoas se cadastrando
+// com o mesmo email ao mesmo tempo poderiam duplicar a conta — o mesmo
+// problema de concorrência que o doPost já resolve pras outras escritas.
+function validarEmail_(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function processarCadastroSolicitante_(nome, email, senha) {
+  nome = String(nome || '').trim();
+  email = String(email || '').trim().toLowerCase();
+  senha = String(senha || '');
+  if (!nome || !email || !senha) {
+    return { ok: false, error: 'Preencha nome, email e senha.' };
+  }
+  if (!validarEmail_(email)) {
+    return { ok: false, error: 'Informe um email válido.' };
+  }
+  const existentes = getSolicitantes();
+  const jaExisteEmail = existentes.some(function (s) { return s.email && s.email.trim().toLowerCase() === email; });
+  if (jaExisteEmail) {
+    return { ok: false, error: 'Já existe um cadastro com esse email.' };
+  }
+  const jaExisteNome = existentes.some(function (s) { return s.nome.trim().toLowerCase() === nome.toLowerCase(); });
+  if (jaExisteNome) {
+    return { ok: false, error: 'Já existe um cadastro com esse nome.' };
+  }
+  const novo = { nome: nome, senha: senha, tipo: 'solicitante', foto: '', email: email, aprovado: false };
+  saveSolicitantes(existentes.concat([novo]));
+  return { ok: true };
+}
+
+function cadastrarSolicitanteComTrava_(nome, email, senha) {
+  const lock = LockService.getScriptLock();
+  let temLock = false;
+  try {
+    temLock = lock.tryLock(30000);
+  } catch (err) {
+    temLock = false;
+  }
+  if (!temLock) {
+    return { ok: false, error: 'Sistema ocupado, tente novamente em alguns segundos.' };
+  }
+  try {
+    return processarCadastroSolicitante_(nome, email, senha);
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 function getConfigValor(chave) {
@@ -555,6 +653,16 @@ function doGet(e) {
   const callback = p.callback || '';
   let payload;
 
+  if (p.action === 'cadastro') {
+    payload = cadastrarSolicitanteComTrava_(p.novoNome, p.novoEmail, p.novoSenha);
+    if (callback) {
+      return ContentService
+        .createTextOutput(callback + '(' + JSON.stringify(payload) + ');')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    return jsonOut(payload);
+  }
+
   const secret = p.secret || '';
   const userNome = p.userNome || '';
   const userSenha = p.userSenha || '';
@@ -609,7 +717,9 @@ function doGet(e) {
     };
   } else if (userNome) {
     const usuario = autenticarUsuarioLogin(userNome, userSenha);
-    if (usuario && usuario.tipo === 'autorizado') {
+    if (usuario && usuario.aprovado === false) {
+      payload = { ok: true, isAdmin: false, isUser: false, error: 'Seu cadastro ainda está aguardando aprovação de um administrador.' };
+    } else if (usuario && usuario.tipo === 'autorizado') {
       // Autorizado: entra como um usuário comum (não como admin), mas com
       // visão só-leitura de Painel/Categorias/Salas/Inventário — sem
       // chamados dos outros, sem admins/solicitantes/histórico.
@@ -631,7 +741,12 @@ function doGet(e) {
       };
     } else if (usuario) {
       const state = readState();
-      const alvo = userNome.trim().toLowerCase();
+      // Usa usuario.nome (o nome de verdade, resolvido pelo login) em vez do
+      // que a pessoa digitou em userNome — desde que o login também aceita
+      // email (ver findSolicitante), comparar direto com o que foi digitado
+      // deixaria "meus chamados" vazio pra quem entra pelo email, já que
+      // criadoPor sempre guarda o nome, nunca o email.
+      const alvo = usuario.nome.trim().toLowerCase();
       const meusChamados = listarChamados().filter(function (c) {
         return (c.criadoPor || '').trim().toLowerCase() === alvo;
       });
