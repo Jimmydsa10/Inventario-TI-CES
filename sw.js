@@ -1,4 +1,4 @@
-const CACHE_NAME = "inventario-ti-v19";
+const CACHE_NAME = "inventario-ti-v20";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -24,7 +24,15 @@ self.addEventListener("fetch", (event) => {
   // chamados) — nunca deve ser cacheado. Se ficasse em cache, uma resposta
   // antiga (inclusive de erro) continuaria sendo servida para sempre, mesmo
   // depois do backend ser corrigido ou os dados mudarem.
-  if (new URL(event.request.url).hostname === "script.google.com") return;
+  // Domínios *.googleapis.com (Firestore, Auth) também ficam de fora: a
+  // conexão "Listen" do Firestore (sincronização ao vivo dos chamados) é uma
+  // resposta contínua (stream), não uma resposta normal de uma vez só —
+  // tentar interceptar/clonar ela pra cachear quebra a conexão (erro
+  // "Response body is already used" no console) e derrubava o listener ao
+  // vivo, mesmo sem nenhum benefício em cachear algo que nunca deveria ser
+  // reaproveitado.
+  const hostname = new URL(event.request.url).hostname;
+  if (hostname === "script.google.com" || hostname.endsWith(".googleapis.com")) return;
 
   event.respondWith(
     caches.match(event.request).then((cached) => {
