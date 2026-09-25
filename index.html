@@ -5767,17 +5767,28 @@ function StatTile({
   emoji,
   value,
   label,
-  accent
+  accent,
+  onClick
 }) {
+  const [hover, setHover] = useState(false);
+  const clickable = !!onClick;
   return /*#__PURE__*/React.createElement("div", {
+    onClick: onClick,
+    onMouseEnter: () => clickable && setHover(true),
+    onMouseLeave: () => clickable && setHover(false),
     style: {
       background: COLORS.surface,
-      border: `1px solid ${COLORS.line}`,
+      border: `1px solid ${clickable && hover ? COLORS.accent : COLORS.line}`,
       borderRadius: 8,
       padding: "14px 16px",
       display: "flex",
       alignItems: "center",
-      gap: 12
+      gap: 12,
+      position: "relative",
+      cursor: clickable ? "pointer" : "default",
+      boxShadow: clickable && hover ? "0 4px 14px rgba(201,122,43,0.18)" : "none",
+      transform: clickable && hover ? "translateY(-1px)" : "none",
+      transition: "border-color .15s, box-shadow .15s, transform .15s"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5811,14 +5822,25 @@ function StatTile({
       color: COLORS.inkSoft,
       marginTop: 3
     }
-  }, label)));
+  }, label)), clickable && /*#__PURE__*/React.createElement(ChevronRight, {
+    size: 13,
+    style: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      color: COLORS.accent,
+      opacity: hover ? 1 : 0,
+      transition: "opacity .15s"
+    }
+  }));
 }
 function Dashboard({
   state,
   setView,
   unidadeAtiva,
   onAbrirChamado,
-  onFiltrarStatus
+  onFiltrarStatus,
+  onFiltrarTipoArea
 }) {
   const inv = useMemo(() => state.inventario.filter(r => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter(a => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
@@ -6342,7 +6364,11 @@ function Dashboard({
     key: s.tipo,
     emoji: TIPO_AREA_EMOJI[s.tipo] || "🚪",
     value: s.value,
-    label: s.tipo
+    label: s.tipo,
+    onClick: () => {
+      onFiltrarTipoArea(s.tipo);
+      setView("areas");
+    }
   }))), /*#__PURE__*/React.createElement("div", {
     className: "grid-2",
     style: {
@@ -8166,7 +8192,9 @@ function Areas({
   state,
   setState,
   unidadeAtiva,
-  podeEditar = true
+  podeEditar = true,
+  pendingTipoFiltro,
+  onConsumeTipoFiltro
 }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
@@ -8174,7 +8202,14 @@ function Areas({
   const [viewing, setViewing] = useState(null);
   const [novoTipo, setNovoTipo] = useState(false);
   const [novoTipoTexto, setNovoTipoTexto] = useState("");
+  const [fTipo, setFTipo] = useState("");
+  useEffect(() => {
+    if (pendingTipoFiltro === null || pendingTipoFiltro === undefined) return;
+    setFTipo(pendingTipoFiltro);
+    if (onConsumeTipoFiltro) onConsumeTipoFiltro();
+  }, [pendingTipoFiltro]);
   const areasUnidade = useMemo(() => ordenarPorNome(state.areas.filter(a => unidadeDe(a) === unidadeAtiva), "nome"), [state.areas, unidadeAtiva]);
+  const areasFiltradas = useMemo(() => fTipo ? areasUnidade.filter(a => (a.tipo && a.tipo.trim() || "Outro") === fTipo) : areasUnidade, [areasUnidade, fTipo]);
 
   // Tipos personalizados já usados em qualquer unidade, além dos padrão —
   // assim, uma vez criado, um tipo novo fica disponível pra escolher de novo
@@ -8295,7 +8330,31 @@ function Areas({
     variant: "primary",
     icon: Plus,
     onClick: openNew
-  }, "Nova sala/\xE1rea")), /*#__PURE__*/React.createElement(Panel, null, /*#__PURE__*/React.createElement("table", {
+  }, "Nova sala/\xE1rea")), fTipo && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 8,
+      background: COLORS.accentSoft,
+      color: COLORS.accent,
+      fontSize: 12,
+      fontWeight: 700,
+      padding: "6px 12px",
+      borderRadius: 999
+    }
+  }, TIPO_AREA_EMOJI[fTipo] || "🚪", " Filtrado por: ", fTipo, /*#__PURE__*/React.createElement("span", {
+    onClick: () => setFTipo(""),
+    style: {
+      cursor: "pointer",
+      opacity: 0.75,
+      fontWeight: 900,
+      lineHeight: 1
+    }
+  }, "\u2715"))), /*#__PURE__*/React.createElement(Panel, null, /*#__PURE__*/React.createElement("table", {
     style: {
       width: "100%",
       borderCollapse: "collapse",
@@ -8330,7 +8389,7 @@ function Areas({
     style: {
       padding: "8px 6px"
     }
-  }))), /*#__PURE__*/React.createElement("tbody", null, areasUnidade.map(a => /*#__PURE__*/React.createElement("tr", {
+  }))), /*#__PURE__*/React.createElement("tbody", null, areasFiltradas.map(a => /*#__PURE__*/React.createElement("tr", {
     key: a.id,
     onClick: () => setViewing(a),
     style: {
@@ -12926,6 +12985,7 @@ function App() {
   });
   const [pendingCategoriaFiltro, setPendingCategoriaFiltro] = useState(null);
   const [pendingStatusFiltro, setPendingStatusFiltro] = useState(null);
+  const [pendingTipoAreaFiltro, setPendingTipoAreaFiltro] = useState(null);
   const [unidadeAtiva, setUnidadeAtiva] = useState("colegio");
   const saveTimer = useRef(null);
   function aplicarLoginAdmin(data, senhaUsada) {
@@ -13283,7 +13343,8 @@ function App() {
     setView: setView,
     unidadeAtiva: unidadeAtiva,
     onAbrirChamado: setChamadoAbertoId,
-    onFiltrarStatus: status => setPendingStatusFiltro(status)
+    onFiltrarStatus: status => setPendingStatusFiltro(status),
+    onFiltrarTipoArea: tipo => setPendingTipoAreaFiltro(tipo)
   }), view === "inventario" && allowed.has("inventario") && /*#__PURE__*/React.createElement(Inventario, {
     state: state,
     setState: setState,
@@ -13304,7 +13365,9 @@ function App() {
     state: state,
     setState: setState,
     unidadeAtiva: unidadeAtiva,
-    podeEditar: podeEditar
+    podeEditar: podeEditar,
+    pendingTipoFiltro: pendingTipoAreaFiltro,
+    onConsumeTipoFiltro: () => setPendingTipoAreaFiltro(null)
   }), view === "responsaveis" && allowed.has("responsaveis") && /*#__PURE__*/React.createElement(Responsaveis, {
     state: state,
     setState: setState,

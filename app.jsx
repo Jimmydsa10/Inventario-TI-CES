@@ -1348,9 +1348,29 @@ function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, perm
 
 const DASH_VIEW_STORAGE_KEY = "inventario-ti-dashview";
 
-function StatTile({ icon: Icon, emoji, value, label, accent }) {
+function StatTile({ icon: Icon, emoji, value, label, accent, onClick }) {
+  const [hover, setHover] = useState(false);
+  const clickable = !!onClick;
   return (
-    <div style={{ background: COLORS.surface, border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+    <div
+      onClick={onClick}
+      onMouseEnter={() => clickable && setHover(true)}
+      onMouseLeave={() => clickable && setHover(false)}
+      style={{
+        background: COLORS.surface,
+        border: `1px solid ${clickable && hover ? COLORS.accent : COLORS.line}`,
+        borderRadius: 8,
+        padding: "14px 16px",
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        position: "relative",
+        cursor: clickable ? "pointer" : "default",
+        boxShadow: clickable && hover ? "0 4px 14px rgba(201,122,43,0.18)" : "none",
+        transform: clickable && hover ? "translateY(-1px)" : "none",
+        transition: "border-color .15s, box-shadow .15s, transform .15s",
+      }}
+    >
       <div
         style={{
           width: 36,
@@ -1370,11 +1390,14 @@ function StatTile({ icon: Icon, emoji, value, label, accent }) {
         <div style={{ fontSize: 20, fontWeight: 700, color: accent ? COLORS.accent : COLORS.ink, lineHeight: 1 }}>{value}</div>
         <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 3 }}>{label}</div>
       </div>
+      {clickable && (
+        <ChevronRight size={13} style={{ position: "absolute", top: 8, right: 8, color: COLORS.accent, opacity: hover ? 1 : 0, transition: "opacity .15s" }} />
+      )}
     </div>
   );
 }
 
-function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStatus }) {
+function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStatus, onFiltrarTipoArea }) {
   const inv = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
   const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
@@ -1689,7 +1712,16 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStat
           </div>
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 16 }}>
             {salasPorTipo.map((s) => (
-              <StatTile key={s.tipo} emoji={TIPO_AREA_EMOJI[s.tipo] || "🚪"} value={s.value} label={s.tipo} />
+              <StatTile
+                key={s.tipo}
+                emoji={TIPO_AREA_EMOJI[s.tipo] || "🚪"}
+                value={s.value}
+                label={s.tipo}
+                onClick={() => {
+                  onFiltrarTipoArea(s.tipo);
+                  setView("areas");
+                }}
+              />
             ))}
           </div>
 
@@ -2867,15 +2899,26 @@ function Categorias({ state, setState, unidadeAtiva, podeEditar = true }) {
 // ---------- Áreas / Salas ----------
 
 
-function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
+function Areas({ state, setState, unidadeAtiva, podeEditar = true, pendingTipoFiltro, onConsumeTipoFiltro }) {
   const [modal, setModal] = useState(null);
   const [removeTarget, setRemoveTarget] = useState(null);
   const [error, setError] = useState("");
   const [viewing, setViewing] = useState(null);
   const [novoTipo, setNovoTipo] = useState(false);
   const [novoTipoTexto, setNovoTipoTexto] = useState("");
+  const [fTipo, setFTipo] = useState("");
+
+  useEffect(() => {
+    if (pendingTipoFiltro === null || pendingTipoFiltro === undefined) return;
+    setFTipo(pendingTipoFiltro);
+    if (onConsumeTipoFiltro) onConsumeTipoFiltro();
+  }, [pendingTipoFiltro]);
 
   const areasUnidade = useMemo(() => ordenarPorNome(state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), "nome"), [state.areas, unidadeAtiva]);
+  const areasFiltradas = useMemo(
+    () => (fTipo ? areasUnidade.filter((a) => ((a.tipo && a.tipo.trim()) || "Outro") === fTipo) : areasUnidade),
+    [areasUnidade, fTipo]
+  );
 
   // Tipos personalizados já usados em qualquer unidade, além dos padrão —
   // assim, uma vez criado, um tipo novo fica disponível pra escolher de novo
@@ -2965,6 +3008,29 @@ function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
         )}
       </div>
 
+      {fTipo && (
+        <div style={{ marginBottom: 14 }}>
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: COLORS.accentSoft,
+              color: COLORS.accent,
+              fontSize: 12,
+              fontWeight: 700,
+              padding: "6px 12px",
+              borderRadius: 999,
+            }}
+          >
+            {TIPO_AREA_EMOJI[fTipo] || "🚪"} Filtrado por: {fTipo}
+            <span onClick={() => setFTipo("")} style={{ cursor: "pointer", opacity: 0.75, fontWeight: 900, lineHeight: 1 }}>
+              ✕
+            </span>
+          </span>
+        </div>
+      )}
+
       <Panel>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5 }}>
           <thead>
@@ -2976,7 +3042,7 @@ function Areas({ state, setState, unidadeAtiva, podeEditar = true }) {
             </tr>
           </thead>
           <tbody>
-            {areasUnidade.map((a) => (
+            {areasFiltradas.map((a) => (
               <tr
                 key={a.id}
                 onClick={() => setViewing(a)}
@@ -5829,6 +5895,7 @@ function App() {
   });
   const [pendingCategoriaFiltro, setPendingCategoriaFiltro] = useState(null);
   const [pendingStatusFiltro, setPendingStatusFiltro] = useState(null);
+  const [pendingTipoAreaFiltro, setPendingTipoAreaFiltro] = useState(null);
   const [unidadeAtiva, setUnidadeAtiva] = useState("colegio");
   const saveTimer = useRef(null);
 
@@ -6147,6 +6214,7 @@ function App() {
               unidadeAtiva={unidadeAtiva}
               onAbrirChamado={setChamadoAbertoId}
               onFiltrarStatus={(status) => setPendingStatusFiltro(status)}
+              onFiltrarTipoArea={(tipo) => setPendingTipoAreaFiltro(tipo)}
             />
           )}
           {view === "inventario" && allowed.has("inventario") && (
@@ -6164,7 +6232,16 @@ function App() {
             />
           )}
           {view === "categorias" && allowed.has("categorias") && <Categorias state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
-          {view === "areas" && allowed.has("areas") && <Areas state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
+          {view === "areas" && allowed.has("areas") && (
+            <Areas
+              state={state}
+              setState={setState}
+              unidadeAtiva={unidadeAtiva}
+              podeEditar={podeEditar}
+              pendingTipoFiltro={pendingTipoAreaFiltro}
+              onConsumeTipoFiltro={() => setPendingTipoAreaFiltro(null)}
+            />
+          )}
           {view === "responsaveis" && allowed.has("responsaveis") && <Responsaveis state={state} setState={setState} unidadeAtiva={unidadeAtiva} podeEditar={podeEditar} />}
           {view === "relatorios" && allowed.has("relatorios") && <Relatorios state={state} historico={historico} />}
           {view === "chamados" && allowed.has("chamados") && (
