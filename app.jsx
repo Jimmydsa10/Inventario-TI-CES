@@ -3932,7 +3932,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
     if (!podeMexerNesseChamado(selecionado)) return;
     const texto = replyText.trim();
     if (!texto || !selecionado) return;
-    const mensagem = { autor: "ti", texto, data: new Date().toISOString() };
+    const mensagem = { autor: "ti", nome: meuNome, texto, data: new Date().toISOString() };
     setBusy(true);
     setErro("");
     try {
@@ -4241,7 +4241,7 @@ function Chamados({ state, setState, unidadeAtiva, secret, podeAbrirChamados = t
                   )}
                   {selecionado.mensagens.map((m, i) => {
                     const abertura = i === 0;
-                    const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+                    const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : selecionado.solicitante || "Solicitante";
                     const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
                     const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
                     return (
@@ -4897,7 +4897,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                     )}
                     {selecionado.mensagens.map((m, i) => {
                       const abertura = i === 0;
-                      const nomeAutor = m.autor === "ti" ? "Administrador" : userAuth.nome;
+                      const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : userAuth.nome;
                       const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
                       const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
                       return (
@@ -5613,7 +5613,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeRe
     if (!podeMexerNesseChamado(selecionado)) return;
     const valor = texto.trim();
     if (!valor || !selecionado) return;
-    const mensagem = { autor: "ti", texto: valor, data: new Date().toISOString() };
+    const mensagem = { autor: "ti", nome: meuNome, texto: valor, data: new Date().toISOString() };
     setBusy(true);
     setErro("");
     try {
@@ -5709,7 +5709,7 @@ function ChamadosDock({ state, setState, abertoId, onAbrirChange, secret, podeRe
         <div style={{ flex: 1, overflow: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12, maxHeight: 420 }}>
           {selecionado.mensagens.map((m, i) => {
             const abertura = i === 0;
-            const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+            const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : selecionado.solicitante || "Solicitante";
             const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? COLORS.accentSoft : "#fff";
             const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
             return (

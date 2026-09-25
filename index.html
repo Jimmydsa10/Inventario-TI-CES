@@ -9793,6 +9793,7 @@ function Chamados({
     if (!texto || !selecionado) return;
     const mensagem = {
       autor: "ti",
+      nome: meuNome,
       texto,
       data: new Date().toISOString()
     };
@@ -10315,7 +10316,7 @@ function Chamados({
     }
   }))), selecionado.mensagens.map((m, i) => {
     const abertura = i === 0;
-    const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+    const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : selecionado.solicitante || "Solicitante";
     const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
     const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
     return /*#__PURE__*/React.createElement("div", {
@@ -11449,7 +11450,7 @@ function ChamadosSolicitante({
     }
   }))), selecionado.mensagens.map((m, i) => {
     const abertura = i === 0;
-    const nomeAutor = m.autor === "ti" ? "Administrador" : userAuth.nome;
+    const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : userAuth.nome;
     const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
     const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
     return /*#__PURE__*/React.createElement("div", {
@@ -12503,6 +12504,7 @@ function ChamadosDock({
     if (!valor || !selecionado) return;
     const mensagem = {
       autor: "ti",
+      nome: meuNome,
       texto: valor,
       data: new Date().toISOString()
     };
@@ -12675,7 +12677,7 @@ function ChamadosDock({
       }
     }, selecionado.mensagens.map((m, i) => {
       const abertura = i === 0;
-      const nomeAutor = m.autor === "ti" ? "Administrador" : selecionado.solicitante || "Solicitante";
+      const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : selecionado.solicitante || "Solicitante";
       const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? COLORS.accentSoft : "#fff";
       const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
       return /*#__PURE__*/React.createElement("div", {
