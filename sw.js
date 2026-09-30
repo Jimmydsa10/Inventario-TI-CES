@@ -1,4 +1,4 @@
-const CACHE_NAME = "inventario-ti-v22";
+const CACHE_NAME = "inventario-ti-v26";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", (event) => {
@@ -38,11 +38,10 @@ self.addEventListener("fetch", (event) => {
     caches.match(event.request).then((cached) => {
       const fetchPromise = fetch(event.request)
         .then((networkResponse) => {
-          // Cross-origin CDN scripts (react, chart.js, xlsx...) come back as
-          // opaque responses (status 0, ok === false) since they're loaded
-          // without CORS, so opaque responses are cached too — otherwise
-          // those libraries would never be cached and get re-downloaded on
-          // every visit.
+          // As bibliotecas das CDNs (react, chart.js, xlsx...) agora vêm com
+          // CORS (por causa do integrity/SRI no index.html), então chegam
+          // como resposta normal (ok). Resposta opaca continua aceita pra
+          // qualquer outro recurso de fora carregado sem CORS.
           if (networkResponse && (networkResponse.ok || networkResponse.type === "opaque")) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse.clone()));
           }
