@@ -1723,6 +1723,9 @@ function doPostComTrava(e) {
     if (!podeMexerNesseChamado_(chamado)) {
       return jsonOut({ ok: false, error: 'Você só pode mudar o status dos chamados que você mesma abriu' });
     }
+    // Mudou o status: a resposta do solicitante ao "Ficou bom?" valia pro
+    // status anterior. Se o TI marcar Resolvido de novo, ele pergunta outra vez.
+    if (chamado.status !== body.status) delete chamado.confirmacao;
     chamado.status = body.status;
     try {
       salvarChamado_(chamado);
@@ -1734,6 +1737,51 @@ function doPostComTrava(e) {
     }
     sincronizarChamadoNoFirestore_(chamado);
     return jsonOut({ ok: true });
+  }
+
+  // "Ficou bom?" — quem abriu o chamado responde depois que o TI marcou
+  // como Resolvido. Sim: fica registrado (o app mostra como "Fechado").
+  // Não: o chamado volta pra "Em andamento" com uma mensagem avisando o TI.
+  if (body.action === 'confirmarChamado') {
+    const solicitante = solicitanteDoPedido_();
+    if (!solicitante) {
+      return jsonOut({ ok: false, error: 'Não autenticado' });
+    }
+    const chamado = buscarChamadoPorId_(body.chamadoId);
+    if (!chamado) {
+      return jsonOut({ ok: false, error: 'Chamado não encontrado' });
+    }
+    const dono = String(chamado.criadoPor || chamado.solicitante || '').trim().toLowerCase();
+    if (dono !== solicitante.nome.trim().toLowerCase()) {
+      return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
+    }
+    if (chamado.status !== 'Resolvido') {
+      return jsonOut({ ok: false, error: 'Esse chamado não está marcado como resolvido.' });
+    }
+    const agora = new Date().toISOString();
+    if (body.resolveu === true) {
+      chamado.confirmacao = { resolveu: true, data: agora };
+    } else {
+      delete chamado.confirmacao;
+      chamado.status = 'Em andamento';
+      chamado.mensagens.push({
+        autor: 'solicitante',
+        nome: solicitante.nome,
+        texto: 'Não resolveu — o problema continua.' + (body.texto ? ' ' + String(body.texto).slice(0, 2000) : ''),
+        data: agora,
+        reabertura: true,
+      });
+    }
+    try {
+      salvarChamado_(chamado);
+    } catch (err) {
+      if (err.message === 'CHAMADO_MUITO_GRANDE') {
+        return jsonOut({ ok: false, error: 'Não foi possível salvar: esse chamado ficou grande demais. Avise o suporte.' });
+      }
+      throw err;
+    }
+    sincronizarChamadoNoFirestore_(chamado);
+    return jsonOut({ ok: true, chamado: chamado });
   }
 
   if (body.action === 'excluirChamado') {

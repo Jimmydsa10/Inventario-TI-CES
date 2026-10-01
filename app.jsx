@@ -44,6 +44,27 @@ const ICON_PATHS = {
   qrcode: "M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm14 0h2v2h-2zm-4 0h2v2h-2zm4 4h2v2h-2zm-4 0h2v2h-2z",
   pin: "M12 17v5m-5-9h10l-1.5-2V5a3.5 3.5 0 00-7 0v6L7 13z",
   clock: "M12 21a9 9 0 100-18 9 9 0 000 18zm0-14v5l3.5 2",
+  bell: "M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 003.4 0",
+  camera: "M14.5 4h-5L7 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-3l-2.5-3zM12 16a3 3 0 100-6 3 3 0 000 6z",
+  chevronDown: "M6 9l6 6 6-6",
+  logout: "M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9",
+  home: "M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1V10z",
+  more: "M5 12h.01M12 12h.01M19 12h.01",
+  thumbUp: "M7 10v12M15 5.9L14 10h5.8a2 2 0 011.9 2.6l-2.3 8A2 2 0 0117.4 22H4a2 2 0 01-2-2v-8a2 2 0 012-2h2.8a2 2 0 001.8-1.1L12 2a3.1 3.1 0 013 3.9z",
+  thumbDown: "M17 14V2M9 18.1L10 14H4.2a2 2 0 01-1.9-2.6l2.3-8A2 2 0 016.6 2H20a2 2 0 012 2v8a2 2 0 01-2 2h-2.8a2 2 0 00-1.8 1.1L12 22a3.1 3.1 0 01-3-3.9z",
+  checkCircle: "M12 22a10 10 0 100-20 10 10 0 000 20zM9 12l2 2 4-4",
+  wifi: "M12 20h.01M2 8.8a15 15 0 0120 0M5 12.9a10 10 0 0114 0M8.5 16.4a5 5 0 017 0",
+  key: "M15.5 7.5l2.3 2.3a1 1 0 001.4 0l2.1-2.1a1 1 0 000-1.4L19 4M21 2l-9.6 9.6M7.5 21a5.5 5.5 0 100-11 5.5 5.5 0 000 11z",
+  help: "M12 22a10 10 0 100-20 10 10 0 000 20zM9.1 9a3 3 0 015.8 1c0 2-3 3-3 3M12 17h.01",
+  printer: "M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 9V3h12v6M6 14h12v8H6z",
+  monitor: "M4 3h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2zM8 21h8M12 17v4",
+  projector: "M2 3h20M21 3v11a2 2 0 01-2 2H5a2 2 0 01-2-2V3M7 21l5-5 5 5",
+  arrowLeft: "M15 18l-6-6 6-6",
+  user: "M12 13a5 5 0 100-10 5 5 0 000 10zM20 21a8 8 0 00-16 0",
+  lock: "M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2zM7 11V7a5 5 0 0110 0v4",
+  shield: "M20 13c0 5-3.5 7.5-7.7 9a1 1 0 01-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 011-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 011.5 0C14.5 3.8 17 5 19 5a1 1 0 011 1z",
+  wrench: "M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.8-3.8a6 6 0 01-7.9 7.9l-6.9 6.9a2.1 2.1 0 01-3-3l6.9-6.9a6 6 0 017.9-7.9l-3.8 3.8z",
+  school: "M14 22v-4a2 2 0 10-4 0v4M18 10l3.4 1.7a1 1 0 01.6.9V20a2 2 0 01-2 2H4a2 2 0 01-2-2v-7.4a1 1 0 01.6-.9L6 10M18 5v17M4 6l7.1-3.6a2 2 0 011.8 0L20 6M6 5v17M12 11a2 2 0 100-4 2 2 0 000 4z",
 };
 
 function Icon({ name, size = 16, ...rest }) {
@@ -81,6 +102,21 @@ const Menu = IconWrap("menu");
 const QrCode = IconWrap("qrcode");
 const Pin = IconWrap("pin");
 const Clock = IconWrap("clock");
+const Bell = IconWrap("bell");
+const Camera = IconWrap("camera");
+const ChevronDown = IconWrap("chevronDown");
+const LogOut = IconWrap("logout");
+const HomeIcon = IconWrap("home");
+const MoreH = IconWrap("more");
+const ThumbsUp = IconWrap("thumbUp");
+const ThumbsDown = IconWrap("thumbDown");
+const CheckCircle = IconWrap("checkCircle");
+const ArrowLeft = IconWrap("arrowLeft");
+const UserIcon = IconWrap("user");
+const LockIcon = IconWrap("lock");
+const ShieldIcon = IconWrap("shield");
+const Wrench = IconWrap("wrench");
+const SchoolIcon = IconWrap("school");
 
 const TIPO_AREA_EMOJI = {
   "Sala de aula": "🎓",
@@ -91,6 +127,63 @@ const TIPO_AREA_EMOJI = {
   "Informática": "💻",
   "Laboratório de Informática": "💻",
 };
+
+// ---------- Bibliotecas só do TI (carregadas sob demanda) ----------
+
+// Chart.js e SheetJS (xlsx) somam ~350 KB e só servem pra quem é do TI
+// (gráficos e importar/exportar planilha). Antes vinham no <head> do
+// index.html e todo mundo baixava — inclusive o professor que só abre
+// chamado pelo celular. Agora o app busca os dois quando um admin entra
+// (e de novo, se precisar, na hora de usar). Mesmo integrity (SRI) de antes.
+const BIBLIOTECAS_TI = {
+  chart: {
+    global: "Chart",
+    url: "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js?sri=1",
+    integrity: "sha384-bs/nf9FbdNouRbMiFcrcZfLXYPKiPaGVGplVbv7dLGECccEXDW+S3zjqSKR5ZEaD",
+  },
+  // SheetJS da CDN oficial deles — a 0.18.5 do cdnjs tem falhas de
+  // segurança conhecidas ao ler planilhas maliciosas.
+  xlsx: {
+    global: "XLSX",
+    url: "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js",
+    integrity: "sha384-EnyY0/GSHQGSxSgMwaIPzSESbqoOLSexfnSMN2AP+39Ckmn92stwABZynq1JyzdT",
+  },
+};
+const bibliotecasCarregando_ = {};
+
+function carregarBiblioteca_(nome) {
+  const b = BIBLIOTECAS_TI[nome];
+  if (window[b.global]) return Promise.resolve(window[b.global]);
+  if (!bibliotecasCarregando_[nome]) {
+    bibliotecasCarregando_[nome] = new Promise((resolve, reject) => {
+      const tag = document.createElement("script");
+      tag.src = b.url;
+      tag.integrity = b.integrity;
+      tag.crossOrigin = "anonymous";
+      tag.onload = () => resolve(window[b.global]);
+      tag.onerror = () => {
+        delete bibliotecasCarregando_[nome];
+        tag.remove();
+        reject(new Error("Não foi possível carregar a biblioteca (" + nome + "). Verifique a internet e tente de novo."));
+      };
+      document.head.appendChild(tag);
+    });
+  }
+  return bibliotecasCarregando_[nome];
+}
+
+function useBiblioteca_(nome) {
+  const [pronta, setPronta] = useState(() => !!window[BIBLIOTECAS_TI[nome].global]);
+  useEffect(() => {
+    if (pronta) return;
+    let vivo = true;
+    carregarBiblioteca_(nome).then(() => vivo && setPronta(true)).catch(() => {});
+    return () => {
+      vivo = false;
+    };
+  }, [nome, pronta]);
+  return pronta;
+}
 
 // ---------- Gráficos com Chart.js (substituem recharts) ----------
 
@@ -105,7 +198,7 @@ const valueLabelsPlugin = {
       chart.getDatasetMeta(i).data.forEach((bar, idx) => {
         ctx.save();
         ctx.fillStyle = "#16233D";
-        ctx.font = "700 11px ui-sans-serif, system-ui, sans-serif";
+        ctx.font = "700 11px Inter, ui-sans-serif, system-ui, sans-serif";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.fillText(ds.data[idx], bar.x + 6, bar.y);
@@ -118,9 +211,10 @@ const valueLabelsPlugin = {
 function BarChartHorizontal({ data, color = "#C97A2B" }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
+  const chartPronto = useBiblioteca_("chart");
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !chartPronto) return;
     if (chartRef.current) chartRef.current.destroy();
     const ctx = canvasRef.current.getContext("2d");
     chartRef.current = new Chart(ctx, {
@@ -136,7 +230,7 @@ function BarChartHorizontal({ data, color = "#C97A2B" }) {
         layout: { padding: { right: 34 } },
         plugins: { legend: { display: false }, tooltip: { enabled: true } },
         scales: {
-          x: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: "#E1DDD0" } },
+          x: { beginAtZero: true, ticks: { precision: 0, font: { size: 11 } }, grid: { color: "#EFECE3" } },
           y: { ticks: { font: { size: 11 } }, grid: { display: false } },
         },
       },
@@ -145,7 +239,7 @@ function BarChartHorizontal({ data, color = "#C97A2B" }) {
     return () => {
       if (chartRef.current) chartRef.current.destroy();
     };
-  }, [JSON.stringify(data), color]);
+  }, [JSON.stringify(data), color, chartPronto]);
 
   return (
     <div style={{ position: "relative", height: Math.max(280, data.length * 24) }}>
@@ -157,9 +251,10 @@ function BarChartHorizontal({ data, color = "#C97A2B" }) {
 function DonutChart({ data, colors }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
+  const chartPronto = useBiblioteca_("chart");
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !chartPronto) return;
     if (chartRef.current) chartRef.current.destroy();
     const ctx = canvasRef.current.getContext("2d");
     chartRef.current = new Chart(ctx, {
@@ -178,7 +273,7 @@ function DonutChart({ data, colors }) {
     return () => {
       if (chartRef.current) chartRef.current.destroy();
     };
-  }, [JSON.stringify(data)]);
+  }, [JSON.stringify(data), chartPronto]);
 
   return (
     <div style={{ position: "relative", height: 300 }}>
@@ -845,16 +940,27 @@ const TIPO_AREA_OPTIONS = ["Sala de aula", "Laboratório", "Biblioteca", "Admini
 
 const COLORS = {
   ink: "#16233D",
-  inkSoft: "#4B5768",
+  ink3: "#2A3D61",
+  inkSoft: "#5B6576",
+  faint: "#8A92A0",
   paper: "#F7F5EF",
+  paper2: "#F3F1EA",
   surface: "#FFFFFF",
-  line: "#E1DDD0",
-  lineStrong: "#C9C3B2",
+  line: "#E8E4D9",
+  lineSoft: "#F0EDE5",
+  lineStrong: "#D9D3C3",
   accent: "#C97A2B",
-  accentSoft: "#F3E2C8",
+  accentSoft: "#F6E7D2",
+  accentInk: "#8A4F14",
+  green: "#2F6F5E",
+  greenSoft: "#E1EEE8",
+  blue: "#2F5DA8",
+  blueSoft: "#E3EAF6",
   danger: "#B23A32",
-  dangerSoft: "#F6E1DE",
+  dangerSoft: "#F7E2DF",
 };
+
+const FONTE_APP = 'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
 
 const STATUS_COLORS = {
   "Em uso": "#2F6F5E",
@@ -865,10 +971,10 @@ const STATUS_COLORS = {
 };
 
 const STATUS_BG = {
-  "Em uso": "#E3EEE9",
-  "Em manutenção": "#F3E2C8",
-  "Precisa de manutenção": "#F6E1DE",
-  "Em estoque": "#E9EAEC",
+  "Em uso": "#E1EEE8",
+  "Em manutenção": "#F6E7D2",
+  "Precisa de manutenção": "#F7E2DF",
+  "Em estoque": "#ECEDEF",
   "Descartado": "#EEEEEE",
 };
 
@@ -975,9 +1081,9 @@ const CHAMADO_STATUS_COLORS = {
   Resolvido: "#2F6F5E",
 };
 const CHAMADO_STATUS_BG = {
-  Aberto: "#F6E1DE",
-  "Em andamento": "#F3E2C8",
-  Resolvido: "#E3EEE9",
+  Aberto: "#F7E2DF",
+  "Em andamento": "#F6E7D2",
+  Resolvido: "#E1EEE8",
 };
 
 function formatDateTime(iso) {
@@ -1016,7 +1122,7 @@ function toCSV(rows, columns) {
 function Field({ label, children }) {
   return (
     <label style={{ display: "block", marginBottom: 14 }}>
-      <span style={{ display: "block", fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>{label}</span>
+      <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 6 }}>{label}</span>
       {children}
     </label>
   );
@@ -1025,10 +1131,10 @@ function Field({ label, children }) {
 const inputStyle = {
   width: "100%",
   boxSizing: "border-box",
-  padding: "8px 10px",
+  padding: "9px 12px",
   fontSize: 14,
   border: `1px solid ${COLORS.lineStrong}`,
-  borderRadius: 6,
+  borderRadius: 10,
   background: "#fff",
   color: COLORS.ink,
   outline: "none",
@@ -1051,18 +1157,21 @@ function Button({ variant = "ghost", icon: Icon, children, style, ...rest }) {
     display: "inline-flex",
     alignItems: "center",
     gap: 6,
-    fontSize: 13.5,
+    fontSize: 13,
     fontWeight: 600,
-    padding: "8px 14px",
-    borderRadius: 6,
-    cursor: "pointer",
+    padding: "9px 14px",
+    borderRadius: 9,
+    cursor: rest.disabled ? "default" : "pointer",
+    opacity: rest.disabled ? 0.6 : 1,
     border: "1px solid transparent",
     lineHeight: 1,
+    whiteSpace: "nowrap",
   };
   const variants = {
     primary: { background: COLORS.ink, color: "#fff", border: `1px solid ${COLORS.ink}` },
     accent: { background: COLORS.accent, color: "#fff", border: `1px solid ${COLORS.accent}` },
     ghost: { background: "#fff", color: COLORS.ink, border: `1px solid ${COLORS.lineStrong}` },
+    green: { background: COLORS.green, color: "#fff", border: `1px solid ${COLORS.green}` },
     danger: { background: "#fff", color: COLORS.danger, border: `1px solid ${COLORS.danger}` },
   };
   return (
@@ -1115,16 +1224,19 @@ function StatusPill({ status }) {
   return (
     <span
       style={{
-        display: "inline-block",
-        padding: "3px 10px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "3px 9px",
         borderRadius: 999,
-        fontSize: 12.5,
+        fontSize: 11.5,
         fontWeight: 600,
         color: c,
         background: bg,
         whiteSpace: "nowrap",
       }}
     >
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />
       {status}
     </span>
   );
@@ -1136,14 +1248,14 @@ function Panel({ title, action, children, style }) {
       style={{
         background: COLORS.surface,
         border: `1px solid ${COLORS.line}`,
-        borderRadius: 8,
+        borderRadius: 14,
         padding: 20,
         ...style,
       }}
     >
       {(title || action) && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-          {title ? <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: COLORS.ink }}>{title}</h3> : <span />}
+          {title ? <h3 style={{ margin: 0, fontSize: 14.5, fontWeight: 700, color: COLORS.ink }}>{title}</h3> : <span />}
           {action}
         </div>
       )}
@@ -1170,18 +1282,18 @@ function Modal({ title, onClose, children, width = 460 }) {
       <div
         style={{
           background: "#fff",
-          borderRadius: 10,
-          padding: 24,
+          borderRadius: 16,
+          padding: "22px 24px",
           width,
           maxWidth: "100%",
           maxHeight: "85vh",
           overflow: "auto",
-          boxShadow: "0 12px 40px rgba(0,0,0,0.25)",
+          boxShadow: "0 30px 70px rgba(0,0,0,0.3)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: COLORS.ink }}>{title}</h3>
+          <h3 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: COLORS.ink, letterSpacing: -0.3 }}>{title}</h3>
           <button
             onClick={onClose}
             style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }}
@@ -1285,34 +1397,6 @@ function nomesCategoriasDaUnidade(categorias, unidade) {
   return (categorias || []).filter((c) => unidadeDe(c) === unidade).map((c) => c.nome);
 }
 
-function UnidadeTabs({ unidade, onChange }) {
-  return (
-    <div style={{ display: "flex", gap: 4, marginBottom: 16, borderBottom: `1px solid ${COLORS.line}`, flexWrap: "wrap" }}>
-      {UNIDADES.map((u) => {
-        const active = unidade === u.id;
-        return (
-          <button
-            key={u.id}
-            onClick={() => onChange(u.id)}
-            style={{
-              padding: "9px 16px",
-              fontSize: 13,
-              fontWeight: active ? 600 : 500,
-              color: active ? COLORS.ink : COLORS.inkSoft,
-              background: "none",
-              border: "none",
-              borderBottom: active ? `2px solid ${COLORS.accent}` : "2px solid transparent",
-              cursor: "pointer",
-            }}
-          >
-            {u.nome}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 const NAV_ITEMS = [
   { key: "dashboard", label: "Painel", icon: LayoutDashboard },
   { key: "inventario", label: "Inventário", icon: Boxes },
@@ -1351,166 +1435,406 @@ function getAllowedSections(permissoes) {
     .filter(Boolean);
 }
 
-function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, podeEditar, onLogout, categorias, unidadeAtiva }) {
+function Sidebar({ view, onNavigate, onNavigateCategoria, mobileOpen, nome, permissoes, podeEditar, onLogout, categorias, unidadeAtiva, contagens = {} }) {
   const isMaster = isAcessoTotal(permissoes);
   const allowed = useMemo(() => new Set(getAllowedSections(permissoes)), [permissoes]);
-  const [openGroups, setOpenGroups] = useState(() => {
-    const init = {};
-    NAV_GROUPS.forEach((g) => (init[g.label] = true));
-    return init;
-  });
-  const [catListOpen, setCatListOpen] = useState(true);
+  // A lista de categorias embaixo de "Inventário" começa fechada (menos
+  // coisa na tela); a seta abre.
+  const [catListOpen, setCatListOpen] = useState(false);
 
   const groups = NAV_GROUPS.map((g) => ({
     label: g.label,
     items: g.keys.filter((k) => (k === "administradores" || k === "usuarios" ? isMaster : allowed.has(k))).map((k) => NAV_ITEM_MAP[k]),
   })).filter((g) => g.items.length > 0);
 
-  function toggleGroup(label) {
-    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
-  }
-
   return (
     <div
       className={"app-sidebar" + (mobileOpen ? " open" : "")}
       style={{
-        width: 220,
+        width: 232,
         flexShrink: 0,
         background: COLORS.ink,
-        color: "#fff",
-        padding: "22px 14px",
-        minHeight: "100%",
+        color: "#C9D1DE",
+        padding: "18px 14px",
+        height: "100vh",
+        position: "sticky",
+        top: 0,
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <div style={{ padding: "0 8px 20px 8px", display: "flex", alignItems: "center", gap: 10 }}>
-        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 34, height: 34, flexShrink: 0, background: "#fff", borderRadius: 6, padding: 2 }} />
+      <div style={{ padding: "4px 6px 18px", display: "flex", alignItems: "center", gap: 11 }}>
+        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 38, height: 38, flexShrink: 0, background: "#fff", borderRadius: 10, padding: 3 }} />
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.2, color: "#fff" }}>Inventário de TI</div>
-          <div style={{ fontSize: 12, color: "#9AA6B8", marginTop: 2 }}>Escola Espírito Santo</div>
+          <div style={{ fontSize: 14.5, fontWeight: 700, color: "#fff" }}>Inventário de TI</div>
+          <div style={{ fontSize: 11.5, color: "#93A0B5" }}>Escola Espírito Santo</div>
         </div>
       </div>
-      <nav style={{ flex: 1, overflowY: "auto" }}>
-        {groups.map((group) => {
-          const isOpen = openGroups[group.label] !== false;
-          return (
-            <div key={group.label} style={{ marginBottom: 4 }}>
-              <button
-                onClick={() => toggleGroup(group.label)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "10px 10px 4px",
-                }}
-              >
-                <span style={{ fontSize: 10, letterSpacing: 0.4, textTransform: "uppercase", color: "#7D8AA0" }}>{group.label}</span>
-                <ChevronRight
-                  size={12}
-                  style={{ color: "#7D8AA0", transform: isOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}
-                />
-              </button>
-              {isOpen &&
-                group.items.map((item) => {
-                  const Icon = item.icon;
-                  const active = view === item.key;
-                  const categoriasUnidade = group.label === "Inventário" && item.key === "inventario" ? [...nomesCategoriasDaUnidade(categorias, unidadeAtiva || "colegio")].sort((a, b) => a.localeCompare(b, "pt-BR")) : [];
-                  const temSubCategorias = categoriasUnidade.length > 0;
-                  return (
-                    <React.Fragment key={item.key}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
-                        <button
-                          onClick={() => onNavigate(item.key)}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 10,
-                            flex: 1,
-                            padding: "9px 10px",
-                            background: active ? "rgba(255,255,255,0.12)" : "transparent",
-                            border: "none",
-                            borderRadius: 6,
-                            color: active ? "#fff" : "#B7C0CF",
-                            fontSize: 13.5,
-                            fontWeight: active ? 600 : 500,
-                            cursor: "pointer",
-                            textAlign: "left",
-                          }}
-                        >
-                          <Icon size={16} />
-                          {item.label}
-                        </button>
-                        {temSubCategorias && (
-                          <button
-                            onClick={() => setCatListOpen((v) => !v)}
-                            title={catListOpen ? "Esconder equipamentos" : "Mostrar equipamentos"}
-                            style={{ background: "none", border: "none", cursor: "pointer", padding: "6px 8px", color: "#7D8AA0", flexShrink: 0 }}
-                          >
-                            <ChevronRight size={13} style={{ transform: catListOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }} />
-                          </button>
-                        )}
-                      </div>
-                      {temSubCategorias && catListOpen && (
-                        <div style={{ marginBottom: 4 }}>
-                          {categoriasUnidade.map((cat) => (
-                            <button
-                              key={cat}
-                              onClick={() => onNavigateCategoria(cat)}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 8,
-                                width: "100%",
-                                padding: "6px 10px 6px 26px",
-                                background: "transparent",
-                                border: "none",
-                                borderRadius: 6,
-                                color: "#9AA6B8",
-                                fontSize: 12,
-                                cursor: "pointer",
-                                textAlign: "left",
-                              }}
-                            >
-                              <CategoriaIcon categoria={cat} size={13} color="#9AA6B8" />
-                              {cat}
-                            </button>
-                          ))}
-                        </div>
+      <nav style={{ flex: 1, overflowY: "auto", margin: "0 -4px", padding: "0 4px" }}>
+        {groups.map((group, gi) => (
+          <div key={group.label}>
+            {gi > 0 && <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: 0.9, color: "#6F7E97", padding: "16px 10px 6px", textTransform: "uppercase" }}>{group.label}</div>}
+            {group.items.map((item) => {
+              const ItemIcon = item.icon;
+              const active = view === item.key;
+              const categoriasUnidade = item.key === "inventario" ? [...nomesCategoriasDaUnidade(categorias, unidadeAtiva || "colegio")].sort((a, b) => a.localeCompare(b, "pt-BR")) : [];
+              const temSubCategorias = categoriasUnidade.length > 0;
+              const contagem = contagens[item.key];
+              return (
+                <React.Fragment key={item.key}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 2, marginBottom: 2 }}>
+                    <button
+                      onClick={() => onNavigate(item.key)}
+                      aria-current={active ? "page" : undefined}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 11,
+                        flex: 1,
+                        padding: "9px 10px",
+                        background: active ? "rgba(255,255,255,0.1)" : "transparent",
+                        boxShadow: active ? `inset 3px 0 0 ${COLORS.accent}` : "none",
+                        border: "none",
+                        borderRadius: 9,
+                        color: active ? "#fff" : "#C9D1DE",
+                        fontSize: 13.5,
+                        fontWeight: active ? 600 : 500,
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontFamily: "inherit",
+                      }}
+                    >
+                      <ItemIcon size={18} style={{ opacity: 0.85 }} />
+                      {item.label}
+                      {contagem > 0 && (
+                        <span style={{ marginLeft: "auto", background: item.key === "chamados" ? COLORS.accent : "rgba(255,255,255,.12)", color: item.key === "chamados" ? "#fff" : "#DCE3EE", fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 20 }}>{contagem}</span>
                       )}
-                    </React.Fragment>
-                  );
-                })}
-            </div>
-          );
-        })}
+                    </button>
+                    {temSubCategorias && (
+                      <button
+                        onClick={() => setCatListOpen((v) => !v)}
+                        title={catListOpen ? "Esconder categorias" : "Mostrar categorias"}
+                        aria-label={catListOpen ? "Esconder categorias" : "Mostrar categorias"}
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: "6px 8px", color: "#7D8AA0", flexShrink: 0 }}
+                      >
+                        <ChevronRight size={13} style={{ transform: catListOpen ? "rotate(90deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }} />
+                      </button>
+                    )}
+                  </div>
+                  {temSubCategorias && catListOpen && (
+                    <div style={{ marginBottom: 4 }}>
+                      {categoriasUnidade.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => onNavigateCategoria(cat)}
+                          style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "6px 10px 6px 30px", background: "transparent", border: "none", borderRadius: 7, color: "#9AA6B8", fontSize: 12, cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
+                        >
+                          <CategoriaIcon categoria={cat} size={13} color="#9AA6B8" />
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        ))}
       </nav>
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.12)", paddingTop: 12, marginTop: 12 }}>
-        <div style={{ fontSize: 12, color: "#fff", fontWeight: 600, marginBottom: 2 }}>{nome || "Administrador"}</div>
-        <div style={{ fontSize: 11, color: "#9AA6B8", marginBottom: 10 }}>
-          {isMaster ? "Acesso total" : podeEditar ? "Acesso restrito · pode editar" : "Acesso restrito · só visualização"}
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", padding: "14px 6px 2px", marginTop: 12, display: "flex", alignItems: "center", gap: 10 }}>
+        <Avatar nome={nome || "Administrador"} size={34} />
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ fontSize: 13, color: "#fff", fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nome || "Administrador"}</div>
+          <div style={{ fontSize: 11.5, color: "#93A0B5" }}>{isMaster ? "Acesso total" : podeEditar ? "Pode editar" : "Só visualização"}</div>
         </div>
-        <button
-          onClick={onLogout}
-          style={{
-            width: "100%",
-            padding: "7px 10px",
-            background: "rgba(255,255,255,0.08)",
-            border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: 6,
-            color: "#fff",
-            fontSize: 12.5,
-            cursor: "pointer",
-          }}
-        >
-          Sair
+        <button onClick={onLogout} title="Sair" aria-label="Sair" style={{ background: "none", border: "none", color: "#C9D1DE", opacity: 0.8, cursor: "pointer", padding: 4, display: "grid" }}>
+          <LogOut size={18} />
         </button>
       </div>
     </div>
+  );
+}
+
+// ---------- Topo do TI (unidade, busca e sino) ----------
+
+function useFecharAoClicarFora(ref, aberto, fechar) {
+  useEffect(() => {
+    if (!aberto) return;
+    const aoClicar = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) fechar();
+    };
+    const aoTeclar = (e) => e.key === "Escape" && fechar();
+    document.addEventListener("mousedown", aoClicar);
+    document.addEventListener("keydown", aoTeclar);
+    return () => {
+      document.removeEventListener("mousedown", aoClicar);
+      document.removeEventListener("keydown", aoTeclar);
+    };
+  }, [aberto]);
+}
+
+function SeletorUnidade({ unidade, onChange }) {
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef(null);
+  useFecharAoClicarFora(ref, aberto, () => setAberto(false));
+  const atual = UNIDADES.find((u) => u.id === unidade) || UNIDADES[0];
+  return (
+    <div ref={ref} style={{ position: "relative", flexShrink: 0 }}>
+      <button
+        onClick={() => setAberto((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={aberto}
+        style={{ display: "flex", alignItems: "center", gap: 10, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: "6px 12px 6px 8px", background: "#FBFAF6", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
+      >
+        <span style={{ width: 26, height: 26, borderRadius: 7, background: COLORS.accentSoft, color: COLORS.accentInk, display: "grid", placeItems: "center" }}>
+          <SchoolIcon size={15} />
+        </span>
+        <span>
+          <small style={{ display: "block", fontSize: 10.5, color: COLORS.faint, fontWeight: 500, lineHeight: 1.1 }}>Unidade</small>
+          <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink }}>{atual.nome}</span>
+        </span>
+        <ChevronDown size={16} style={{ color: COLORS.faint }} />
+      </button>
+      {aberto && (
+        <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 45, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: "0 14px 40px rgba(22,35,61,.15)", padding: 6, minWidth: 230 }}>
+          {UNIDADES.map((u) => (
+            <button
+              key={u.id}
+              role="option"
+              aria-selected={u.id === unidade}
+              onClick={() => {
+                onChange(u.id);
+                setAberto(false);
+              }}
+              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "9px 10px", borderRadius: 8, border: "none", background: u.id === unidade ? COLORS.paper2 : "transparent", fontSize: 13, fontWeight: u.id === unidade ? 700 : 500, color: COLORS.ink, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              {u.nome}
+              {u.id === unidade && <Check size={14} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BuscaGlobal({ state, onEquipamento, onChamado }) {
+  const [q, setQ] = useState("");
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef(null);
+  const inputRef = useRef(null);
+  useFecharAoClicarFora(ref, aberto, () => setAberto(false));
+
+  // Ctrl+K (ou Cmd+K) põe o cursor na busca de qualquer tela.
+  useEffect(() => {
+    const aoTeclar = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (inputRef.current) inputRef.current.focus();
+      }
+    };
+    document.addEventListener("keydown", aoTeclar);
+    return () => document.removeEventListener("keydown", aoTeclar);
+  }, []);
+
+  const termo = q.trim().toLowerCase();
+  const equipamentos = useMemo(() => {
+    if (termo.length < 2) return [];
+    return (state.inventario || [])
+      .filter((r) => [r.id, r.categoria, r.marca, r.modelo, r.serie, r.sala, r.responsavel].some((v) => String(v || "").toLowerCase().includes(termo)))
+      .slice(0, 6);
+  }, [termo, state.inventario]);
+  const chamados = useMemo(() => {
+    if (termo.length < 2) return [];
+    return (state.chamados || [])
+      .filter((c) => [c.assunto, c.sala, c.solicitante, c.categoria].some((v) => String(v || "").toLowerCase().includes(termo)))
+      .slice(0, 4);
+  }, [termo, state.chamados]);
+
+  function escolher(fn, item) {
+    fn(item);
+    setQ("");
+    setAberto(false);
+    if (inputRef.current) inputRef.current.blur();
+  }
+
+  const nomeUnidade = (id) => (UNIDADES.find((u) => u.id === id) || {}).nome || "";
+  const temResultado = equipamentos.length > 0 || chamados.length > 0;
+
+  return (
+    <div ref={ref} style={{ position: "relative", flex: 1, maxWidth: 520, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, background: COLORS.paper2, border: `1px solid ${aberto ? COLORS.lineStrong : "transparent"}`, borderRadius: 10, padding: "0 12px", color: COLORS.faint }}>
+        <Search size={17} />
+        <input
+          ref={inputRef}
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value);
+            setAberto(true);
+          }}
+          onFocus={() => setAberto(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (equipamentos[0]) escolher(onEquipamento, equipamentos[0]);
+              else if (chamados[0]) escolher(onChamado, chamados[0]);
+            }
+          }}
+          placeholder="Buscar patrimônio, sala, chamado…"
+          aria-label="Buscar patrimônio, sala ou chamado"
+          style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 13, color: COLORS.ink, padding: "9px 0", minWidth: 0 }}
+        />
+        <kbd style={{ fontFamily: "inherit", fontSize: 11, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 6, padding: "1px 6px", color: COLORS.inkSoft }}>Ctrl K</kbd>
+      </div>
+      {aberto && termo.length >= 2 && (
+        <div style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, right: 0, zIndex: 45, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: "0 14px 40px rgba(22,35,61,.15)", padding: 6, maxHeight: 420, overflow: "auto" }}>
+          {!temResultado && <div style={{ padding: 12, fontSize: 13, color: COLORS.inkSoft }}>Nada encontrado para "{q.trim()}".</div>}
+          {equipamentos.length > 0 && <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.faint, textTransform: "uppercase", letterSpacing: 0.6, padding: "8px 10px 4px" }}>Equipamentos</div>}
+          {equipamentos.map((r) => (
+            <button key={r.id} onClick={() => escolher(onEquipamento, r)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "8px 10px", border: "none", background: "none", borderRadius: 8, cursor: "pointer", textAlign: "left", fontFamily: "inherit" }} className="item-busca">
+              <span style={{ width: 30, height: 30, borderRadius: 8, background: COLORS.paper2, color: COLORS.ink3, display: "grid", placeItems: "center", flexShrink: 0 }}>
+                <CategoriaIcon categoria={r.categoria} size={16} />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <b style={{ display: "block", fontSize: 13, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                  {r.categoria} {r.marca ? "· " + r.marca : ""} {r.modelo || ""}
+                </b>
+                <span style={{ fontSize: 12, color: COLORS.inkSoft }}>
+                  {r.sala || "Sem sala"} · {nomeUnidade(unidadeDe(r))}
+                </span>
+              </span>
+              <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, color: COLORS.faint }}>{r.id}</span>
+            </button>
+          ))}
+          {chamados.length > 0 && <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.faint, textTransform: "uppercase", letterSpacing: 0.6, padding: "8px 10px 4px" }}>Chamados</div>}
+          {chamados.map((c) => (
+            <button key={c.id} onClick={() => escolher(onChamado, c)} style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "8px 10px", border: "none", background: "none", borderRadius: 8, cursor: "pointer", textAlign: "left", fontFamily: "inherit" }} className="item-busca">
+              <IconeDoChamado chamado={c} size={30} />
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <b style={{ display: "block", fontSize: 13, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.assunto}</b>
+                <span style={{ fontSize: 12, color: COLORS.inkSoft }}>
+                  {c.solicitante || c.abertoPorAdmin || "—"} · {c.sala || "Sem sala"}
+                </span>
+              </span>
+              <ChamadoStatusPill status={c.status} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SinoChamados({ chamados, onAbrir, onVerTodos }) {
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef(null);
+  useFecharAoClicarFora(ref, aberto, () => setAberto(false));
+  const emAberto = useMemo(
+    () => (chamados || []).filter((c) => c.status === "Aberto" || c.status === "Em andamento").sort((a, b) => new Date(ultimaAtividade(b)) - new Date(ultimaAtividade(a))),
+    [chamados]
+  );
+  const novos = emAberto.filter((c) => c.status === "Aberto").length;
+  const nomeUnidade = (id) => (UNIDADES.find((u) => u.id === id) || {}).nome || "";
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button
+        onClick={() => setAberto((v) => !v)}
+        aria-label={novos ? novos + " chamados abertos" : "Chamados"}
+        aria-expanded={aberto}
+        style={{ width: 38, height: 38, borderRadius: 10, border: `1px solid ${COLORS.line}`, display: "grid", placeItems: "center", position: "relative", color: COLORS.inkSoft, background: "#fff", cursor: "pointer" }}
+      >
+        <Bell size={18} />
+        {novos > 0 && (
+          <span style={{ position: "absolute", top: -5, right: -5, background: COLORS.danger, color: "#fff", fontSize: 10.5, fontWeight: 700, borderRadius: 20, padding: "1px 6px", border: "2px solid #fff" }}>{novos}</span>
+        )}
+      </button>
+      {aberto && (
+        <div style={{ position: "absolute", top: "calc(100% + 8px)", right: 0, zIndex: 45, width: 380, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 14, boxShadow: "0 18px 50px rgba(22,35,61,.18)", overflow: "hidden" }}>
+          <div style={{ display: "flex", alignItems: "center", padding: "14px 16px 10px" }}>
+            <b style={{ fontSize: 14.5, color: COLORS.ink }}>Chamados em aberto</b>
+            <span style={{ marginLeft: 8, fontSize: 12, color: COLORS.faint }}>{emAberto.length}</span>
+          </div>
+          <div style={{ maxHeight: 400, overflow: "auto" }}>
+            {emAberto.length === 0 && <EmptyState text="Nenhum chamado em aberto." />}
+            {emAberto.slice(0, 10).map((c) => (
+              <button
+                key={c.id}
+                onClick={() => {
+                  setAberto(false);
+                  onAbrir(c);
+                }}
+                className="item-busca"
+                style={{ display: "flex", gap: 11, width: "100%", padding: "11px 16px", border: "none", borderTop: `1px solid ${COLORS.lineSoft}`, background: "none", cursor: "pointer", textAlign: "left", fontFamily: "inherit" }}
+              >
+                <Avatar nome={c.solicitante || c.abertoPorAdmin || "?"} size={32} />
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, color: COLORS.inkSoft }}>
+                    <b style={{ color: COLORS.ink }}>{c.solicitante || c.abertoPorAdmin || "—"}</b>
+                    <span style={{ marginLeft: "auto", fontSize: 11.5, color: COLORS.faint }}>{horaCurta(ultimaAtividade(c))}</span>
+                  </span>
+                  <b style={{ display: "block", fontSize: 13, color: COLORS.ink, margin: "2px 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.assunto}</b>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: COLORS.inkSoft }}>
+                    {c.sala || "Sem sala"} · {nomeUnidade(unidadeDe(c))}
+                    <span style={{ marginLeft: "auto" }}>
+                      <ChamadoStatusPill status={c.status} />
+                    </span>
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => {
+              setAberto(false);
+              onVerTodos();
+            }}
+            style={{ width: "100%", padding: 12, border: "none", borderTop: `1px solid ${COLORS.line}`, background: "#FBFAF6", color: COLORS.accentInk, fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
+          >
+            Abrir a tela de chamados
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TopoAdmin({ state, unidade, onUnidade, onEquipamento, onChamado, onVerChamados, mostrarSino }) {
+  return (
+    <header className="app-topo-desk" style={{ height: 64, background: "#fff", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 14, padding: "0 28px", position: "sticky", top: 0, zIndex: 30 }}>
+      <SeletorUnidade unidade={unidade} onChange={onUnidade} />
+      <BuscaGlobal state={state} onEquipamento={onEquipamento} onChamado={onChamado} />
+      <div style={{ flex: 1 }} />
+      {mostrarSino && <SinoChamados chamados={state.chamados} onAbrir={onChamado} onVerTodos={onVerChamados} />}
+    </header>
+  );
+}
+
+// Abas embaixo no celular (o menu completo continua no botão "Menu").
+function AbasCelular({ view, allowed, chamadosAbertos, onNavigate, onMenu }) {
+  const itens = [
+    { key: "dashboard", label: "Painel", icone: HomeIcon },
+    { key: "inventario", label: "Inventário", icone: Boxes },
+    { key: "chamados", label: "Chamados", icone: MessageSquare, badge: chamadosAbertos },
+  ].filter((i) => allowed.has(i.key));
+  return (
+    <nav className="app-abas-celular" aria-label="Navegação principal">
+      {itens.map((i) => {
+        const Ic = i.icone;
+        const on = view === i.key;
+        return (
+          <button key={i.key} onClick={() => onNavigate(i.key)} aria-current={on ? "page" : undefined} style={{ color: on ? COLORS.ink : COLORS.faint }}>
+            <span style={{ position: "relative", display: "grid" }}>
+              <Ic size={22} />
+              {i.badge > 0 && <span style={{ position: "absolute", top: -6, right: -10, background: COLORS.danger, color: "#fff", fontSize: 10, fontWeight: 700, borderRadius: 20, padding: "0 5px", border: "2px solid #fff" }}>{i.badge}</span>}
+            </span>
+            {i.label}
+          </button>
+        );
+      })}
+      <button onClick={onMenu} style={{ color: COLORS.faint }}>
+        <Menu size={22} />
+        Menu
+      </button>
+    </nav>
   );
 }
 
@@ -1567,7 +1891,78 @@ function StatTile({ icon: Icon, emoji, value, label, accent, onClick }) {
   );
 }
 
-function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStatus, onFiltrarTipoArea }) {
+function saudacao() {
+  const h = new Date().getHours();
+  return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+}
+
+function KpiCard({ icone: IconeKpi, cor, fundo, label, valor, valorCor, detalhe, rodape, barra, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      style={{ background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 14, padding: "16px 18px", display: "flex", flexDirection: "column", gap: 6, cursor: onClick ? "pointer" : "default", minWidth: 0 }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12.5, fontWeight: 600, color: COLORS.inkSoft }}>
+        <span style={{ width: 28, height: 28, borderRadius: 8, display: "grid", placeItems: "center", background: fundo, color: cor, flexShrink: 0 }}>
+          <IconeKpi size={16} />
+        </span>
+        {label}
+      </div>
+      <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: -0.8, lineHeight: 1.1, color: valorCor || COLORS.ink }}>
+        {valor} {detalhe && <small style={{ fontSize: 14, color: COLORS.faint, fontWeight: 600, letterSpacing: 0 }}>{detalhe}</small>}
+      </div>
+      {barra !== undefined && (
+        <div style={{ height: 6, borderRadius: 6, background: "#EFECE3", overflow: "hidden" }}>
+          <div style={{ width: barra + "%", height: "100%", background: COLORS.green }} />
+        </div>
+      )}
+      {rodape && <div style={{ fontSize: 12, color: COLORS.inkSoft }}>{rodape}</div>}
+    </div>
+  );
+}
+
+function ChamadoStatusPill({ status }) {
+  return <Pill label={status} cor={CHAMADO_STATUS_COLORS[status] || COLORS.inkSoft} bg={CHAMADO_STATUS_BG[status] || "#eee"} />;
+}
+
+function LinhaFilaChamado({ chamado: c, primeira, onAbrir }) {
+  const horas = (Date.now() - new Date(c.criadoEm).getTime()) / 3600000;
+  const respondido = (c.mensagens || []).some((m) => m.autor === "ti");
+  const atrasado = c.status === "Aberto" && !respondido && horas >= 4;
+  const quem = c.solicitante || c.abertoPorAdmin || "";
+  return (
+    <div
+      className="linha-fila"
+      style={{ display: "grid", gridTemplateColumns: "10px minmax(0, 1fr) 110px 92px 112px 72px", alignItems: "center", gap: 12, padding: 10, borderTop: primeira ? "none" : `1px solid ${COLORS.lineSoft}` }}
+    >
+      <i style={{ width: 8, height: 8, borderRadius: "50%", background: atrasado ? COLORS.danger : c.status === "Aberto" ? COLORS.accent : COLORS.green }} />
+      <div style={{ minWidth: 0 }}>
+        <b style={{ display: "block", fontSize: 13.5, fontWeight: 600, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.assunto}</b>
+        <span style={{ display: "block", fontSize: 12, color: COLORS.inkSoft, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+          {[c.categoria, c.sala].filter(Boolean).join(" · ") || "Sem sala"}
+          {c.foto ? " · com foto" : ""}
+        </span>
+      </div>
+      <div className="fila-quem" style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12.5, color: COLORS.inkSoft, minWidth: 0 }}>
+        <Avatar nome={quem || "?"} size={24} />
+        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{quem ? quem.split(" ")[0] : "—"}</span>
+      </div>
+      <span className="fila-idade" title={atrasado ? "Mais de 4 horas sem resposta do TI" : ""} style={{ whiteSpace: "nowrap", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 5, color: atrasado ? COLORS.danger : COLORS.inkSoft }}>
+        <Clock size={14} />
+        {tempoDecorrido(c.criadoEm).replace("há ", "")}
+      </span>
+      <span className="fila-status">
+        <ChamadoStatusPill status={c.status} />
+      </span>
+      <Button variant={c.status === "Aberto" ? "accent" : "ghost"} onClick={onAbrir} style={{ padding: "6px 10px", fontSize: 12, justifyContent: "center" }}>
+        {c.status === "Aberto" ? "Atender" : "Abrir"}
+      </Button>
+    </div>
+  );
+}
+
+function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStatus, onFiltrarTipoArea, meuNome = "" }) {
   const inv = useMemo(() => state.inventario.filter((r) => unidadeDe(r) === unidadeAtiva), [state.inventario, unidadeAtiva]);
   const areasUnidade = useMemo(() => state.areas.filter((a) => unidadeDe(a) === unidadeAtiva), [state.areas, unidadeAtiva]);
   const categoriasUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, unidadeAtiva), [state.categorias, unidadeAtiva]);
@@ -1658,6 +2053,19 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStat
       .sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm));
   }, [state.chamados, unidadeAtiva]);
 
+  // Chamado aberto sem nenhuma resposta do TI ainda.
+  const semResposta = chamadosAbertos.filter((c) => c.status === "Aberto" && !(c.mensagens || []).some((m) => m.autor === "ti"));
+  const fila = [...chamadosAbertos].sort((a, b) => {
+    if (a.status !== b.status) return a.status === "Aberto" ? -1 : 1;
+    return new Date(a.criadoEm) - new Date(b.criadoEm);
+  });
+  const maisAntigo = fila.length ? [...fila].sort((a, b) => new Date(a.criadoEm) - new Date(b.criadoEm))[0] : null;
+  const limite30 = Date.now() - 30 * 86400000;
+  const resolvidos30 = (state.chamados || []).filter(
+    (c) => unidadeDe(c) === unidadeAtiva && c.status === "Resolvido" && new Date(ultimaAtividade(c)).getTime() >= limite30
+  );
+  const confirmados30 = resolvidos30.filter((c) => c.confirmacao && c.confirmacao.resolveu).length;
+
   const kpis = [
     { label: "Total de equipamentos", value: total },
     { label: "Em uso", value: emUso },
@@ -1689,7 +2097,15 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStat
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18, flexWrap: "wrap", gap: 10 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Painel geral</h2>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: -0.4, color: COLORS.ink }}>
+            {saudacao()}
+            {meuNome ? ", " + meuNome.split(" ")[0] : ""}
+          </h1>
+          <div style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 3 }}>
+            {new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }).replace(/^./, (l) => l.toUpperCase())} · {(UNIDADES.find((u) => u.id === unidadeAtiva) || {}).nome}
+          </div>
+        </div>
         <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3, alignItems: "center" }}>
           <button
             onClick={() => setDashView("geral")}
@@ -1782,27 +2198,61 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStat
 
       {dashView === "geral" ? (
         <>
-          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
-            <Panel title="Saúde do parque" action={<span style={{ fontSize: 11, color: COLORS.inkSoft }}>{total} equipamentos</span>}>
-              <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
-                <div style={{ width: 88, height: 88, borderRadius: "50%", flexShrink: 0, background: statusGradient, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                    <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, lineHeight: 1 }}>{emUsoPct}%</div>
-                    <div style={{ fontSize: 8.5, color: COLORS.inkSoft, marginTop: 2 }}>em uso</div>
-                  </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: 1, minWidth: 0 }}>
-                  {porStatus.map((s) => (
-                    <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: COLORS.inkSoft }}>
-                      <span style={{ width: 8, height: 8, borderRadius: 2, background: STATUS_COLORS[s.name], display: "inline-block", flexShrink: 0 }} />
-                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
-                      <span style={{ fontWeight: 700, color: COLORS.ink }}>{s.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Panel>
+          <div className="grid-kpi" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 14, marginBottom: 14 }}>
+            <KpiCard
+              icone={MessageSquare}
+              cor={COLORS.accentInk}
+              fundo={COLORS.accentSoft}
+              label="Chamados abertos"
+              valor={chamadosAbertos.length}
+              detalhe={semResposta.length ? semResposta.length + " sem resposta" : ""}
+              rodape={maisAntigo ? "mais antigo " + tempoDecorrido(maisAntigo.criadoEm) : "nenhum na fila"}
+              onClick={() => setView("chamados")}
+            />
+            <KpiCard
+              icone={Wrench}
+              cor={COLORS.danger}
+              fundo={COLORS.dangerSoft}
+              label="Precisam de atenção"
+              valor={precisamAtencao.length}
+              valorCor={precisamAtencao.length ? COLORS.danger : COLORS.ink}
+              rodape={emManutencao + " em manutenção · " + precisaManutencao + " aguardando"}
+              onClick={() => {
+                onFiltrarStatus("Precisa de manutenção");
+                setView("inventario");
+              }}
+            />
+            <KpiCard icone={Boxes} cor={COLORS.green} fundo={COLORS.greenSoft} label="Equipamentos em uso" valor={emUso} detalhe={"de " + total} barra={emUsoPct} />
+            <KpiCard
+              icone={CheckCircle}
+              cor={COLORS.blue}
+              fundo={COLORS.blueSoft}
+              label="Resolvidos em 30 dias"
+              valor={resolvidos30.length}
+              rodape={confirmados30 + " confirmado" + (confirmados30 === 1 ? "" : "s") + " por quem abriu"}
+            />
+          </div>
 
+          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.7fr) minmax(0, 1fr)", gap: 14, marginBottom: 16 }}>
+            <Panel
+              style={{ padding: "16px 10px 8px" }}
+              title={
+                <span style={{ display: "flex", alignItems: "baseline", gap: 8, paddingLeft: 8 }}>
+                  Fila de chamados <span style={{ fontSize: 12, color: COLORS.faint, fontWeight: 500 }}>mais antigos primeiro</span>
+                </span>
+              }
+              action={
+                <button className="painel-fila-link" onClick={() => setView("chamados")} style={{ background: "none", border: "none", color: COLORS.accentInk, fontWeight: 600, fontSize: 12.5, cursor: "pointer", paddingRight: 8 }}>
+                  Abrir chamados →
+                </button>
+              }
+            >
+              {fila.length === 0 ? (
+                <EmptyState text="Nenhum chamado em aberto." />
+              ) : (
+                fila.slice(0, 6).map((c, i) => <LinhaFilaChamado key={c.id} chamado={c} primeira={i === 0} onAbrir={() => onAbrirChamado(c.id)} />)
+              )}
+            </Panel>
             <Panel
               style={{ borderLeft: `3px solid ${COLORS.danger}` }}
               title={
@@ -1834,40 +2284,6 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStat
                 Ver todos
               </Button>
             </Panel>
-
-            <Panel
-              style={{ borderLeft: `3px solid ${COLORS.accent}` }}
-              title={
-                <span style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <MessageSquare size={15} style={{ color: COLORS.accent }} />
-                  Chamados abertos
-                </span>
-              }
-              action={<span style={{ fontSize: 20, fontWeight: 700, color: COLORS.accent }}>{chamadosAbertos.length}</span>}
-            >
-              {chamadosAbertos.length === 0 ? (
-                <EmptyState text="Nenhum chamado em aberto." />
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 10 }}>
-                  {chamadosAbertos.slice(0, 3).map((c) => (
-                    <div
-                      key={c.id}
-                      onClick={() => onAbrirChamado(c.id)}
-                      title="Responder no chat"
-                      style={{ background: COLORS.accentSoft, borderRadius: 7, padding: "7px 10px", cursor: "pointer" }}
-                    >
-                      <div style={{ fontSize: 12, fontWeight: 600, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.assunto}</div>
-                      <div style={{ fontSize: 11, color: COLORS.inkSoft, marginTop: 1 }}>
-                        {c.solicitante || "Solicitante"} · {c.sala || "Sem sala"} · {tempoDecorrido(c.criadoEm)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              <Button variant="ghost" onClick={() => setView("chamados")}>
-                Ver todos
-              </Button>
-            </Panel>
           </div>
 
           <div className="grid-4" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 16, marginBottom: 16 }}>
@@ -1895,7 +2311,26 @@ function Dashboard({ state, setView, unidadeAtiva, onAbrirChamado, onFiltrarStat
             ))}
           </div>
 
-          <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.3fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
+          <div className="grid-3" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1fr)", gap: 16, marginBottom: 16 }}>
+            <Panel title="Saúde do parque" action={<span style={{ fontSize: 11, color: COLORS.inkSoft }}>{total} equipamentos</span>}>
+              <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+                <div style={{ width: 88, height: 88, borderRadius: "50%", flexShrink: 0, background: statusGradient, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: COLORS.ink, lineHeight: 1 }}>{emUsoPct}%</div>
+                    <div style={{ fontSize: 8.5, color: COLORS.inkSoft, marginTop: 2 }}>em uso</div>
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: 1, minWidth: 0 }}>
+                  {porStatus.map((s) => (
+                    <div key={s.name} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: COLORS.inkSoft }}>
+                      <span style={{ width: 8, height: 8, borderRadius: 2, background: STATUS_COLORS[s.name], display: "inline-block", flexShrink: 0 }} />
+                      <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+                      <span style={{ fontWeight: 700, color: COLORS.ink }}>{s.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Panel>
             <Panel title="Equipamentos por categoria">
               <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
                 {porCategoria.map((c) => (
@@ -2439,12 +2874,16 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
   const [selected, setSelected] = useState(() => new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [qrTarget, setQrTarget] = useState(null);
+  // Ficha lateral: clicar num equipamento abre os detalhes ao lado, sem
+  // sair da lista. "Editar" abre a mesma janela de edição de antes.
+  const [detalheId, setDetalheId] = useState(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!pendingPatrimonio) return;
     const item = state.inventario.find((r) => r.id === pendingPatrimonio);
     if (item) {
-      setModal({ mode: "edit", original: item, form: { ...emptyEquipForm(), ...item } });
+      setDetalheId(item.id);
     }
     if (onConsumePending) onConsumePending();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2578,6 +3017,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
       }
       return { ...prev, inventario };
     });
+    if (modal.mode === "edit" && detalheId === modal.original.id) setDetalheId(registro.id);
     setModal(null);
   }
 
@@ -2586,14 +3026,20 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
     setState((prev) => ({ ...prev, inventario: prev.inventario.filter((r) => r !== row) }));
     setDeleteTarget(null);
     setModal(null);
+    if (detalheId === row.id) setDetalheId(null);
   }
 
   const activeFilters = fCategoria || fSala || fStatus || fResp || search;
 
   return (
-    <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Inventário</h2>
+    <div style={{ paddingRight: detalheId && !isMobile ? 392 : 0, transition: "padding .15s" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 18, gap: 12, flexWrap: "wrap" }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: -0.4, color: COLORS.ink }}>Inventário</h1>
+          <div style={{ fontSize: 13.5, color: COLORS.inkSoft, marginTop: 3 }}>
+            {inventarioUnidade.length} equipamento{inventarioUnidade.length !== 1 ? "s" : ""} · {(UNIDADES.find((u) => u.id === unidadeAtiva) || {}).nome}
+          </div>
+        </div>
         {podeEditar && (
           <Button variant="primary" icon={Plus} onClick={openNew}>
             Novo equipamento
@@ -2601,7 +3047,30 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
         )}
       </div>
 
-      <Panel style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+        {[["", "Todos"], ...STATUS_OPTIONS.map((st) => [st, st])].map(([st, rotulo]) => {
+          const on = fStatus === st;
+          const n = st ? inventarioUnidade.filter((r) => r.status === st).length : inventarioUnidade.length;
+          if (st && n === 0 && !on) return null;
+          return (
+            <button
+              key={rotulo}
+              onClick={() => {
+                setFStatus(st);
+                setPage(1);
+              }}
+              aria-pressed={on}
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 13px", borderRadius: 10, border: `1px solid ${on ? COLORS.ink : COLORS.line}`, background: on ? COLORS.ink : "#fff", fontSize: 13, fontWeight: 600, color: on ? "#fff" : COLORS.inkSoft, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              {st && <i style={{ width: 8, height: 8, borderRadius: "50%", background: STATUS_COLORS[st] }} />}
+              {rotulo}
+              <b style={{ fontSize: 12, background: on ? "rgba(255,255,255,.18)" : COLORS.paper2, color: on ? "#fff" : COLORS.ink, padding: "1px 7px", borderRadius: 20 }}>{n}</b>
+            </button>
+          );
+        })}
+      </div>
+
+      <Panel style={{ marginBottom: 14, padding: 14 }}>
         <div className="grid-5" style={{ display: "grid", gridTemplateColumns: "1.4fr 1fr 1fr 1fr 1fr", gap: 10 }}>
           <div style={{ position: "relative" }}>
             <Search size={15} style={{ position: "absolute", left: 10, top: 10, color: COLORS.inkSoft }} />
@@ -2716,8 +3185,8 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: `1px solid ${COLORS.lineStrong}` }}>
-                <th style={{ padding: "8px 6px", width: 28 }}>
+              <tr>
+                <th style={{ padding: "8px 10px", width: 34 }}>
                   <input
                     type="checkbox"
                     checked={pageRows.length > 0 && pageRows.every((r) => selected.has(r.id))}
@@ -2725,8 +3194,8 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
                     style={{ cursor: "pointer" }}
                   />
                 </th>
-                {["Patrimônio", "Categoria", "Marca / Modelo", "Sala", "Status", "Responsável"].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "8px 6px", color: COLORS.inkSoft, fontWeight: 600, fontSize: 12 }}>
+                {["Equipamento", "Patrimônio", "Sala", "Responsável", "Status"].map((h) => (
+                  <th key={h} style={{ textAlign: "left", padding: "8px 10px", color: COLORS.faint, fontWeight: 600, fontSize: 11.5, textTransform: "uppercase", letterSpacing: 0.5 }}>
                     {h}
                   </th>
                 ))}
@@ -2736,39 +3205,49 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
               {pageRows.map((r) => (
                 <tr
                   key={r.id}
-                  onClick={() => openEdit(r)}
-                  style={{ borderBottom: `1px solid ${COLORS.line}`, background: selected.has(r.id) ? COLORS.accentSoft : "transparent", cursor: "pointer" }}
-                  onMouseEnter={(e) => {
-                    if (!selected.has(r.id)) e.currentTarget.style.background = COLORS.paper;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!selected.has(r.id)) e.currentTarget.style.background = "transparent";
+                  onClick={() => setDetalheId(r.id)}
+                  className="linha-inventario"
+                  style={{
+                    borderTop: `1px solid ${COLORS.lineSoft}`,
+                    background: detalheId === r.id ? "#FBF4EA" : selected.has(r.id) ? COLORS.accentSoft : "transparent",
+                    boxShadow: detalheId === r.id ? `inset 3px 0 0 ${COLORS.accent}` : "none",
+                    cursor: "pointer",
                   }}
                 >
-                  <td style={{ padding: "9px 6px" }} onClick={(e) => e.stopPropagation()}>
+                  <td style={{ padding: "9px 10px" }} onClick={(e) => e.stopPropagation()}>
                     <input type="checkbox" checked={selected.has(r.id)} onChange={() => toggleSelect(r.id)} style={{ cursor: "pointer" }} />
                   </td>
-                  <td style={{ padding: "9px 6px", fontFamily: "ui-monospace, monospace", fontSize: 12.5, color: COLORS.ink }}>{r.id}</td>
-                  <td style={{ padding: "9px 6px", color: COLORS.ink }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      <CategoriaIcon categoria={r.categoria} color={COLORS.inkSoft} />
-                      {r.categoria}
+                  <td style={{ padding: "9px 10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ width: 32, height: 32, borderRadius: 9, background: COLORS.paper2, color: COLORS.ink3, display: "grid", placeItems: "center", flexShrink: 0 }}>
+                        <CategoriaIcon categoria={r.categoria} size={17} />
+                      </span>
+                      <div style={{ minWidth: 0 }}>
+                        <b style={{ display: "block", fontSize: 13, fontWeight: 600, color: COLORS.ink }}>{r.categoria}</b>
+                        <span style={{ fontSize: 12, color: COLORS.inkSoft }}>{[r.marca, r.modelo].filter(Boolean).join(" ") || "—"}</span>
+                      </div>
                     </div>
                   </td>
-                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>
-                    {r.marca}
-                    {r.modelo ? " · " + r.modelo : ""}
+                  <td style={{ padding: "9px 10px", fontFamily: "ui-monospace, monospace", fontSize: 12, color: COLORS.ink, whiteSpace: "nowrap" }}>{r.id}</td>
+                  <td style={{ padding: "9px 10px", color: COLORS.inkSoft }}>{r.sala}</td>
+                  <td style={{ padding: "9px 10px", color: COLORS.inkSoft }}>
+                    {r.responsavel ? (
+                      <span style={{ display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap" }}>
+                        <Avatar nome={r.responsavel} size={24} />
+                        {r.responsavel}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
                   </td>
-                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.sala}</td>
-                  <td style={{ padding: "9px 6px" }}>
+                  <td style={{ padding: "9px 10px" }}>
                     <StatusPill status={r.status} />
                   </td>
-                  <td style={{ padding: "9px 6px", color: COLORS.inkSoft }}>{r.responsavel || "—"}</td>
                 </tr>
               ))}
               {pageRows.length === 0 && (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={6}>
                     <EmptyState text="Nenhum equipamento encontrado com esses filtros." />
                   </td>
                 </tr>
@@ -2799,6 +3278,111 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
           </div>
         )}
       </Panel>
+
+      {detalheId && (() => {
+        const d = state.inventario.find((r) => r.id === detalheId);
+        if (!d) return null;
+        const dias = diasParaVencerGarantia(d.dataCompra, d.vidaUtil);
+        const limite = Date.now() - 90 * 86400000;
+        const chamadosSala = d.sala
+          ? (state.chamados || []).filter((c) => c.sala === d.sala && unidadeDe(c) === unidadeDe(d) && new Date(c.criadoEm).getTime() >= limite).sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
+          : [];
+        const historico = [...(d.historicoManutencao || [])].reverse();
+        return (
+          <>
+            {isMobile && <div onClick={() => setDetalheId(null)} style={{ position: "fixed", inset: 0, background: "rgba(22,35,61,.35)", zIndex: 54 }} />}
+            <aside
+              aria-label={"Ficha do equipamento " + d.id}
+              style={{ position: "fixed", top: isMobile ? 0 : 64, right: 0, bottom: 0, width: isMobile ? "100%" : 392, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, boxShadow: "-18px 0 40px rgba(22,35,61,.10)", display: "flex", flexDirection: "column", zIndex: 55 }}
+            >
+              <div style={{ padding: "18px 20px 14px", borderBottom: `1px solid ${COLORS.line}` }}>
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, color: COLORS.faint }}>{d.id}</span>
+                  <button onClick={() => setDetalheId(null)} aria-label="Fechar ficha" style={{ marginLeft: "auto", background: "none", border: "none", color: COLORS.faint, cursor: "pointer", padding: 4, display: "grid" }}>
+                    <X size={18} />
+                  </button>
+                </div>
+                <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 8 }}>
+                  <span style={{ width: 46, height: 46, borderRadius: 12, background: COLORS.paper2, color: COLORS.ink3, display: "grid", placeItems: "center", flexShrink: 0 }}>
+                    <CategoriaIcon categoria={d.categoria} size={24} />
+                  </span>
+                  <div style={{ minWidth: 0 }}>
+                    <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: COLORS.ink }}>{[d.categoria, d.marca, d.modelo].filter(Boolean).join(" ")}</h2>
+                    <div style={{ marginTop: 5 }}>
+                      <StatusPill status={d.status} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style={{ padding: "16px 20px", overflow: "auto", flex: 1, display: "flex", flexDirection: "column", gap: 18 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px 16px" }}>
+                  {[
+                    ["Sala", d.sala || "—"],
+                    ["Responsável", d.responsavel || "—"],
+                    ["Nº de série", d.serie || "—"],
+                    ["Garantia", dias === null ? "—" : dias < 0 ? "vencida há " + Math.abs(dias) + " dias" : "vence em " + dias + " dias"],
+                    ["Compra", d.dataCompra ? new Date(d.dataCompra + "T12:00:00").toLocaleDateString("pt-BR") : "—"],
+                    ["Valor", d.valor ? "R$ " + d.valor : "—"],
+                  ].map(([rotulo, valor]) => (
+                    <div key={rotulo} style={{ minWidth: 0 }}>
+                      <span style={{ display: "block", fontSize: 11.5, color: COLORS.faint, fontWeight: 600, marginBottom: 2 }}>{rotulo}</span>
+                      <b style={{ fontSize: 13, fontWeight: 600, color: rotulo === "Garantia" && dias !== null && dias <= 30 ? COLORS.danger : COLORS.ink, wordBreak: "break-word" }}>{valor}</b>
+                    </div>
+                  ))}
+                </div>
+                {d.observacoes && (
+                  <div style={{ background: "#FBFAF6", border: `1px solid ${COLORS.line}`, borderRadius: 12, padding: 12, fontSize: 13, color: COLORS.ink, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{d.observacoes}</div>
+                )}
+                {d.sala && (
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.faint, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Chamados da {d.sala} (90 dias)</div>
+                    {chamadosSala.length === 0 ? (
+                      <div style={{ fontSize: 12.5, color: COLORS.inkSoft }}>Nenhum chamado nessa sala.</div>
+                    ) : (
+                      chamadosSala.slice(0, 5).map((c) => (
+                        <div key={c.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderTop: `1px solid ${COLORS.lineSoft}` }}>
+                          <IconeDoChamado chamado={c} size={30} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <b style={{ display: "block", fontSize: 12.5, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.assunto}</b>
+                            <span style={{ fontSize: 11.5, color: COLORS.faint }}>
+                              {c.solicitante || c.abertoPorAdmin || "—"} · {horaCurta(c.criadoEm)}
+                            </span>
+                          </div>
+                          <ChamadoStatusPill status={c.status} />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.faint, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 10 }}>Histórico de status</div>
+                  {historico.length === 0 ? (
+                    <div style={{ fontSize: 12.5, color: COLORS.inkSoft }}>Sem mudanças de status registradas.</div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 12, borderLeft: `2px solid ${COLORS.line}`, marginLeft: 6, paddingLeft: 16 }}>
+                      {historico.slice(0, 8).map((h, i) => (
+                        <div key={i} style={{ position: "relative", fontSize: 12.5, color: COLORS.ink }}>
+                          <span style={{ position: "absolute", left: -22, top: 4, width: 10, height: 10, borderRadius: "50%", background: "#fff", border: `2px solid ${STATUS_COLORS[h.para] || COLORS.lineStrong}` }} />
+                          <b style={{ fontWeight: 600 }}>{h.de || "—"} → {h.para}</b>
+                          <span style={{ display: "block", color: COLORS.faint, fontSize: 11.5 }}>{formatDateTime(h.data)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ padding: "14px 20px", borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
+                <Button variant="ghost" icon={QrCode} onClick={() => setQrTarget(d)} style={{ flex: 1, justifyContent: "center" }}>
+                  QR Code
+                </Button>
+                <Button variant="primary" icon={Pencil} onClick={() => openEdit(d)} style={{ flex: 1, justifyContent: "center" }}>
+                  {podeEditar ? "Editar" : "Ver tudo"}
+                </Button>
+              </div>
+            </aside>
+          </>
+        );
+      })()}
 
       {modal && (
         <Modal title={modal.mode === "new" ? "Novo equipamento" : podeEditar ? "Editar equipamento" : "Equipamento"} onClose={() => setModal(null)} width={620}>
@@ -3814,7 +4398,12 @@ function Importar({ state, setState, unidadeAtiva, sessao, podeEditar = true }) 
       }
       if (fileRef.current) fileRef.current.value = "";
     };
-    reader.readAsArrayBuffer(file);
+    carregarBiblioteca_("xlsx")
+      .then(() => reader.readAsArrayBuffer(file))
+      .catch((err) => {
+        setBusy(false);
+        setStatus({ type: "error", msg: err.message });
+      });
   }
 
   function confirmarImportacao(modo) {
@@ -3879,7 +4468,13 @@ function Importar({ state, setState, unidadeAtiva, sessao, podeEditar = true }) 
     setPending(null);
   }
 
-  function exportarXlsx() {
+  async function exportarXlsx() {
+    try {
+      await carregarBiblioteca_("xlsx");
+    } catch (err) {
+      window.alert(err.message);
+      return;
+    }
     const cols = [
       ["Nº Patrimônio", "Categoria", "Marca", "Modelo", "Nº de Série", "Sala/Localização", "Status", "Responsável", "Observações", "Data de compra", "Valor de aquisição", "Vida útil (anos)", "Unidade"],
     ];
@@ -4091,8 +4686,14 @@ function novoChamadoForm(unidadeAtiva) {
   return { tipo: "Problema técnico", unidade: unidadeAtiva || "colegio", sala: "", categoria: "", texto: "", foto: "" };
 }
 
-function Chamados({ state, setState, unidadeAtiva, sessao, podeAbrirChamados = true, podeResponderChamados = true, responderSoProprios = false, meuNome = "", fotosSolicitantes = {} }) {
-  const [selectedId, setSelectedId] = useState(null);
+function Chamados({ state, setState, unidadeAtiva, sessao, podeAbrirChamados = true, podeResponderChamados = true, responderSoProprios = false, meuNome = "", fotosSolicitantes = {}, abertoId = null, onConsumeAberto }) {
+  const [selectedId, setSelectedId] = useState(abertoId);
+  useEffect(() => {
+    if (!abertoId) return;
+    setSelectedId(abertoId);
+    if (onConsumeAberto) onConsumeAberto();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abertoId]);
   const [novoMode, setNovoMode] = useState(false);
   const [form, setForm] = useState(novoChamadoForm(unidadeAtiva));
   const [replyText, setReplyText] = useState("");
@@ -4200,7 +4801,7 @@ function Chamados({ state, setState, unidadeAtiva, sessao, podeAbrirChamados = t
       await backendPost("mudarStatusChamado", { chamadoId: selecionado.id, status, sessao });
       setState((prev) => ({
         ...prev,
-        chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, status } : c)),
+        chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, status, confirmacao: c.status === status ? c.confirmacao : undefined } : c)),
       }));
     } catch (e) {
       setErro(textoDoErro_(e, "Não foi possível mudar o status. Tente novamente."));
@@ -4223,346 +4824,477 @@ function Chamados({ state, setState, unidadeAtiva, sessao, podeAbrirChamados = t
     setBusy(false);
   }
 
-  return (
-    <div>
-      {erro && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{erro}</div>}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h2>
+  const isMobile = useIsMobile();
+  const [aba, setAba] = useState("Aberto");
+  const [busca, setBusca] = useState("");
+
+  // Abrir pelo sino/painel um chamado de outra aba: muda pra aba dele.
+  useEffect(() => {
+    if (selecionado && selecionado.status !== aba && !busca) setAba(selecionado.status);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selecionado && selecionado.id]);
+
+  const contagemAba = useMemo(() => {
+    const m = { Aberto: 0, "Em andamento": 0, Resolvido: 0 };
+    chamados.forEach((c) => (m[c.status] = (m[c.status] || 0) + 1));
+    return m;
+  }, [chamados]);
+
+  const listaVisivel = useMemo(() => {
+    const q = busca.trim().toLowerCase();
+    return ordenados.filter((c) => {
+      if (q) return [c.assunto, c.sala, c.solicitante, c.categoria, c.abertoPorAdmin].some((v) => String(v || "").toLowerCase().includes(q));
+      return c.status === aba;
+    });
+  }, [ordenados, aba, busca]);
+
+  const RESPOSTAS_RAPIDAS = ["Estou a caminho", "Pode testar agora?", "Vou verificar e te retorno", "Resolvido! Qualquer coisa, é só chamar."];
+  const nomeQuem = (c) => c.solicitante || c.abertoPorAdmin || "Sem nome";
+  const nomeUnidade = (id) => (UNIDADES.find((u) => u.id === id) || {}).nome || "";
+
+  const formNovo = (
+    <>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <Field label="Tipo de chamado">
+          <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+            {TIPO_CHAMADO_OPTIONS.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Unidade">
+          <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value, sala: "", categoria: "" })}>
+            {UNIDADES.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.nome}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+      <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <Field label="Sala (opcional)">
+          <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
+            <option value="">Nenhuma</option>
+            {ordenarPorNome(state.areas.filter((a) => unidadeDe(a) === form.unidade), "nome").map((a) => (
+              <option key={a.id} value={a.nome}>
+                {a.nome}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Assunto / categoria (opcional)">
+          <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
+            <option value="">Nenhuma</option>
+            <optgroup label="Assuntos">
+              {ASSUNTOS_CHAMADO.map((a) => (
+                <option key={a.nome} value={a.nome}>
+                  {a.nome}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="Categorias de equipamento">
+              {nomesCategoriasDaUnidade(state.categorias, form.unidade).map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </optgroup>
+          </Select>
+        </Field>
+      </div>
+      <Field label="Descreva">
+        <textarea
+          value={form.texto}
+          onChange={(e) => setForm({ ...form, texto: e.target.value })}
+          rows={4}
+          placeholder="Ex: O projetor da sala 108 não liga mais..."
+          style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit", lineHeight: 1.5 }}
+        />
+      </Field>
+      <input ref={fotoInputRefAdmin} type="file" accept="image/*" onChange={handleFotoAdmin} style={{ display: "none" }} />
+      {form.foto ? (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ display: "flex", background: COLORS.paper, borderRadius: 8, padding: 3 }}>
-            <button
-              onClick={() => setViewMode("lista")}
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                padding: "7px 14px",
-                borderRadius: 6,
-                cursor: "pointer",
-                color: COLORS.ink,
-                background: viewMode === "lista" ? "#fff" : "transparent",
-                border: viewMode === "lista" ? `1px solid ${COLORS.line}` : "1px solid transparent",
-              }}
-            >
-              Lista
-            </button>
-            <button
-              onClick={() => setViewMode("quadro")}
-              style={{
-                fontSize: 12.5,
-                fontWeight: 600,
-                padding: "7px 14px",
-                borderRadius: 6,
-                cursor: "pointer",
-                color: COLORS.ink,
-                background: viewMode === "quadro" ? "#fff" : "transparent",
-                border: viewMode === "quadro" ? `1px solid ${COLORS.line}` : "1px solid transparent",
-              }}
-            >
-              Quadro
-            </button>
-          </div>
+          <img src={form.foto} alt="Foto anexada" style={{ width: 92, height: 66, borderRadius: 10, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
+          <Button variant="ghost" icon={X} onClick={() => setForm((prev) => ({ ...prev, foto: "" }))} style={{ padding: "6px 10px", fontSize: 12 }}>
+            Tirar foto
+          </Button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fotoInputRefAdmin.current && fotoInputRefAdmin.current.click()}
+          disabled={fotoBusyAdmin}
+          style={{ width: "100%", border: `1.5px dashed ${COLORS.lineStrong}`, borderRadius: 11, padding: 11, display: "flex", gap: 8, alignItems: "center", justifyContent: "center", color: COLORS.faint, fontSize: 13, background: "#fff", cursor: "pointer", fontFamily: "inherit" }}
+        >
+          <Camera size={17} />
+          {fotoBusyAdmin ? "Preparando a foto..." : "Adicionar foto (opcional)"}
+        </button>
+      )}
+      {erro && <div style={{ color: COLORS.danger, fontSize: 13, marginTop: 10 }}>{erro}</div>}
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 18 }}>
+        <Button variant="ghost" onClick={() => setNovoMode(false)}>
+          Cancelar
+        </Button>
+        <Button variant="primary" icon={Send} onClick={enviarNovoChamado} disabled={busy || !form.texto.trim()}>
+          {busy ? "Enviando..." : "Abrir chamado"}
+        </Button>
+      </div>
+    </>
+  );
+
+  const colunaLista = (
+    <div style={{ background: "#fff", borderRight: isMobile ? "none" : `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", minHeight: 0, minWidth: 0 }}>
+      <div style={{ padding: "18px 16px 12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: COLORS.ink }}>Chamados</h1>
+          <button
+            onClick={() => setViewMode("quadro")}
+            title="Ver em quadro (colunas por status)"
+            style={{ marginLeft: "auto", background: "none", border: `1px solid ${COLORS.line}`, borderRadius: 8, padding: "5px 8px", fontSize: 12, fontWeight: 600, color: COLORS.inkSoft, cursor: "pointer", fontFamily: "inherit" }}
+          >
+            Quadro
+          </button>
           {podeAbrirChamados && (
-            <Button variant="primary" icon={Plus} onClick={abrirNovo}>
-              Novo chamado
+            <Button variant="primary" icon={Plus} onClick={abrirNovo} style={{ padding: "6px 10px", fontSize: 12 }}>
+              Novo
             </Button>
           )}
         </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12, background: "#F7F6F1", borderRadius: 10, padding: "0 12px", color: COLORS.faint }}>
+          <Search size={16} />
+          <input
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Assunto, sala ou pessoa"
+            aria-label="Buscar chamados"
+            style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontSize: 13, color: COLORS.ink, padding: "9px 0", minWidth: 0 }}
+          />
+          {busca && (
+            <button onClick={() => setBusca("")} aria-label="Limpar busca" style={{ background: "none", border: "none", color: COLORS.faint, cursor: "pointer", display: "grid", padding: 0 }}>
+              <X size={14} />
+            </button>
+          )}
+        </div>
+        {!busca && (
+          <div role="tablist" style={{ display: "flex", gap: 4, marginTop: 12, background: COLORS.paper2, borderRadius: 10, padding: 3 }}>
+            {[
+              ["Aberto", "Abertos"],
+              ["Em andamento", "Andamento"],
+              ["Resolvido", "Resolvidos"],
+            ].map(([st, rotulo]) => (
+              <button
+                key={st}
+                role="tab"
+                aria-selected={aba === st}
+                onClick={() => setAba(st)}
+                style={{ flex: 1, textAlign: "center", fontSize: 12.5, fontWeight: 600, color: aba === st ? COLORS.ink : COLORS.inkSoft, padding: "6px 0", borderRadius: 8, border: "none", background: aba === st ? "#fff" : "transparent", boxShadow: aba === st ? "0 1px 2px rgba(0,0,0,.08)" : "none", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                {rotulo}
+                <b style={{ fontSize: 11, color: COLORS.faint, marginLeft: 3 }}>{contagemAba[st] || 0}</b>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+      <div style={{ overflow: "auto", flex: 1 }}>
+        {listaVisivel.length === 0 ? (
+          <EmptyState text={busca ? "Nenhum chamado encontrado." : aba === "Aberto" ? "Nenhum chamado aberto." : aba === "Em andamento" ? "Nenhum chamado em andamento." : "Nenhum chamado resolvido nesta unidade."} />
+        ) : (
+          listaVisivel.map((c) => {
+            const ativo = selecionado && selecionado.id === c.id;
+            const respondido = (c.mensagens || []).some((m) => m.autor === "ti");
+            const horas = (Date.now() - new Date(c.criadoEm).getTime()) / 3600000;
+            const atrasado = c.status === "Aberto" && !respondido && horas >= 4;
+            return (
+              <button
+                key={c.id}
+                onClick={() => {
+                  setSelectedId(c.id);
+                  setNovoMode(false);
+                }}
+                style={{ display: "flex", gap: 11, width: "100%", textAlign: "left", padding: "12px 16px", border: "none", borderTop: `1px solid ${COLORS.lineSoft}`, background: ativo ? "#FBF4EA" : "#fff", boxShadow: ativo ? `inset 3px 0 0 ${COLORS.accent}` : "none", cursor: "pointer", fontFamily: "inherit" }}
+              >
+                <Avatar nome={nomeQuem(c)} foto={fotosSolicitantes[c.solicitante]} size={34} />
+                <span style={{ flex: 1, minWidth: 0 }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: COLORS.ink }}>
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nomeQuem(c)}</span>
+                    {c.status === "Aberto" && !respondido && <span title="Sem resposta do TI" style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS.accent, flexShrink: 0 }} />}
+                    <time style={{ marginLeft: "auto", fontSize: 11.5, color: COLORS.faint, fontWeight: 500, flexShrink: 0 }}>{horaCurta(ultimaAtividade(c))}</time>
+                  </span>
+                  <span style={{ display: "block", fontSize: 13, fontWeight: 600, color: COLORS.ink, margin: "2px 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {c.assunto} {c.tipo && c.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={c.tipo} />}
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: COLORS.inkSoft }}>
+                    <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.sala || "Sem sala"}</span>
+                    {busca && (
+                      <span style={{ marginLeft: "auto" }}>
+                        <ChamadoStatusPill status={c.status} />
+                      </span>
+                    )}
+                    {!busca && c.status === "Resolvido" && (
+                      <span style={{ marginLeft: "auto", fontSize: 11.5, fontWeight: 600, color: c.confirmacao ? COLORS.green : COLORS.faint, whiteSpace: "nowrap" }}>{c.confirmacao ? "✓ confirmado" : "aguardando confirmar"}</span>
+                    )}
+                    {!busca && c.status !== "Resolvido" && (
+                      <span style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 600, color: atrasado ? COLORS.danger : COLORS.faint, whiteSpace: "nowrap" }}>
+                        <Clock size={13} />
+                        {tempoDecorrido(c.criadoEm).replace("há ", "")}
+                      </span>
+                    )}
+                  </span>
+                </span>
+              </button>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
 
-      {viewMode === "quadro" && (
-        <ChamadosKanban
-          chamados={ordenados}
-          onSelect={(c) => {
-            setSelectedId(c.id);
-            setNovoMode(false);
-            setViewMode("lista");
-          }}
-        />
-      )}
+  let colunaConversa = (
+    <div style={{ display: "grid", placeItems: "center", background: COLORS.paper, color: COLORS.inkSoft, fontSize: 14, textAlign: "center", padding: 30 }}>
+      {chamados.length === 0 ? "Nenhum chamado nesta unidade ainda." : "Escolha um chamado na lista."}
+    </div>
+  );
+  let colunaInfo = null;
 
-      {viewMode === "lista" && (
-      <>
-      <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 16, height: 560 }}>
-        <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-          <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
-            {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
+  if (selecionado) {
+    const podeMexer = podeMexerNesseChamado(selecionado);
+    const msgs = selecionado.mensagens || [];
+    const doMesmo = (state.chamados || []).filter((c) => c.solicitante && c.solicitante === selecionado.solicitante).length;
+    colunaConversa = (
+      <div style={{ display: "flex", flexDirection: "column", minHeight: 0, minWidth: 0, background: COLORS.paper }}>
+        <div style={{ background: "#fff", borderBottom: `1px solid ${COLORS.line}`, padding: isMobile ? "12px 14px" : "14px 22px", display: "flex", alignItems: "center", gap: 12 }}>
+          {isMobile && (
+            <button onClick={() => setSelectedId(null)} aria-label="Voltar" style={{ background: "none", border: "none", padding: 4, cursor: "pointer", color: COLORS.ink, display: "grid" }}>
+              <ArrowLeft size={22} />
+            </button>
+          )}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{ margin: 0, fontSize: 16.5, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
+              {selecionado.assunto} {selecionado.tipo && selecionado.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={selecionado.tipo} />}
+            </h2>
+            <p style={{ margin: "2px 0 0", fontSize: 12.5, color: COLORS.inkSoft }}>
+              <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12 }}>{selecionado.id}</span> · {nomeQuem(selecionado)} · {selecionado.sala || "Sem sala"}
+            </p>
           </div>
-          <div style={{ overflow: "auto", flex: 1 }}>
-            {ordenados.length === 0 ? (
-              <EmptyState text="Nenhum chamado aberto ainda." />
-            ) : (
-              ordenados.map((c) => (
-                <div
-                  key={c.id}
-                  onClick={() => {
-                    setSelectedId(c.id);
-                    setNovoMode(false);
-                  }}
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: `1px solid ${COLORS.line}`,
-                    cursor: "pointer",
-                    background: selectedId === c.id ? COLORS.accentSoft : "transparent",
-                    position: "relative",
-                  }}
-                >
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 6 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4 }}>
-                      {c.assunto} {c.tipo && c.tipo !== "Problema técnico" && <TipoChamadoBadge tipo={c.tipo} />}
+          <ChamadoStatusPill status={selecionado.status} />
+        </div>
+
+        <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: isMobile ? "16px 14px" : "18px 26px", display: "flex", flexDirection: "column", gap: 12 }}>
+          {msgs.map((m, i) => {
+            const doTi = m.autor === "ti";
+            const nomeAutor = doTi ? m.nome || "Administrador" : m.nome || nomeQuem(selecionado);
+            const novoDia = i === 0 || rotuloDia(msgs[i - 1].data) !== rotuloDia(m.data);
+            return (
+              <React.Fragment key={i}>
+                {novoDia && <span style={{ alignSelf: "center", fontSize: 11.5, color: COLORS.faint, fontWeight: 600, background: "#EFECE3", padding: "3px 10px", borderRadius: 20 }}>{rotuloDia(m.data)}</span>}
+                <div style={{ display: "flex", gap: 10 }}>
+                  <Avatar nome={nomeAutor} foto={doTi ? undefined : fotosSolicitantes[selecionado.solicitante]} size={30} />
+                  <div
+                    style={{
+                      flex: 1,
+                      minWidth: 0,
+                      background: m.reabertura ? "#FFF6F5" : doTi ? "#fff" : "#fff",
+                      border: `1px solid ${m.reabertura ? "#EFC6C1" : doTi ? "#EBD9C2" : COLORS.line}`,
+                      borderLeft: doTi ? `3px solid ${COLORS.accent}` : `1px solid ${m.reabertura ? "#EFC6C1" : COLORS.line}`,
+                      borderRadius: 12,
+                      padding: "10px 13px",
+                      fontSize: 13.5,
+                      lineHeight: 1.5,
+                      color: COLORS.ink,
+                    }}
+                  >
+                    <div style={{ fontSize: 11.5, color: COLORS.faint, fontWeight: 600, marginBottom: 3, display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                      {nomeAutor} {doTi ? "· TI" : ""} · {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      {i === 0 && <span style={{ fontSize: 10.5, fontWeight: 700, padding: "1px 7px", borderRadius: 20, background: COLORS.greenSoft, color: COLORS.green, textTransform: "uppercase", letterSpacing: 0.3 }}>Abriu o chamado</span>}
+                      {m.reabertura && <span style={{ fontSize: 10.5, fontWeight: 700, padding: "1px 7px", borderRadius: 20, background: COLORS.dangerSoft, color: COLORS.danger, textTransform: "uppercase", letterSpacing: 0.3 }}>Reaberto</span>}
                     </div>
-                    {podeMexerNesseChamado(c) && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteTarget(c);
-                        }}
-                        style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, flexShrink: 0 }}
-                        aria-label="Excluir chamado"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.solicitante ? c.solicitante + " · " : ""}{c.sala || "Sem sala"}</span>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 600,
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                        color: CHAMADO_STATUS_COLORS[c.status],
-                        background: CHAMADO_STATUS_BG[c.status],
-                      }}
-                    >
-                      {c.status}
-                    </span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </Panel>
-
-        <Panel style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {novoMode ? (
-            <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-              <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
-              <div style={{ padding: 18, flex: 1, overflow: "auto" }}>
-                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-                  <Field label="Tipo de chamado">
-                    <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
-                      {TIPO_CHAMADO_OPTIONS.map((t) => (
-                        <option key={t} value={t}>
-                          {t}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                  <Field label="Unidade">
-                    <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value, sala: "", categoria: "" })}>
-                      {UNIDADES.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {u.nome}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                </div>
-                <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-                  <Field label="Sala relacionada (opcional)">
-                    <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
-                      <option value="">Nenhuma</option>
-                      {state.areas.filter((a) => unidadeDe(a) === form.unidade).map((a) => (
-                        <option key={a.id} value={a.nome}>
-                          {a.nome}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                  <Field label="Categoria relacionada (opcional)">
-                    <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
-                      <option value="">Nenhuma</option>
-                      {nomesCategoriasDaUnidade(state.categorias, form.unidade).map((c) => (
-                        <option key={c} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </Select>
-                  </Field>
-                </div>
-                <Field label="Descreva">
-                  <textarea
-                    value={form.texto}
-                    onChange={(e) => setForm({ ...form, texto: e.target.value })}
-                    rows={4}
-                    placeholder="Ex: O projetor da sala 108 não liga mais..."
-                    style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
-                  />
-                </Field>
-                <div style={{ marginTop: 14 }}>
-                  <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 5 }}>Foto (opcional)</div>
-                  <input ref={fotoInputRefAdmin} type="file" accept="image/*" onChange={handleFotoAdmin} style={{ display: "none" }} />
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {form.foto && (
-                      <div style={{ width: 64, height: 64, borderRadius: 8, overflow: "hidden", border: `1px solid ${COLORS.line}`, position: "relative" }}>
-                        <img src={form.foto} alt="Foto anexada" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        <button
-                          onClick={() => setForm((prev) => ({ ...prev, foto: "" }))}
-                          style={{ position: "absolute", top: 2, right: 2, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: 4, color: "#fff", cursor: "pointer", padding: 2 }}
-                          aria-label="Remover foto"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    )}
-                    <button
-                      onClick={() => fotoInputRefAdmin.current && fotoInputRefAdmin.current.click()}
-                      disabled={fotoBusyAdmin}
-                      style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 8,
-                        border: `1px dashed ${COLORS.lineStrong}`,
-                        background: "#fff",
-                        color: COLORS.inkSoft,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 4,
-                        cursor: "pointer",
-                        fontSize: 10,
-                      }}
-                    >
-                      <Plus size={16} />
-                      {fotoBusyAdmin ? "..." : "Adicionar"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                <Button variant="ghost" onClick={() => setNovoMode(false)}>
-                  Cancelar
-                </Button>
-                <Button variant="primary" icon={Send} onClick={enviarNovoChamado} disabled={busy || !form.texto.trim()}>
-                  Abrir chamado
-                </Button>
-              </div>
-            </div>
-          ) : !selecionado ? (
-            <EmptyState text="Selecione um chamado à esquerda ou abra um novo." />
-          ) : (
-            <div className="chamado-detail" style={{ display: "flex", height: "100%" }}>
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, borderRight: `1px solid ${COLORS.line}` }}>
-                <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
-                    {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
-                  </div>
-                  {podeMexerNesseChamado(selecionado) && (
-                    <button
-                      onClick={() => setDeleteTarget(selecionado)}
-                      style={{ background: "#fff", border: `1px solid ${COLORS.danger}`, borderRadius: 6, cursor: "pointer", color: COLORS.danger, padding: "6px 9px", flexShrink: 0 }}
-                      aria-label="Excluir chamado"
-                      title="Excluir chamado"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  )}
-                </div>
-
-                <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
-                  {selecionado.foto && (
-                    <div style={{ display: "flex", gap: 10 }}>
-                      <Avatar nome={selecionado.solicitante || "?"} foto={fotosSolicitantes[selecionado.solicitante]} />
-                      <a href={selecionado.foto} target="_blank" rel="noreferrer">
-                        <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 90, height: 90, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
+                    <div style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>{m.texto}</div>
+                    {i === 0 && selecionado.foto && (
+                      <a href={selecionado.foto} target="_blank" rel="noreferrer" style={{ display: "inline-block", marginTop: 8 }}>
+                        <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 210, maxWidth: "100%", height: 130, borderRadius: 10, objectFit: "cover", display: "block" }} />
                       </a>
-                    </div>
-                  )}
-                  {selecionado.mensagens.map((m, i) => {
-                    const abertura = i === 0;
-                    const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : selecionado.solicitante || "Solicitante";
-                    const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
-                    const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
-                    return (
-                      <div key={i} style={{ display: "flex", gap: 10 }}>
-                        <Avatar nome={nomeAutor} foto={m.autor === "ti" ? undefined : fotosSolicitantes[selecionado.solicitante]} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div
-                            style={{
-                              padding: "9px 13px",
-                              borderRadius: 10,
-                              borderLeft: `3px solid ${borda}`,
-                              fontSize: 13.5,
-                              background: bg,
-                              color: COLORS.ink,
-                            }}
-                          >
-                            <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
-                              {nomeAutor} {abertura && <span style={{ color: "#2F6F5E" }}>· abriu o chamado</span>}
-                            </div>
-                            <div>{m.texto}</div>
-                          </div>
-                          <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 3, marginLeft: 4 }}>{formatDateTime(m.data)}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {podeMexerNesseChamado(selecionado) && (
-                  <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
-                    <TextInput
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Escrever uma atualização..."
-                      onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                      style={{ flex: 1 }}
-                    />
-                    <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy}>
-                      Enviar
-                    </Button>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <div style={{ width: 220, flexShrink: 0, padding: 16, overflow: "auto" }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 12 }}>Propriedades</div>
-                {[
-                  ["Solicitante", selecionado.solicitante || "—"],
-                  ["Sala", selecionado.sala || "—"],
-                  ["Categoria", selecionado.categoria || "—"],
-                ].map(([label, val]) => (
-                  <div key={label} style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginTop: 2 }}>{val}</div>
-                  </div>
-                ))}
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, color: COLORS.inkSoft, marginBottom: 4 }}>Status</div>
-                  <Select disabled={!podeMexerNesseChamado(selecionado) || busy} value={selecionado.status} onChange={(e) => mudarStatus(e.target.value)} style={{ width: "100%" }}>
-                    {CHAMADO_STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </Select>
                 </div>
-                <div>
-                  <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Aberto</div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginTop: 2 }}>{tempoDecorrido(selecionado.criadoEm)}</div>
-                </div>
-              </div>
+              </React.Fragment>
+            );
+          })}
+          {selecionado.status === "Resolvido" && (
+            <div style={{ alignSelf: "center", fontSize: 12, color: selecionado.confirmacao ? COLORS.green : COLORS.inkSoft, display: "flex", gap: 6, alignItems: "center", fontWeight: 600 }}>
+              <CheckCircle size={14} />
+              {selecionado.confirmacao
+                ? nomeQuem(selecionado).split(" ")[0] + " confirmou que resolveu · " + formatDateTime(selecionado.confirmacao.data)
+                : selecionado.solicitante
+                ? "Aguardando " + selecionado.solicitante.split(" ")[0] + " confirmar se ficou bom"
+                : "Resolvido"}
             </div>
           )}
-        </Panel>
+        </div>
+
+        {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: "8px 22px 0", background: "#fff" }}>{erro}</div>}
+        {podeMexer ? (
+          <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "10px 12px 12px" : "12px 22px 16px" }}>
+            <div className="sem-barra" style={{ display: "flex", gap: 6, marginBottom: 10, overflowX: "auto", scrollbarWidth: "none" }}>
+              {RESPOSTAS_RAPIDAS.map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setReplyText(r)}
+                  style={{ whiteSpace: "nowrap", fontSize: 12, fontWeight: 500, border: `1px solid ${COLORS.line}`, background: "#FBFAF6", borderRadius: 20, padding: "4px 10px", color: COLORS.inkSoft, cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, border: `1px solid ${COLORS.lineStrong}`, borderRadius: 12, padding: "6px 6px 6px 14px" }}>
+              <input
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                placeholder={"Escreva uma resposta pra " + nomeQuem(selecionado).split(" ")[0] + "…"}
+                aria-label="Resposta"
+                style={{ flex: 1, border: "none", outline: "none", fontSize: 13.5, color: COLORS.ink, background: "transparent", minWidth: 0, padding: "6px 0" }}
+              />
+              <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy || !replyText.trim()}>
+                Enviar
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: "14px 22px", fontSize: 12.5, color: COLORS.inkSoft }}>Você pode ver este chamado, mas não responder.</div>
+        )}
       </div>
-      </>
+    );
+
+    colunaInfo = (
+      <aside style={{ background: "#fff", borderLeft: isMobile ? "none" : `1px solid ${COLORS.line}`, borderTop: isMobile ? `1px solid ${COLORS.line}` : "none", padding: 18, display: "flex", flexDirection: "column", gap: 18, overflow: "auto", minWidth: 0 }}>
+        <div style={{ display: "flex", gap: 11, alignItems: "center" }}>
+          <Avatar nome={nomeQuem(selecionado)} foto={fotosSolicitantes[selecionado.solicitante]} size={42} />
+          <div style={{ minWidth: 0 }}>
+            <b style={{ display: "block", fontSize: 14, color: COLORS.ink }}>{nomeQuem(selecionado)}</b>
+            <span style={{ fontSize: 12, color: COLORS.inkSoft }}>
+              {selecionado.solicitante ? doMesmo + " chamado" + (doMesmo === 1 ? "" : "s") + " no total" : selecionado.abertoPorAdmin ? "aberto pelo TI" : ""}
+            </span>
+          </div>
+        </div>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.faint, textTransform: "uppercase", letterSpacing: 0.6, marginBottom: 8 }}>Status</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {CHAMADO_STATUS_OPTIONS.map((st) => {
+              const on = selecionado.status === st;
+              return (
+                <button
+                  key={st}
+                  disabled={!podeMexer || busy || on}
+                  onClick={() => mudarStatus(st)}
+                  aria-pressed={on}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 9, border: `1.5px solid ${on ? CHAMADO_STATUS_COLORS[st] : COLORS.line}`, background: on ? CHAMADO_STATUS_BG[st] : "#fff", color: on ? CHAMADO_STATUS_COLORS[st] : COLORS.ink, fontSize: 13, fontWeight: 600, cursor: !podeMexer || on ? "default" : "pointer", opacity: !podeMexer && !on ? 0.55 : 1, fontFamily: "inherit", textAlign: "left" }}
+                >
+                  <span style={{ width: 8, height: 8, borderRadius: "50%", background: CHAMADO_STATUS_COLORS[st] }} />
+                  {st === "Resolvido" && !on ? "Marcar como resolvido" : st}
+                </button>
+              );
+            })}
+          </div>
+          {selecionado.status !== "Resolvido" && selecionado.solicitante && podeMexer && (
+            <div style={{ fontSize: 11.5, color: COLORS.inkSoft, marginTop: 8, lineHeight: 1.4 }}>Ao marcar como resolvido, {selecionado.solicitante.split(" ")[0]} recebe a pergunta "Ficou bom?".</div>
+          )}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+          {[
+            ["Unidade", nomeUnidade(unidadeDe(selecionado))],
+            ["Sala", selecionado.sala || "—"],
+            ["Assunto", selecionado.categoria || "—"],
+            ["Aberto", formatDateTime(selecionado.criadoEm)],
+          ].map(([rotulo, valor]) => (
+            <div key={rotulo} style={{ display: "flex", justifyContent: "space-between", gap: 10, fontSize: 13 }}>
+              <span style={{ color: COLORS.inkSoft }}>{rotulo}</span>
+              <b style={{ fontWeight: 600, color: COLORS.ink, textAlign: "right" }}>{valor}</b>
+            </div>
+          ))}
+        </div>
+        {podeMexer && (
+          <button
+            onClick={() => setDeleteTarget(selecionado)}
+            style={{ marginTop: "auto", display: "flex", alignItems: "center", gap: 6, justifyContent: "center", background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 9, color: COLORS.danger, fontSize: 12.5, fontWeight: 600, padding: "8px 10px", cursor: "pointer", fontFamily: "inherit" }}
+          >
+            <Trash2 size={14} />
+            Excluir chamado
+          </button>
+        )}
+      </aside>
+    );
+  }
+
+  return (
+    <div>
+      {viewMode === "quadro" ? (
+        <>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, flexWrap: "wrap", gap: 10 }}>
+            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: COLORS.ink }}>Chamados</h1>
+            <div style={{ display: "flex", gap: 8 }}>
+              <Button variant="ghost" onClick={() => setViewMode("lista")}>
+                Voltar pra lista
+              </Button>
+              {podeAbrirChamados && (
+                <Button variant="primary" icon={Plus} onClick={abrirNovo}>
+                  Novo chamado
+                </Button>
+              )}
+            </div>
+          </div>
+          <ChamadosKanban
+            chamados={ordenados}
+            onSelect={(c) => {
+              setSelectedId(c.id);
+              setNovoMode(false);
+              setViewMode("lista");
+            }}
+          />
+        </>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "minmax(260px, 300px) minmax(0, 1fr) minmax(240px, 280px)",
+            height: isMobile ? "auto" : "calc(100vh - 64px - 44px)",
+            minHeight: isMobile ? 0 : 560,
+            background: "#fff",
+            border: `1px solid ${COLORS.line}`,
+            borderRadius: 14,
+            overflow: "hidden",
+          }}
+        >
+          {isMobile ? (
+            selecionado ? (
+              <>
+                <div style={{ height: "calc(100vh - 200px)", minHeight: 420, display: "flex", flexDirection: "column" }}>{colunaConversa}</div>
+                {colunaInfo}
+              </>
+            ) : (
+              colunaLista
+            )
+          ) : (
+            <>
+              {colunaLista}
+              {colunaConversa}
+              {colunaInfo || <div style={{ background: "#fff", borderLeft: `1px solid ${COLORS.line}` }} />}
+            </>
+          )}
+        </div>
+      )}
+
+      {novoMode && (
+        <Modal title="Novo chamado" onClose={() => setNovoMode(false)} width={620}>
+          {formNovo}
+        </Modal>
       )}
 
       {deleteTarget && (
-        <Modal title="Excluir chamado" onClose={() => setDeleteTarget(null)} width={380}>
+        <Modal title="Excluir chamado" onClose={() => setDeleteTarget(null)} width={400}>
           <p style={{ fontSize: 14, color: COLORS.ink, marginTop: 0 }}>
             Tem certeza que deseja excluir o chamado <strong>{deleteTarget.assunto}</strong>? Essa ação não pode ser desfeita.
           </p>
@@ -4660,7 +5392,7 @@ function ChamadosKanban({ chamados, onSelect }) {
 
 function ErrorScreen({ msg, detail }) {
   return (
-    <div style={{ padding: 60, textAlign: "center", color: COLORS.danger, fontFamily: "ui-sans-serif, system-ui, sans-serif", maxWidth: 560, margin: "0 auto" }}>
+    <div style={{ padding: 60, textAlign: "center", color: COLORS.danger, fontFamily: FONTE_APP, maxWidth: 560, margin: "0 auto" }}>
       <div style={{ fontWeight: 700, marginBottom: 8 }}>Não foi possível conectar</div>
       <div style={{ fontSize: 14, color: COLORS.inkSoft, marginBottom: detail ? 14 : 0 }}>{msg}</div>
       {detail && (
@@ -4746,118 +5478,140 @@ function LoginPublico({ onLoggedIn, aviso = "" }) {
     setCadBusy(false);
   }
 
+  const campoComIcone = (IconeCampo, input) => (
+    <div style={{ position: "relative" }}>
+      <span style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: COLORS.faint, display: "grid", pointerEvents: "none" }}>
+        <IconeCampo size={17} />
+      </span>
+      {input}
+    </div>
+  );
+  const estiloCampo = { padding: "12px 14px 12px 40px", fontSize: 14, borderRadius: 11 };
+  const linkBtn = { display: "inline", background: "none", border: "none", color: COLORS.accentInk, fontSize: 13.5, fontWeight: 700, cursor: "pointer", padding: 0, fontFamily: "inherit" };
+
   return (
-    <div className="login-split" style={{ minHeight: 640, background: COLORS.paper, display: "flex", fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+    <div className="login-split" style={{ minHeight: "100vh", background: COLORS.paper, display: "flex", fontFamily: FONTE_APP }}>
       <div
         className="login-brand-panel"
         style={{
-          width: "42%",
-          minWidth: 280,
-          background: `linear-gradient(160deg, ${COLORS.ink} 0%, #223454 100%)`,
+          width: "51%",
+          minWidth: 300,
+          background: `radial-gradient(1200px 600px at 20% 10%, ${COLORS.ink3} 0%, ${COLORS.ink} 55%, #0F1A2F 100%)`,
+          color: "#fff",
+          padding: "56px 64px",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 40,
-          textAlign: "center",
         }}
       >
-        <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 68, height: 68, borderRadius: 14, background: "#fff", padding: 4, marginBottom: 18 }} />
-        <div style={{ fontSize: 19, fontWeight: 700, color: "#fff", lineHeight: 1.3 }}>Escola Espírito Santo</div>
-        <div style={{ fontSize: 13.5, color: "#B7C0CF", marginTop: 4 }}>Chamados de TI</div>
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <img src={LOGO_DATA_URL} alt="Logo Colégio Espírito Santo" style={{ width: 52, height: 52, borderRadius: 14, background: "#fff", padding: 3 }} />
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>Escola Espírito Santo</div>
+            <div style={{ fontSize: 13, color: "#93A0B5" }}>Tecnologia da Informação</div>
+          </div>
+        </div>
+        <h1 className="login-titulo" style={{ fontSize: 44, lineHeight: 1.1, letterSpacing: -1.2, fontWeight: 800, margin: "auto 0 0", maxWidth: 520 }}>
+          Pediu, o TI <em style={{ fontStyle: "normal", color: "#F0B878" }}>já está vendo.</em>
+        </h1>
+        <p className="login-texto" style={{ fontSize: 16, color: "#B5C0D2", marginTop: 14, maxWidth: 470, lineHeight: 1.55 }}>
+          Abra um chamado em poucos segundos, acompanhe a resposta e ajude a manter os equipamentos da escola funcionando.
+        </p>
+        <div className="login-feats" style={{ display: "flex", gap: 12, marginTop: 30 }}>
+          {[
+            [MessageSquare, "Chamados", "com foto e conversa com o TI"],
+            [Boxes, "Inventário", "equipamentos de cada sala"],
+            [ShieldIcon, "Seguro", "sessão protegida"],
+          ].map(([IconeFeat, titulo, texto]) => (
+            <div key={titulo} style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 14, padding: "14px 16px", flex: 1 }}>
+              <span style={{ color: "#F0B878", display: "grid" }}>
+                <IconeFeat size={20} />
+              </span>
+              <b style={{ display: "block", fontSize: 14, marginTop: 8 }}>{titulo}</b>
+              <span style={{ fontSize: 12.5, color: "#9FAAC0" }}>{texto}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 28 }}>
-        <div style={{ width: "100%", maxWidth: 300 }}>
+        <div style={{ width: "100%", maxWidth: 380 }}>
           {modo === "login" ? (
             <>
-              <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Bem-vindo(a)</div>
-              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Entre com seu nome (ou email) e senha de acesso</div>
+              <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: -0.5, color: COLORS.ink }}>Entrar</h2>
+              <div style={{ fontSize: 14, color: COLORS.inkSoft, margin: "6px 0 26px" }}>Use seu nome ou email e sua senha.</div>
 
-              <div style={{ textAlign: "left" }}>
-                <Field label="Nome ou email">
-                  <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="Como podemos te chamar" />
-                </Field>
-                <Field label="Senha">
-                  <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} />
-                </Field>
-              </div>
+              <Field label="Nome ou email">
+                {campoComIcone(
+                  UserIcon,
+                  <TextInput value={nome} onChange={(e) => setNome(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} placeholder="maria@escola.com" autoComplete="username" style={estiloCampo} />
+                )}
+              </Field>
+              <Field label="Senha">
+                {campoComIcone(
+                  LockIcon,
+                  <TextInput type="password" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && entrar()} autoComplete="current-password" style={estiloCampo} />
+                )}
+              </Field>
 
-              {erro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{erro}</div>}
+              {erro && (
+                <div role="alert" style={{ color: COLORS.danger, background: COLORS.dangerSoft, borderRadius: 10, padding: "9px 12px", fontSize: 13, marginBottom: 14 }}>
+                  {erro}
+                </div>
+              )}
 
-              <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
-                {busy ? "Aguarde..." : "Entrar"}
+              <Button variant="primary" onClick={entrar} disabled={busy} style={{ width: "100%", justifyContent: "center", padding: 13, fontSize: 14.5, borderRadius: 11, marginTop: 4 }}>
+                {busy ? "Entrando..." : "Entrar"}
               </Button>
+              <div style={{ fontSize: 12.5, color: COLORS.faint, textAlign: "center", marginTop: 12 }}>Esqueceu a senha? Fale com o TI.</div>
 
-              <button
-                onClick={() => setModo("cadastro")}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "center",
-                  marginTop: 14,
-                  background: "none",
-                  border: "none",
-                  color: COLORS.accent,
-                  fontSize: 12.5,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  padding: 4,
-                }}
-              >
-                Não tem conta? Cadastre-se
-              </button>
+              <div style={{ textAlign: "center", fontSize: 13.5, color: COLORS.inkSoft, marginTop: 22 }}>
+                Ainda não tem acesso?{" "}
+                <button onClick={() => setModo("cadastro")} style={linkBtn}>
+                  Pedir cadastro
+                </button>
+              </div>
             </>
           ) : cadOk ? (
             <>
-              <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Cadastro enviado!</div>
-              <p style={{ fontSize: 13, color: COLORS.inkSoft, lineHeight: 1.5, marginTop: 10 }}>
+              <h2 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: COLORS.ink }}>Cadastro enviado!</h2>
+              <p style={{ fontSize: 14, color: COLORS.inkSoft, lineHeight: 1.55, marginTop: 10 }}>
                 Um administrador vai revisar seu pedido e liberar seu acesso. Assim que for aprovado, você já consegue entrar com o email e a senha que acabou de cadastrar.
               </p>
-              <Button variant="ghost" onClick={voltarParaLogin} style={{ width: "100%", justifyContent: "center", marginTop: 8 }}>
+              <Button variant="ghost" onClick={voltarParaLogin} style={{ width: "100%", justifyContent: "center", padding: 12, marginTop: 8 }}>
                 Voltar para o login
               </Button>
             </>
           ) : (
             <>
-              <div style={{ fontSize: 17, fontWeight: 700, color: COLORS.ink }}>Criar conta</div>
-              <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginBottom: 22 }}>Use seu email da escola — um administrador precisa aprovar antes de você conseguir entrar</div>
+              <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: -0.5, color: COLORS.ink }}>Pedir cadastro</h2>
+              <div style={{ fontSize: 14, color: COLORS.inkSoft, margin: "6px 0 24px", lineHeight: 1.5 }}>Use seu email da escola. Um administrador precisa aprovar antes de você conseguir entrar.</div>
 
-              <div style={{ textAlign: "left" }}>
-                <Field label="Nome">
-                  <TextInput value={cadNome} onChange={(e) => setCadNome(e.target.value)} placeholder="Seu nome completo" />
-                </Field>
-                <Field label="Email da escola">
-                  <TextInput type="email" value={cadEmail} onChange={(e) => setCadEmail(e.target.value)} placeholder="voce@escola.com.br" />
-                </Field>
-                <Field label="Crie uma senha">
-                  <TextInput type="password" value={cadSenha} onChange={(e) => setCadSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && cadastrar()} />
-                </Field>
-              </div>
+              <Field label="Nome">
+                {campoComIcone(UserIcon, <TextInput value={cadNome} onChange={(e) => setCadNome(e.target.value)} placeholder="Seu nome completo" autoComplete="name" style={estiloCampo} />)}
+              </Field>
+              <Field label="Email da escola">
+                {campoComIcone(MessageSquare, <TextInput type="email" value={cadEmail} onChange={(e) => setCadEmail(e.target.value)} placeholder="voce@escola.com.br" autoComplete="email" style={estiloCampo} />)}
+              </Field>
+              <Field label="Crie uma senha">
+                {campoComIcone(LockIcon, <TextInput type="password" value={cadSenha} onChange={(e) => setCadSenha(e.target.value)} onKeyDown={(e) => e.key === "Enter" && cadastrar()} autoComplete="new-password" style={estiloCampo} />)}
+              </Field>
 
-              {cadErro && <div style={{ color: COLORS.danger, fontSize: 12.5, marginBottom: 12, textAlign: "left" }}>{cadErro}</div>}
+              {cadErro && (
+                <div role="alert" style={{ color: COLORS.danger, background: COLORS.dangerSoft, borderRadius: 10, padding: "9px 12px", fontSize: 13, marginBottom: 14 }}>
+                  {cadErro}
+                </div>
+              )}
 
-              <Button variant="primary" onClick={cadastrar} disabled={cadBusy} style={{ width: "100%", justifyContent: "center", marginTop: 4 }}>
-                {cadBusy ? "Aguarde..." : "Cadastrar"}
+              <Button variant="primary" onClick={cadastrar} disabled={cadBusy} style={{ width: "100%", justifyContent: "center", padding: 13, fontSize: 14.5, borderRadius: 11, marginTop: 4 }}>
+                {cadBusy ? "Enviando..." : "Pedir cadastro"}
               </Button>
 
-              <button
-                onClick={voltarParaLogin}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  textAlign: "center",
-                  marginTop: 14,
-                  background: "none",
-                  border: "none",
-                  color: COLORS.lineStrong,
-                  fontSize: 12.5,
-                  cursor: "pointer",
-                  padding: 4,
-                }}
-              >
-                Já tem conta? Entrar
-              </button>
+              <div style={{ textAlign: "center", fontSize: 13.5, color: COLORS.inkSoft, marginTop: 20 }}>
+                Já tem acesso?{" "}
+                <button onClick={voltarParaLogin} style={linkBtn}>
+                  Entrar
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -4866,7 +5620,86 @@ function LoginPublico({ onLoggedIn, aviso = "" }) {
   );
 }
 
-function TopBarSolicitante({ nome, foto, onFotoChange, onLogout }) {
+// ---------- Chamados do usuário (layout enxuto: lista + conversa) ----------
+
+// Os 6 assuntos que o usuário escolhe ao abrir um chamado. O nome vai no
+// campo "categoria" do chamado (o TI vê como categoria).
+const ASSUNTOS_CHAMADO = [
+  { nome: "Projetor e som", curto: "Projetor e som", icone: "projector", cor: "#A65C12", bg: "#FFF1E2" },
+  { nome: "Computador", curto: "Computador", icone: "monitor", cor: "#2F5DA8", bg: "#E8EEF8" },
+  { nome: "Internet e Wi-Fi", curto: "Internet", icone: "wifi", cor: "#2F6F5E", bg: "#E3F1EC" },
+  { nome: "Impressora", curto: "Impressora", icone: "printer", cor: "#5B3FA0", bg: "#EFEAF8" },
+  { nome: "Senha e acessos", curto: "Senha", icone: "key", cor: "#9B2F28", bg: "#F7E9E7" },
+  { nome: "Outro assunto", curto: "Outro", icone: "help", cor: "#4B5768", bg: "#F1F0EC" },
+];
+
+function IconeDoChamado({ chamado, size = 40 }) {
+  const assunto = ASSUNTOS_CHAMADO.find((a) => a.nome === chamado.categoria);
+  const raio = Math.round(size * 0.28);
+  if (assunto) {
+    return (
+      <span style={{ width: size, height: size, borderRadius: raio, background: assunto.bg, color: assunto.cor, display: "grid", placeItems: "center", flexShrink: 0 }}>
+        <Icon name={assunto.icone} size={Math.round(size * 0.5)} />
+      </span>
+    );
+  }
+  return (
+    <span style={{ width: size, height: size, borderRadius: raio, background: COLORS.paper2, color: COLORS.ink3, display: "grid", placeItems: "center", flexShrink: 0 }}>
+      {chamado.categoria ? <CategoriaIcon categoria={chamado.categoria} size={Math.round(size * 0.5)} /> : <MessageSquare size={Math.round(size * 0.5)} />}
+    </span>
+  );
+}
+
+// Como o usuário vê o status (o TI continua vendo Aberto / Em andamento /
+// Resolvido). "Fechado" = resolvido e confirmado por quem abriu.
+function statusDoUsuario(chamado) {
+  if (chamado.status === "Resolvido" && chamado.confirmacao && chamado.confirmacao.resolveu) return { label: "Fechado", cor: "#6B7280", bg: "#ECEDEF", fechado: true };
+  if (chamado.status === "Resolvido") return { label: "Resolvido", cor: COLORS.green, bg: COLORS.greenSoft };
+  if (chamado.status === "Em andamento") return { label: "Em atendimento", cor: "#B8741F", bg: COLORS.accentSoft };
+  return { label: "Aberto", cor: COLORS.blue, bg: COLORS.blueSoft };
+}
+
+function Pill({ label, cor, bg }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5, fontWeight: 600, padding: "3px 9px", borderRadius: 20, whiteSpace: "nowrap", color: cor, background: bg }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: "currentColor" }} />
+      {label}
+    </span>
+  );
+}
+
+function mesmoDia_(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+// "09:55" hoje, "ontem", ou "27/09".
+function horaCurta(iso) {
+  try {
+    const d = new Date(iso);
+    const hoje = new Date();
+    if (mesmoDia_(d, hoje)) return d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const ontem = new Date(hoje.getTime() - 86400000);
+    if (mesmoDia_(d, ontem)) return "ontem";
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+  } catch (e) {
+    return "";
+  }
+}
+
+function rotuloDia(iso) {
+  const d = new Date(iso);
+  const hoje = new Date();
+  if (mesmoDia_(d, hoje)) return "Hoje";
+  if (mesmoDia_(d, new Date(hoje.getTime() - 86400000))) return "Ontem";
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "long" });
+}
+
+function ultimaAtividade(c) {
+  const msgs = c.mensagens || [];
+  return (msgs.length && msgs[msgs.length - 1].data) || c.criadoEm;
+}
+
+function TopoSolicitante({ nome, foto, onFotoChange, onLogout, isMobile }) {
   const fotoInputRef = useRef(null);
   const [fotoBusy, setFotoBusy] = useState(false);
 
@@ -4884,82 +5717,70 @@ function TopBarSolicitante({ nome, foto, onFotoChange, onLogout }) {
     if (fotoInputRef.current) fotoInputRef.current.value = "";
   }
 
-  return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", background: COLORS.ink, color: "#fff" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <img src={LOGO_DATA_URL} alt="Logo" style={{ width: 30, height: 30, background: "#fff", borderRadius: 6, padding: 2 }} />
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700 }}>Chamados de TI</div>
-          <div style={{ fontSize: 11.5, color: "#9AA6B8" }}>Olá, {nome}</div>
+  const botaoFoto = (
+    <>
+      <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
+      <button
+        onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
+        disabled={fotoBusy}
+        title="Trocar minha foto"
+        aria-label="Trocar minha foto"
+        style={{ background: "none", border: "none", padding: 0, cursor: "pointer", lineHeight: 0, opacity: fotoBusy ? 0.6 : 1 }}
+      >
+        <Avatar nome={nome} foto={foto} size={isMobile ? 32 : 34} />
+      </button>
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <div style={{ background: COLORS.ink, color: "#fff", padding: "calc(10px + env(safe-area-inset-top)) 16px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+        <img src={LOGO_DATA_URL} alt="" style={{ width: 32, height: 32, borderRadius: 9, background: "#fff", padding: 2 }} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 11, color: "#93A0B5", fontWeight: 500 }}>Chamados de TI</div>
+          <div style={{ fontSize: 15, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Olá, {nome}</div>
         </div>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
-        <button
-          onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
-          disabled={fotoBusy}
-          title="Trocar minha foto"
-          aria-label="Trocar minha foto"
-          style={{ position: "relative", background: "none", border: "none", padding: 0, cursor: "pointer", lineHeight: 0, opacity: fotoBusy ? 0.6 : 1 }}
-        >
-          <Avatar nome={nome} foto={foto} size={30} />
-          <span
-            style={{
-              position: "absolute",
-              bottom: -2,
-              right: -2,
-              width: 14,
-              height: 14,
-              borderRadius: "50%",
-              background: COLORS.accent,
-              border: `1.5px solid ${COLORS.ink}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Pencil size={8} color="#fff" />
-          </span>
+        {botaoFoto}
+        <button onClick={onLogout} aria-label="Sair" title="Sair" style={{ background: "rgba(255,255,255,.08)", border: "1px solid rgba(255,255,255,.14)", borderRadius: 10, color: "#fff", width: 36, height: 36, display: "grid", placeItems: "center", cursor: "pointer" }}>
+          <LogOut size={17} />
         </button>
-        <button
-          onClick={onLogout}
-          style={{ background: "none", border: `1px solid rgba(255,255,255,0.3)`, borderRadius: 6, color: "#fff", fontSize: 12, padding: "6px 10px", cursor: "pointer" }}
-        >
+      </div>
+    );
+  }
+
+  return (
+    <header style={{ height: 66, background: "#fff", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 14, padding: "0 24px", flexShrink: 0 }}>
+      <img src={LOGO_DATA_URL} alt="Logo" style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${COLORS.line}`, padding: 2 }} />
+      <div>
+        <div style={{ fontSize: 14.5, fontWeight: 700, color: COLORS.ink }}>Chamados de TI</div>
+        <div style={{ fontSize: 12, color: COLORS.faint }}>Escola Espírito Santo</div>
+      </div>
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+        <span style={{ fontSize: 13, color: COLORS.inkSoft }}>{nome}</span>
+        {botaoFoto}
+        <Button variant="ghost" onClick={onLogout} style={{ padding: "6px 10px", fontSize: 12 }}>
           Sair
-        </button>
+        </Button>
       </div>
-    </div>
+    </header>
   );
 }
 
 function novoChamadoSolicitanteForm() {
-  return { tipo: "Problema técnico", unidade: "colegio", sala: "", categoria: "", texto: "", foto: "" };
+  return { assunto: "", areaId: "", texto: "", foto: "" };
 }
 
-function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange, embedded = false }) {
-  const chamados = state.chamados || [];
-  const [selectedId, setSelectedId] = useState(null);
-  const [novoMode, setNovoMode] = useState(chamados.length === 0);
+function AbrirChamadoModal({ areas, onClose, onEnviar, isMobile }) {
   const [form, setForm] = useState(novoChamadoSolicitanteForm());
-  // Sala/categoria do formulário de novo chamado só mostram o que é da
-  // unidade escolhida ali (form.unidade) — antes vinha tudo junto, de
-  // todas as unidades, e um mesmo nome de sala/categoria repetido em mais
-  // de uma unidade aparecia duplicado na lista.
-  const areasFormUnidade = useMemo(() => (state.areas || []).filter((a) => unidadeDe(a) === form.unidade), [state.areas, form.unidade]);
-  const categoriasFormUnidade = useMemo(() => nomesCategoriasDaUnidade(state.categorias, form.unidade), [state.categorias, form.unidade]);
-  const [replyText, setReplyText] = useState("");
   const [busy, setBusy] = useState(false);
   const [erro, setErro] = useState("");
   const [fotoBusy, setFotoBusy] = useState(false);
   const fotoInputRef = useRef(null);
-  const scrollRef = useRef(null);
 
-  const ordenados = useMemo(() => [...chamados].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm)), [chamados]);
-  const selecionado = chamados.find((c) => c.id === selectedId) || null;
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [selecionado, selecionado && selecionado.mensagens.length]);
+  // Sala com o nome da unidade quando há salas de mais de uma unidade —
+  // senão "Sala 101" do Colégio e do Maternal ficavam iguais na lista.
+  const unidadesComSala = useMemo(() => [...new Set(areas.map((a) => unidadeDe(a)))], [areas]);
+  const areasOrdenadas = useMemo(() => ordenarPorNome(areas, "nome"), [areas]);
 
   async function handleFoto(e) {
     const file = e.target.files && e.target.files[0];
@@ -4973,43 +5794,185 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
     if (fotoInputRef.current) fotoInputRef.current.value = "";
   }
 
-  async function enviarNovoChamado() {
-    const texto = form.texto.trim();
-    if (!texto) return;
+  async function enviar() {
+    if (!form.assunto) return setErro("Escolha o assunto.");
+    if (!form.texto.trim()) return setErro("Conte o que está acontecendo.");
     setBusy(true);
     setErro("");
+    try {
+      await onEnviar(form);
+    } catch (e) {
+      setErro(textoDoErro_(e, "Não foi possível abrir o chamado. Tente novamente."));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Modal title="Abrir chamado" onClose={busy ? () => {} : onClose} width={640}>
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, marginBottom: 8 }}>Assunto</div>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(3, 1fr)" : "repeat(6, 1fr)", gap: 8 }}>
+        {ASSUNTOS_CHAMADO.map((a) => {
+          const on = form.assunto === a.nome;
+          return (
+            <button
+              key={a.nome}
+              type="button"
+              onClick={() => {
+                setForm({ ...form, assunto: a.nome });
+                setErro("");
+              }}
+              aria-pressed={on}
+              style={{
+                background: on ? "#FFF9F1" : "#fff",
+                border: `1.5px solid ${on ? COLORS.accent : COLORS.line}`,
+                boxShadow: on ? "0 0 0 3px rgba(201,122,43,.15)" : "none",
+                borderRadius: 12,
+                padding: "10px 4px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 12,
+                fontWeight: 600,
+                color: COLORS.ink,
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ color: a.cor }}>
+                <Icon name={a.icone} size={20} />
+              </span>
+              {a.curto}
+            </button>
+          );
+        })}
+      </div>
+
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, margin: "16px 0 8px" }}>Sala</div>
+      <Select value={form.areaId} onChange={(e) => setForm({ ...form, areaId: e.target.value })}>
+        <option value="">Não sei / outro lugar</option>
+        {unidadesComSala.length > 1
+          ? UNIDADES.filter((u) => unidadesComSala.includes(u.id)).map((u) => (
+              <optgroup key={u.id} label={u.nome}>
+                {areasOrdenadas
+                  .filter((a) => unidadeDe(a) === u.id)
+                  .map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.nome}
+                    </option>
+                  ))}
+              </optgroup>
+            ))
+          : areasOrdenadas.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nome}
+              </option>
+            ))}
+      </Select>
+
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, margin: "16px 0 8px" }}>O que está acontecendo?</div>
+      <textarea
+        value={form.texto}
+        onChange={(e) => setForm({ ...form, texto: e.target.value })}
+        rows={4}
+        placeholder="Ex: o projetor liga, mas a luz laranja fica piscando e não aparece imagem."
+        style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit", lineHeight: 1.5, minHeight: 96 }}
+      />
+
+      <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
+      {form.foto ? (
+        <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10 }}>
+          <img src={form.foto} alt="Foto anexada" style={{ width: 92, height: 66, borderRadius: 10, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
+          <Button variant="ghost" icon={X} onClick={() => setForm((prev) => ({ ...prev, foto: "" }))} style={{ padding: "6px 10px", fontSize: 12 }}>
+            Tirar foto
+          </Button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
+          disabled={fotoBusy}
+          style={{ marginTop: 10, width: "100%", border: `1.5px dashed ${COLORS.lineStrong}`, borderRadius: 11, padding: 11, display: "flex", gap: 8, alignItems: "center", justifyContent: "center", color: COLORS.faint, fontSize: 13, background: "#fff", cursor: "pointer" }}
+        >
+          <Camera size={17} />
+          {fotoBusy ? "Preparando a foto..." : "Adicionar foto (opcional)"}
+        </button>
+      )}
+
+      {erro && <div style={{ color: COLORS.danger, fontSize: 13, marginTop: 12 }}>{erro}</div>}
+
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 20 }}>
+        <Button variant="ghost" onClick={onClose} disabled={busy}>
+          Cancelar
+        </Button>
+        <Button variant="primary" icon={Send} onClick={enviar} disabled={busy}>
+          {busy ? "Enviando..." : "Enviar chamado"}
+        </Button>
+      </div>
+    </Modal>
+  );
+}
+
+function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange, embedded = false }) {
+  const isMobile = useIsMobile();
+  const chamados = state.chamados || [];
+  const [selectedId, setSelectedId] = useState(null);
+  const [abrindo, setAbrindo] = useState(false);
+  const [replyText, setReplyText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [erro, setErro] = useState("");
+  const scrollRef = useRef(null);
+
+  const ordenados = useMemo(() => {
+    // Fechados vão pro fim; o resto pela última atividade.
+    return [...chamados].sort((a, b) => {
+      const fa = statusDoUsuario(a).fechado ? 1 : 0;
+      const fb = statusDoUsuario(b).fechado ? 1 : 0;
+      if (fa !== fb) return fa - fb;
+      return new Date(ultimaAtividade(b)) - new Date(ultimaAtividade(a));
+    });
+  }, [chamados]);
+
+  // No computador já abre a conversa do primeiro chamado; no celular
+  // começa pela lista.
+  const selecionado = chamados.find((c) => c.id === selectedId) || (!isMobile && !selectedId ? ordenados[0] : null) || null;
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [selecionado && selecionado.id, selecionado && selecionado.mensagens.length]);
+
+  useEffect(() => {
+    setErro("");
+  }, [selecionado && selecionado.id]);
+
+  async function enviarNovoChamado(form) {
+    const texto = form.texto.trim();
+    const area = (state.areas || []).find((a) => a.id === form.areaId);
     const chamado = {
       id: uid("CH"),
       assunto: texto.length > 60 ? texto.slice(0, 57) + "..." : texto,
       solicitante: userAuth.nome,
       criadoPor: userAuth.nome,
-      tipo: form.tipo,
-      unidade: form.unidade || "colegio",
-      sala: form.sala,
-      categoria: form.categoria,
+      tipo: "Problema técnico",
+      unidade: area ? unidadeDe(area) : "colegio",
+      sala: area ? area.nome : "",
+      categoria: form.assunto,
       foto: form.foto || "",
       status: "Aberto",
       criadoEm: new Date().toISOString(),
       mensagens: [{ autor: "solicitante", texto, data: new Date().toISOString() }],
     };
-    try {
-      await backendPost("novoChamado", { chamado, sessao: userAuth.sessao });
-      setState((prev) => ({ ...prev, chamados: comChamadoSemDuplicar_(prev.chamados, chamado) }));
-      setNovoMode(false);
-      setForm(novoChamadoSolicitanteForm());
-      setSelectedId(chamado.id);
-    } catch (e) {
-      setErro(textoDoErro_(e, "Não foi possível abrir o chamado. Tente novamente."));
-    }
-    setBusy(false);
+    await backendPost("novoChamado", { chamado, sessao: userAuth.sessao });
+    setState((prev) => ({ ...prev, chamados: comChamadoSemDuplicar_(prev.chamados, chamado) }));
+    setAbrindo(false);
+    setSelectedId(chamado.id);
   }
 
   async function enviarResposta() {
     const texto = replyText.trim();
-    if (!texto || !selecionado) return;
+    if (!texto || !selecionado || busy) return;
     setBusy(true);
     setErro("");
-    const mensagem = { autor: "solicitante", texto, data: new Date().toISOString() };
+    const mensagem = { autor: "solicitante", nome: userAuth.nome, texto, data: new Date().toISOString() };
     try {
       await backendPost("novaMensagem", { chamadoId: selecionado.id, mensagem, sessao: userAuth.sessao });
       setState((prev) => ({
@@ -5023,268 +5986,241 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
     setBusy(false);
   }
 
-  const agora = new Date();
-  const dataFormatada = agora.toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const horaFormatada = agora.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  async function responderFicouBom(resolveu) {
+    if (!selecionado || busy) return;
+    // Fixa a seleção: ao virar Fechado o chamado desce pro fim da lista e,
+    // sem isso, a tela pulava pra outro chamado.
+    setSelectedId(selecionado.id);
+    setBusy(true);
+    setErro("");
+    try {
+      const resp = await backendPost("confirmarChamado", { chamadoId: selecionado.id, resolveu, sessao: userAuth.sessao });
+      if (resp.chamado) {
+        setState((prev) => ({ ...prev, chamados: prev.chamados.map((c) => (c.id === resp.chamado.id ? { ...c, ...resp.chamado, foto: c.foto || resp.chamado.foto } : c)) }));
+      }
+    } catch (e) {
+      setErro(textoDoErro_(e, "Não foi possível enviar sua resposta. Tente novamente."));
+    }
+    setBusy(false);
+  }
 
-  return (
-    <div style={embedded ? {} : { minHeight: "100vh", background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
-      {!embedded && <TopBarSolicitante nome={userAuth.nome} foto={userAuth.foto} onFotoChange={onFotoChange} onLogout={onLogout} />}
-      <div style={embedded ? {} : { padding: "14px 24px 16px", maxWidth: 1160, margin: "0 auto" }}>
-        <div
-          className="welcome-banner-solicitante"
-          style={{
-            background: `linear-gradient(120deg, ${COLORS.ink} 0%, #223454 100%)`,
-            borderRadius: 12,
-            padding: "14px 22px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 16,
-            marginBottom: 14,
-          }}
-        >
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>Bem-vindo(a), {userAuth.nome}</div>
-            <div style={{ fontSize: 12, color: "#E7C79A", fontWeight: 600, marginTop: 2 }}>{dataFormatada}, {horaFormatada}</div>
-          </div>
-          <Button variant="accent" icon={Plus} onClick={() => { setNovoMode(true); setSelectedId(null); }} style={{ flexShrink: 0 }}>
-            Novo chamado
+  const lista = (
+    <div style={{ background: "#fff", borderRight: isMobile ? "none" : `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
+      {isMobile ? (
+        <div style={{ padding: 16, paddingBottom: 6 }}>
+          <Button variant="primary" icon={Plus} onClick={() => setAbrindo(true)} style={{ width: "100%", justifyContent: "center", padding: 14, fontSize: 14.5, borderRadius: 11 }}>
+            Abrir chamado
+          </Button>
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink, margin: "18px 2px 4px" }}>Meus chamados</div>
+        </div>
+      ) : (
+        <div style={{ padding: "20px 20px 14px", display: "flex", alignItems: "center" }}>
+          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: COLORS.ink }}>Meus chamados</h2>
+          <Button variant="primary" icon={Plus} onClick={() => setAbrindo(true)} style={{ marginLeft: "auto" }}>
+            Abrir chamado
           </Button>
         </div>
-
-        <div className="grid-chat" style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: 16, height: 460 }}>
-          <Panel style={{ padding: 0, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "12px 14px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 12.5, color: COLORS.inkSoft, fontWeight: 600 }}>
-              {ordenados.length} chamado{ordenados.length !== 1 ? "s" : ""}
-            </div>
-            <div style={{ overflow: "auto", flex: 1 }}>
-              {ordenados.length === 0 ? (
-                <EmptyState text="Nenhum chamado aberto ainda." />
-              ) : (
-                ordenados.map((c) => (
-                  <div
-                    key={c.id}
-                    onClick={() => { setSelectedId(c.id); setNovoMode(false); }}
-                    style={{ padding: "10px 14px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer", background: selectedId === c.id ? COLORS.accentSoft : "transparent" }}
-                  >
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
-                      {c.assunto} <TipoChamadoBadge tipo={c.tipo} />
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <span style={{ fontSize: 11.5, color: COLORS.inkSoft }}>{c.sala || "Sem sala"}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 999, color: CHAMADO_STATUS_COLORS[c.status], background: CHAMADO_STATUS_BG[c.status] }}>
-                        {c.status}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </Panel>
-
-          <Panel style={{ padding: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {novoMode ? (
-              <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-                <div style={{ padding: "10px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink }}>Abrir novo chamado</div>
-                <div style={{ padding: 14, flex: 1, overflow: "auto" }}>
-                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                    <Field label="Tipo de chamado">
-                      <Select value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
-                        {TIPO_CHAMADO_OPTIONS.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                    <Field label="Unidade">
-                      <Select value={form.unidade} onChange={(e) => setForm({ ...form, unidade: e.target.value, sala: "", categoria: "" })}>
-                        {UNIDADES.map((u) => (
-                          <option key={u.id} value={u.id}>
-                            {u.nome}
-                          </option>
-                        ))}
-                      </Select>
-                    </Field>
-                  </div>
-                  <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                    <Field label="Sala relacionada (opcional)">
-                      <Select value={form.sala} onChange={(e) => setForm({ ...form, sala: e.target.value })}>
-                        <option value="">Nenhuma</option>
-                        {areasFormUnidade.map((a) => (
-                          <option key={a.id} value={a.nome}>{a.nome}</option>
-                        ))}
-                      </Select>
-                    </Field>
-                    <Field label="Categoria relacionada (opcional)">
-                      <Select value={form.categoria} onChange={(e) => setForm({ ...form, categoria: e.target.value })}>
-                        <option value="">Nenhuma</option>
-                        {categoriasFormUnidade.map((c) => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </Select>
-                    </Field>
-                  </div>
-                  <Field
-                    label={
-                      form.tipo === "Problema técnico"
-                        ? "Descreva o problema"
-                        : form.tipo === "Solicitar"
-                        ? "Descreva sua solicitação"
-                        : "Descreva sua sugestão"
-                    }
-                  >
-                    <textarea
-                      value={form.texto}
-                      onChange={(e) => setForm({ ...form, texto: e.target.value })}
-                      rows={3}
-                      placeholder={
-                        form.tipo === "Problema técnico"
-                          ? "Ex: O projetor da sala 108 não liga mais..."
-                          : form.tipo === "Solicitar"
-                          ? "Ex: Precisamos de mais 2 mouses pra sala 104..."
-                          : "Ex: Seria bom ter um jeito de..."
-                      }
-                      style={{ ...inputStyle, resize: "vertical", fontFamily: "inherit" }}
-                    />
-                  </Field>
-                  <div>
-                    <div style={{ fontSize: 13, color: COLORS.inkSoft, marginBottom: 4 }}>Foto (opcional)</div>
-                    <input ref={fotoInputRef} type="file" accept="image/*" onChange={handleFoto} style={{ display: "none" }} />
-                    <div style={{ display: "flex", gap: 8 }}>
-                      {form.foto && (
-                        <div style={{ width: 52, height: 52, borderRadius: 8, overflow: "hidden", border: `1px solid ${COLORS.line}`, position: "relative" }}>
-                          <img src={form.foto} alt="Foto anexada" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          <button
-                            onClick={() => setForm((prev) => ({ ...prev, foto: "" }))}
-                            style={{ position: "absolute", top: 2, right: 2, background: "rgba(0,0,0,0.55)", border: "none", borderRadius: 4, color: "#fff", cursor: "pointer", padding: 2 }}
-                            aria-label="Remover foto"
-                          >
-                            <X size={12} />
-                          </button>
-                        </div>
-                      )}
-                      <button
-                        onClick={() => fotoInputRef.current && fotoInputRef.current.click()}
-                        disabled={fotoBusy}
-                        style={{
-                          width: 52,
-                          height: 52,
-                          borderRadius: 8,
-                          border: `1px dashed ${COLORS.lineStrong}`,
-                          background: "#fff",
-                          color: COLORS.inkSoft,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: 3,
-                          cursor: "pointer",
-                          fontSize: 9.5,
-                        }}
-                      >
-                        <Plus size={14} />
-                        {fotoBusy ? "..." : "Adicionar"}
-                      </button>
-                    </div>
-                  </div>
-                  {erro && <div style={{ color: COLORS.danger, fontSize: 13 }}>{erro}</div>}
+      )}
+      <div style={{ overflow: "auto", flex: 1 }}>
+        {ordenados.length === 0 ? (
+          <div style={{ padding: "32px 24px", textAlign: "center", color: COLORS.inkSoft, fontSize: 14, lineHeight: 1.5 }}>
+            Você ainda não abriu nenhum chamado.
+            <br />
+            Quando algo não funcionar, toque em <b>Abrir chamado</b>.
+          </div>
+        ) : (
+          ordenados.map((c) => {
+            const st = statusDoUsuario(c);
+            const ativo = selecionado && selecionado.id === c.id;
+            const ultima = (c.mensagens || [])[c.mensagens.length - 1];
+            const previa = st.fechado ? "Fechado" : ultima ? (ultima.autor === "ti" ? (ultima.nome || "TI") + ": " : "Você: ") + ultima.texto : "";
+            return (
+              <button
+                key={c.id}
+                onClick={() => setSelectedId(c.id)}
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  border: "none",
+                  borderTop: `1px solid ${COLORS.lineSoft}`,
+                  background: ativo && !isMobile ? "#FBF4EA" : "#fff",
+                  boxShadow: ativo && !isMobile ? `inset 3px 0 0 ${COLORS.accent}` : "none",
+                  padding: "14px 20px",
+                  display: "flex",
+                  gap: 12,
+                  alignItems: "center",
+                  cursor: "pointer",
+                  opacity: st.fechado ? 0.7 : 1,
+                  fontFamily: "inherit",
+                }}
+              >
+                <IconeDoChamado chamado={c} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.assunto}</div>
+                  <div style={{ fontSize: 12.5, color: COLORS.inkSoft, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: 2 }}>{previa}</div>
                 </div>
-                <div style={{ padding: 10, borderTop: `1px solid ${COLORS.line}`, display: "flex", justifyContent: "flex-end", gap: 8 }}>
-                  {chamados.length > 0 && (
-                    <Button variant="ghost" onClick={() => setNovoMode(false)}>
-                      Cancelar
-                    </Button>
-                  )}
-                  <Button variant="primary" icon={Send} onClick={enviarNovoChamado} disabled={busy || !form.texto.trim()}>
-                    {busy ? "Enviando..." : "Abrir chamado"}
-                  </Button>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, fontSize: 11.5, color: COLORS.faint, flexShrink: 0 }}>
+                  <Pill {...st} />
+                  {horaCurta(ultimaAtividade(c))}
                 </div>
-              </div>
-            ) : !selecionado ? (
-              <div style={{ flex: 1, position: "relative", overflow: "hidden" }}>
-                <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", pointerEvents: "none" }}>
-                  <img src={LOGO_DATA_URL} alt="" style={{ width: 200, height: 200, opacity: 0.16 }} />
-                </div>
-                <div style={{ position: "relative", paddingTop: 40, textAlign: "center", color: COLORS.inkSoft, fontSize: 14 }}>
-                  <span className="texto-selecione-desktop">Selecione um chamado à esquerda ou abra um novo.</span>
-                  <span className="texto-selecione-mobile">Selecione um chamado acima ou abra um novo.</span>
-                </div>
-              </div>
-            ) : (
-              <div className="chamado-detail" style={{ display: "flex", height: "100%" }}>
-                <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, borderRight: `1px solid ${COLORS.line}` }}>
-                  <div style={{ padding: "14px 18px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 14, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
-                    {selecionado.assunto} <TipoChamadoBadge tipo={selecionado.tipo} />
-                  </div>
-                  <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
-                    {selecionado.foto && (
-                      <div style={{ display: "flex", gap: 10 }}>
-                        <Avatar nome={userAuth.nome} foto={userAuth.foto} />
-                        <a href={selecionado.foto} target="_blank" rel="noreferrer">
-                          <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 90, height: 90, borderRadius: 8, objectFit: "cover", border: `1px solid ${COLORS.line}` }} />
-                        </a>
-                      </div>
-                    )}
-                    {selecionado.mensagens.map((m, i) => {
-                      const abertura = i === 0;
-                      const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : userAuth.nome;
-                      const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? "#F3E2C8" : "#fff";
-                      const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
-                      return (
-                        <div key={i} style={{ display: "flex", gap: 10 }}>
-                          <Avatar nome={nomeAutor} foto={m.autor === "ti" ? undefined : userAuth.foto} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ padding: "9px 13px", borderRadius: 10, borderLeft: `3px solid ${borda}`, fontSize: 13.5, background: bg, color: COLORS.ink }}>
-                              <div style={{ fontSize: 11, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
-                                {nomeAutor} {abertura && <span style={{ color: "#2F6F5E" }}>· abriu o chamado</span>}
-                              </div>
-                              <div>{m.texto}</div>
-                            </div>
-                            <div style={{ fontSize: 10.5, color: COLORS.inkSoft, marginTop: 3, marginLeft: 4 }}>{formatDateTime(m.data)}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div style={{ padding: 14, borderTop: `1px solid ${COLORS.line}`, display: "flex", gap: 8 }}>
-                    <TextInput
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      placeholder="Escrever uma mensagem..."
-                      onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                      style={{ flex: 1 }}
-                    />
-                    <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy}>
-                      Enviar
-                    </Button>
-                  </div>
-                  {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: "0 14px 10px" }}>{erro}</div>}
-                </div>
-
-                <div style={{ width: 200, flexShrink: 0, padding: 16, overflow: "auto" }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: COLORS.inkSoft, textTransform: "uppercase", letterSpacing: 0.3, marginBottom: 12 }}>Propriedades</div>
-                  {[
-                    ["Sala", selecionado.sala || "—"],
-                    ["Categoria", selecionado.categoria || "—"],
-                    ["Status", selecionado.status],
-                  ].map(([label, val]) => (
-                    <div key={label} style={{ marginBottom: 14 }}>
-                      <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{label}</div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: label === "Status" ? CHAMADO_STATUS_COLORS[selecionado.status] : COLORS.ink, marginTop: 2 }}>{val}</div>
-                    </div>
-                  ))}
-                  <div>
-                    <div style={{ fontSize: 11, color: COLORS.inkSoft }}>Aberto</div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink, marginTop: 2 }}>{tempoDecorrido(selecionado.criadoEm)}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </Panel>
-        </div>
+              </button>
+            );
+          })
+        )}
       </div>
+    </div>
+  );
+
+  let conversa = null;
+  if (selecionado) {
+    const st = statusDoUsuario(selecionado);
+    const msgs = selecionado.mensagens || [];
+    const pedeConfirmacao = selecionado.status === "Resolvido" && !st.fechado;
+    const meta = [selecionado.categoria, selecionado.sala, "aberto " + (rotuloDia(selecionado.criadoEm) === "Hoje" ? "hoje às " + horaCurta(selecionado.criadoEm) : "em " + new Date(selecionado.criadoEm).toLocaleDateString("pt-BR"))].filter(Boolean).join(" · ");
+    conversa = (
+      <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, background: COLORS.paper }}>
+        <div style={{ background: "#fff", padding: isMobile ? "12px 14px" : "16px 24px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 12 }}>
+          {isMobile && (
+            <button onClick={() => setSelectedId(null)} aria-label="Voltar" style={{ background: "none", border: "none", padding: 4, cursor: "pointer", color: COLORS.ink, display: "grid" }}>
+              <ArrowLeft size={22} />
+            </button>
+          )}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h2 style={{ margin: 0, fontSize: isMobile ? 15.5 : 17, fontWeight: 800, color: COLORS.ink }}>{selecionado.assunto}</h2>
+            <div style={{ fontSize: 12.5, color: COLORS.inkSoft, marginTop: 2 }}>{meta}</div>
+          </div>
+          <Pill {...st} />
+        </div>
+
+        <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: isMobile ? "16px 14px" : "18px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+          {msgs.map((m, i) => {
+            const minha = m.autor !== "ti";
+            const novoDia = i === 0 || rotuloDia(msgs[i - 1].data) !== rotuloDia(m.data);
+            const nomeTi = m.nome || "TI";
+            return (
+              <React.Fragment key={i}>
+                {novoDia && <span style={{ alignSelf: "center", fontSize: 11.5, color: COLORS.faint, fontWeight: 600, background: "#EFECE3", padding: "3px 10px", borderRadius: 20 }}>{rotuloDia(m.data)}</span>}
+                <div style={{ display: "flex", gap: 10, maxWidth: isMobile ? "88%" : "74%", alignSelf: minha ? "flex-end" : "flex-start", flexDirection: minha ? "row-reverse" : "row" }}>
+                  {minha ? (
+                    !isMobile && <Avatar nome={userAuth.nome} foto={userAuth.foto} size={30} />
+                  ) : (
+                    <Avatar nome={nomeTi} size={30} />
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 11.5, color: COLORS.faint, fontWeight: 600, marginBottom: 4, textAlign: minha ? "right" : "left" }}>
+                      {minha ? "Você" : nomeTi + " · TI"} · {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                    <div
+                      style={{
+                        background: minha ? COLORS.ink : "#fff",
+                        color: minha ? "#fff" : COLORS.ink,
+                        border: `1px solid ${minha ? COLORS.ink : COLORS.line}`,
+                        borderRadius: minha ? "14px 4px 14px 14px" : "4px 14px 14px 14px",
+                        padding: "10px 13px",
+                        fontSize: 13.5,
+                        lineHeight: 1.5,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {m.texto}
+                      {i === 0 && selecionado.foto && (
+                        <a href={selecionado.foto} target="_blank" rel="noreferrer" style={{ display: "block", marginTop: 8 }}>
+                          <img src={selecionado.foto} alt="Foto do chamado" style={{ width: 160, maxWidth: "100%", height: 96, objectFit: "cover", borderRadius: 10, display: "block" }} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {pedeConfirmacao && (
+          <div style={{ margin: isMobile ? "0 14px 10px" : "0 24px 12px", background: "#F2F8F5", border: "1px solid #BFDCCF", borderRadius: 12, padding: "12px 14px", display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", fontSize: 13.5, color: COLORS.ink }}>
+            <span style={{ color: COLORS.green, display: "grid" }}>
+              <CheckCircle size={20} />
+            </span>
+            <span style={{ flex: "1 1 180px" }}>
+              <b style={{ color: COLORS.green }}>O TI marcou como resolvido.</b> Ficou bom?
+            </span>
+            <span style={{ display: "flex", gap: 8, flex: isMobile ? "1 1 100%" : "0 0 auto" }}>
+              <Button variant="green" icon={ThumbsUp} onClick={() => responderFicouBom(true)} disabled={busy} style={{ flex: isMobile ? 1 : "none", justifyContent: "center" }}>
+                Sim, resolveu
+              </Button>
+              <Button variant="ghost" icon={ThumbsDown} onClick={() => responderFicouBom(false)} disabled={busy} style={{ flex: isMobile ? 1 : "none", justifyContent: "center" }}>
+                Não, continua
+              </Button>
+            </span>
+          </div>
+        )}
+
+        {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: isMobile ? "0 14px 8px" : "0 24px 8px" }}>{erro}</div>}
+
+        {st.fechado ? (
+          <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "14px 14px calc(14px + env(safe-area-inset-bottom))" : "14px 24px", fontSize: 13, color: COLORS.inkSoft, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <CheckCircle size={17} />
+            <span style={{ flex: 1 }}>Chamado fechado. Precisa de mais alguma coisa?</span>
+            <Button variant="ghost" icon={Plus} onClick={() => setAbrindo(true)} style={{ padding: "6px 10px", fontSize: 12 }}>
+              Abrir outro chamado
+            </Button>
+          </div>
+        ) : (
+          <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "10px 12px calc(10px + env(safe-area-inset-bottom))" : "12px 24px 16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, border: `1px solid ${COLORS.lineStrong}`, borderRadius: 12, padding: "6px 6px 6px 14px", background: "#fff" }}>
+              <input
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
+                placeholder={isMobile ? "Mensagem…" : "Escreva uma mensagem pro TI…"}
+                aria-label="Mensagem para o TI"
+                style={{ flex: 1, border: "none", outline: "none", fontSize: 13.5, color: COLORS.ink, background: "transparent", minWidth: 0, padding: "6px 0" }}
+              />
+              <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy || !replyText.trim()} aria-label="Enviar">
+                {isMobile ? null : "Enviar"}
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const vazio = (
+    <div style={{ display: "grid", placeItems: "center", background: COLORS.paper, color: COLORS.inkSoft, fontSize: 14, padding: 40, textAlign: "center" }}>
+      <div>
+        <img src={LOGO_DATA_URL} alt="" style={{ width: 120, height: 120, opacity: 0.14, display: "block", margin: "0 auto 14px" }} />
+        Abra um chamado e acompanhe a conversa com o TI aqui.
+      </div>
+    </div>
+  );
+
+  const corpo = isMobile ? (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>{selecionado ? conversa : lista}</div>
+  ) : (
+    <div style={{ flex: 1, display: "grid", gridTemplateColumns: "420px 1fr", minHeight: 0 }}>
+      {lista}
+      {conversa || vazio}
+    </div>
+  );
+
+  const modal = abrindo && <AbrirChamadoModal areas={state.areas || []} isMobile={isMobile} onClose={() => setAbrindo(false)} onEnviar={enviarNovoChamado} />;
+
+  if (embedded) {
+    return (
+      <div style={{ height: isMobile ? "calc(100vh - 130px)" : "calc(100vh - 150px)", minHeight: 480, display: "flex", flexDirection: "column", border: `1px solid ${COLORS.line}`, borderRadius: 14, overflow: "hidden", background: "#fff" }}>
+        {corpo}
+        {modal}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ height: "100dvh", display: "flex", flexDirection: "column", background: COLORS.paper, fontFamily: FONTE_APP }}>
+      {!(isMobile && selecionado) && <TopoSolicitante nome={userAuth.nome} foto={userAuth.foto} onFotoChange={onFotoChange} onLogout={onLogout} isMobile={isMobile} />}
+      {corpo}
+      {modal}
     </div>
   );
 }
@@ -5307,6 +6243,15 @@ function useIsMobile() {
 
 const RESPONSIVE_CSS = `
 .app-topbar-mobile { display: none; }
+.app-abas-celular { display: none; }
+.item-busca:hover { background: #F7F5EF !important; }
+.sem-barra::-webkit-scrollbar { display: none; }
+.linha-fila:hover { background: #FBFAF6; }
+.linha-inventario:hover td { background: #FBFAF6; }
+@media (max-width: 1180px) {
+  .linha-fila { grid-template-columns: 10px minmax(0, 1fr) 92px 72px !important; }
+  .linha-fila .fila-quem, .linha-fila .fila-status { display: none !important; }
+}
 .texto-selecione-mobile { display: none; }
 @media (max-width: 860px) {
   .app-topbar-mobile { display: flex !important; }
@@ -5325,15 +6270,36 @@ const RESPONSIVE_CSS = `
     position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 55;
   }
   .app-main { width: 100%; padding: 16px !important; padding-top: 8px !important; }
-  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr !important; }
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: minmax(0, 1fr) !important; }
   .grid-chat { grid-template-columns: 1fr !important; height: auto !important; }
   .grid-chat > div:first-child { height: 220px !important; }
   .grid-chat > div:last-child { height: 480px !important; }
   .chamado-detail { flex-direction: column !important; }
   .chamado-detail > div:last-child { width: 100% !important; border-top: 1px solid #E1DDD0; border-right: none !important; }
   .chamados-dock { display: none !important; }
+  .app-topo-desk { display: none !important; }
+  .grid-kpi { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
+  .grid-kpi > div { padding: 13px 14px !important; }
+  .linha-fila { grid-template-columns: 10px minmax(0, 1fr) 72px !important; gap: 8px !important; }
+  .linha-fila .fila-idade { display: none !important; }
+  .painel-fila-link { display: none !important; }
+  .app-admin .app-main { padding-bottom: 96px !important; }
+  .app-abas-celular {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    background: #fff; border-top: 1px solid #E8E4D9;
+    padding: 8px 8px calc(10px + env(safe-area-inset-bottom));
+  }
+  .app-abas-celular button {
+    background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10.5px; font-weight: 600; font-family: inherit; cursor: pointer; padding: 4px 0;
+  }
+  .app-sidebar { height: 100% !important; }
   .login-split { flex-direction: column !important; }
   .login-brand-panel { width: 100% !important; min-width: 0 !important; padding: 28px 20px !important; }
+  .login-titulo { font-size: 28px !important; margin-top: 22px !important; }
+  .login-texto { font-size: 14px !important; }
+  .login-feats { display: none !important; }
 }
 `;
 
@@ -6007,6 +6973,28 @@ function Usuarios({ solicitantes, sessao, onSolicitantesChanged }) {
 // Token da sessão (admin ou usuário) — nunca a senha. Ver criarSessao_ no
 // Codigo.gs.
 const SESSAO_STORAGE_KEY = "inventario-ti-sessao";
+// Cópia dos chamados de quem abre chamado (só no próprio navegador dele),
+// pra lista aparecer na hora ao abrir o app, antes do servidor responder
+// (1 a 3 s no Apps Script). Sem as fotos, pra caber no localStorage.
+const CACHE_USUARIO_STORAGE_KEY = "inventario-ti-cache-usuario";
+
+function guardarCacheUsuario_(nome, state) {
+  try {
+    if (!nome || !state) return localStorage.removeItem(CACHE_USUARIO_STORAGE_KEY);
+    const chamados = (state.chamados || []).map((c) => ({ ...c, foto: "" }));
+    localStorage.setItem(CACHE_USUARIO_STORAGE_KEY, JSON.stringify({ nome, areas: state.areas || [], chamados }));
+  } catch (e) {}
+}
+
+function lerCacheUsuario_() {
+  try {
+    const raw = localStorage.getItem(CACHE_USUARIO_STORAGE_KEY);
+    const c = raw ? JSON.parse(raw) : null;
+    return c && c.nome && Array.isArray(c.chamados) ? c : null;
+  } catch (e) {
+    return null;
+  }
+}
 // Onde versões antigas do app guardavam a SENHA pra restaurar o login. Só
 // são lidas uma vez, pra trocar por uma sessão, e apagadas em seguida.
 const SECRET_STORAGE_KEY = "inventario-ti-secret";
@@ -6023,228 +7011,8 @@ function guardarSessao_(token) {
 
 function LoadingScreen() {
   return (
-    <div style={{ padding: 60, textAlign: "center", color: COLORS.inkSoft, fontFamily: "ui-sans-serif, system-ui, sans-serif" }}>
+    <div style={{ padding: 60, textAlign: "center", color: COLORS.inkSoft, fontFamily: FONTE_APP }}>
       Carregando inventário...
-    </div>
-  );
-}
-
-const DOCK_COLLAPSED_STORAGE_KEY = "inventario-ti-dock-collapsed";
-
-function ChamadosDock({ state, setState, abertoId, onAbrirChange, sessao, podeResponderChamados = true, responderSoProprios = false, meuNome = "", fotosSolicitantes = {} }) {
-  const [texto, setTexto] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [erro, setErro] = useState("");
-  const [collapsed, setCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem(DOCK_COLLAPSED_STORAGE_KEY) === "1";
-    } catch (e) {
-      return false;
-    }
-  });
-  const abertos = useMemo(
-    () => (state.chamados || []).filter((c) => c.status === "Aberto" || c.status === "Em andamento"),
-    [state.chamados]
-  );
-  const selecionado = abertos.find((c) => c.id === abertoId) || null;
-
-  function podeMexerNesseChamado(chamado) {
-    if (!podeResponderChamados) return false;
-    if (!responderSoProprios) return true;
-    return chamado && chamado.abertoPorAdmin === meuNome;
-  }
-
-  function toggleCollapsed() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(DOCK_COLLAPSED_STORAGE_KEY, next ? "1" : "0");
-      } catch (e) {}
-      return next;
-    });
-  }
-
-  async function enviarResposta() {
-    if (!podeMexerNesseChamado(selecionado)) return;
-    const valor = texto.trim();
-    if (!valor || !selecionado) return;
-    const mensagem = { autor: "ti", nome: meuNome, texto: valor, data: new Date().toISOString() };
-    setBusy(true);
-    setErro("");
-    try {
-      await backendPost("novaMensagem", { chamadoId: selecionado.id, mensagem, sessao });
-      setState((prev) => ({
-        ...prev,
-        chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, mensagens: comMensagemSemDuplicar_(c.mensagens, mensagem) } : c)),
-      }));
-      setTexto("");
-    } catch (e) {
-      setErro(textoDoErro_(e, "Não foi possível enviar. Tente novamente."));
-    }
-    setBusy(false);
-  }
-
-  if (!selecionado && abertos.length === 0) return null;
-
-  if (collapsed) {
-    return (
-      <div
-        style={{
-          width: 56,
-          flexShrink: 0,
-          background: "#fff",
-          borderLeft: `1px solid ${COLORS.line}`,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          padding: "16px 0",
-          gap: 16,
-          boxShadow: "-4px 0 16px rgba(22,35,61,0.06)",
-        }}
-      >
-        <button
-          onClick={toggleCollapsed}
-          title="Expandir chamados"
-          aria-label="Expandir chamados"
-          style={{ background: "none", border: `1px solid ${COLORS.lineStrong}`, borderRadius: 6, cursor: "pointer", color: COLORS.inkSoft, padding: 6, display: "flex" }}
-        >
-          <ChevronLeft size={16} />
-        </button>
-        <div style={{ position: "relative", display: "flex" }}>
-          <MessageSquare size={20} style={{ color: COLORS.inkSoft }} />
-          {abertos.length > 0 && (
-            <span
-              style={{
-                position: "absolute",
-                top: -7,
-                right: -9,
-                fontSize: 10,
-                fontWeight: 700,
-                minWidth: 15,
-                height: 15,
-                borderRadius: 999,
-                background: COLORS.accent,
-                color: "#fff",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "0 3px",
-              }}
-            >
-              {abertos.length}
-            </span>
-          )}
-        </div>
-        <div style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontSize: 11, fontWeight: 600, color: COLORS.inkSoft, letterSpacing: 0.2 }}>Chamados</div>
-      </div>
-    );
-  }
-
-  if (selecionado) {
-    return (
-      <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
-        <div style={{ padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 8 }}>
-          <button onClick={() => onAbrirChange(null)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex" }} aria-label="Voltar para a lista">
-            <ChevronLeft size={18} />
-          </button>
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{selecionado.assunto}</div>
-            <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{selecionado.solicitante || "Solicitante"} · {selecionado.sala || "Sem sala"} · {tempoDecorrido(selecionado.criadoEm)}</div>
-          </div>
-          <button
-            onClick={toggleCollapsed}
-            title="Recolher chamados"
-            aria-label="Recolher chamados"
-            style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex", flexShrink: 0 }}
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
-        <div style={{ flex: 1, overflow: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 12, maxHeight: 420 }}>
-          {selecionado.mensagens.map((m, i) => {
-            const abertura = i === 0;
-            const nomeAutor = m.autor === "ti" ? m.nome || "Administrador" : selecionado.solicitante || "Solicitante";
-            const bg = abertura ? "#E3EEE9" : m.autor === "ti" ? COLORS.accentSoft : "#fff";
-            const borda = abertura ? "#2F6F5E" : m.autor === "ti" ? COLORS.accent : COLORS.line;
-            return (
-              <div key={i} style={{ display: "flex", gap: 9 }}>
-                <Avatar nome={nomeAutor} foto={m.autor === "ti" ? undefined : fotosSolicitantes[selecionado.solicitante]} size={26} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ padding: "9px 12px", borderRadius: 10, borderLeft: `3px solid ${borda}`, fontSize: 13, background: bg, color: COLORS.ink }}>
-                    <div style={{ fontSize: 10.5, fontWeight: 700, color: COLORS.inkSoft, marginBottom: 3 }}>
-                      {nomeAutor} {abertura && <span style={{ color: "#2F6F5E" }}>· abriu o chamado</span>}
-                    </div>
-                    <div>{m.texto}</div>
-                  </div>
-                  <div style={{ fontSize: 10, color: COLORS.inkSoft, marginTop: 3, marginLeft: 3 }}>{formatDateTime(m.data)}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        {podeMexerNesseChamado(selecionado) && (
-          <div style={{ padding: 12, borderTop: `1px solid ${COLORS.line}` }}>
-            {erro && <div style={{ color: COLORS.danger, fontSize: 12, marginBottom: 6 }}>{erro}</div>}
-            <div style={{ display: "flex", gap: 8 }}>
-              <TextInput
-                value={texto}
-                onChange={(e) => setTexto(e.target.value)}
-                placeholder="Responder..."
-                onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                style={{ flex: 1, minWidth: 0 }}
-              />
-              <Button variant="primary" icon={Send} onClick={enviarResposta} disabled={busy}>
-                Enviar
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="chamados-dock" style={{ width: 320, flexShrink: 0, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", boxShadow: "-4px 0 16px rgba(22,35,61,0.06)" }}>
-      <div style={{ padding: "14px 16px", borderBottom: `1px solid ${COLORS.line}`, fontSize: 13.5, fontWeight: 700, color: COLORS.ink, display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ flex: 1 }}>Chamados em aberto</span>
-        <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: COLORS.accentSoft, color: COLORS.accent }}>{abertos.length}</span>
-        <button
-          onClick={toggleCollapsed}
-          title="Recolher chamados"
-          aria-label="Recolher chamados"
-          style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 2, display: "flex", flexShrink: 0 }}
-        >
-          <ChevronRight size={18} />
-        </button>
-      </div>
-      <div style={{ flex: 1, overflow: "auto" }}>
-        {abertos.map((c) => {
-          const ultima = c.mensagens[c.mensagens.length - 1];
-          const naoLido = ultima.autor === "solicitante";
-          return (
-            <div
-              key={c.id}
-              onClick={() => onAbrirChange(c.id)}
-              style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: `1px solid ${COLORS.line}`, cursor: "pointer" }}
-            >
-              <Avatar nome={c.solicitante || "?"} foto={fotosSolicitantes[c.solicitante]} size={32} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 6 }}>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, color: COLORS.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.solicitante || "Solicitante"}</div>
-                  <div style={{ fontSize: 10.5, color: COLORS.inkSoft, flexShrink: 0 }}>{tempoDecorrido(c.criadoEm)}</div>
-                </div>
-                <div style={{ fontSize: 11.5, color: COLORS.ink, fontWeight: 600, marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.assunto}</div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 3 }}>
-                  <div style={{ fontSize: 11, color: COLORS.inkSoft, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-                    {ultima.autor === "ti" ? "Você: " : ""}{ultima.texto}
-                  </div>
-                  {naoLido && <span style={{ width: 8, height: 8, borderRadius: "50%", background: COLORS.danger, flexShrink: 0, marginLeft: 6 }} />}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
@@ -6289,6 +7057,9 @@ function App() {
   const [tentativaSalvar, setTentativaSalvar] = useState(0);
 
   function aplicarLoginAdmin(data) {
+    // Já busca as bibliotecas do TI em segundo plano (gráficos e planilha).
+    carregarBiblioteca_("chart").catch(() => {});
+    carregarBiblioteca_("xlsx").catch(() => {});
     setAuth({
       isAdmin: true,
       nome: data.nome || "Administrador",
@@ -6373,6 +7144,7 @@ function App() {
     if (token && !aviso) backendPost("sair", { sessao: token }).catch(() => {});
     sairDoFirebase_();
     guardarSessao_("");
+    guardarCacheUsuario_("");
     setSessao("");
     setUserAuth(null);
     setAuth(null);
@@ -6393,6 +7165,14 @@ function App() {
       if (raw) usuarioAntigo = JSON.parse(raw);
     } catch (e) {}
 
+    const cache = sessaoSalva ? lerCacheUsuario_() : null;
+    if (cache) {
+      setAuth({ isAdmin: false });
+      setUserAuth({ nome: cache.nome, sessao: sessaoSalva, foto: "", firebaseToken: "" });
+      setState({ categorias: [], areas: cache.areas, chamados: cache.chamados });
+      setLoaded(true);
+    }
+
     try {
       if (sessaoSalva) {
         const data = await backendGetSessao(sessaoSalva);
@@ -6408,6 +7188,11 @@ function App() {
           return;
         }
         guardarSessao_("");
+        guardarCacheUsuario_("");
+        if (cache) {
+          setUserAuth(null);
+          setState(null);
+        }
         if (data.sessaoInvalida) setAvisoLogin("Sua sessão expirou. Entre de novo.");
       } else if (senhaAntiga || (usuarioAntigo && usuarioAntigo.nome)) {
         // Navegador de antes das sessões, com a SENHA guardada: usa ela uma
@@ -6427,6 +7212,9 @@ function App() {
       setState(null);
       setLoaded(true);
     } catch (e) {
+      // Sem conexão, mas com a cópia local na tela: deixa a pessoa ver os
+      // chamados; a atualização automática tenta de novo depois.
+      if (cache) return;
       setLoadError("Não foi possível conectar ao servidor do inventário. Veja o detalhe técnico abaixo — tire um print e me mande.");
       setLoadErrorDetail(String((e && e.message) || e));
       setLoaded(true);
@@ -6522,6 +7310,40 @@ function App() {
     return cancelar;
   }, [userAuth && userAuth.firebaseToken, userAuth && userAuth.nome]);
 
+  // Mantém a cópia local em dia com o que está na tela.
+  useEffect(() => {
+    if (!userAuth || !state || !auth || auth.isAdmin || auth.isAutorizado) return;
+    guardarCacheUsuario_(userAuth.nome, state);
+  }, [userAuth && userAuth.nome, state && state.chamados]);
+
+  // Sem Firebase (não configurado, ou o SDK não carregou), a resposta do TI
+  // só aparecia com F5. Agora a tela de quem abre chamado pergunta ao
+  // servidor a cada 30 s, só enquanto a aba está visível.
+  useEffect(() => {
+    if (!userAuth || !userAuth.sessao || (userAuth.firebaseToken && window.firebase)) return;
+    let parado = false;
+    const atualizar = async () => {
+      if (parado || document.hidden) return;
+      try {
+        const data = await backendGetSessao(userAuth.sessao);
+        if (parado || !data || !data.ok) return;
+        if (data.isUser && data.state) {
+          setState((prev) => (prev ? { ...prev, chamados: data.state.chamados || [], areas: data.state.areas || prev.areas } : prev));
+        } else if (data.sessaoInvalida) {
+          sairRef.current(MENSAGENS_ERRO_BACKEND.SESSAO_INVALIDA);
+        }
+      } catch (e) {}
+    };
+    const timer = setInterval(atualizar, 30000);
+    const aoVoltar = () => !document.hidden && atualizar();
+    document.addEventListener("visibilitychange", aoVoltar);
+    return () => {
+      parado = true;
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", aoVoltar);
+    };
+  }, [userAuth && userAuth.sessao, userAuth && userAuth.firebaseToken]);
+
   const logout = () => sair();
   const logoutUsuario = () => sair();
 
@@ -6570,9 +7392,19 @@ function App() {
   const podeAbrirChamados = isMaster || (auth.podeAbrirChamados !== undefined ? !!auth.podeAbrirChamados : !!auth.editar);
   const podeResponderChamados = isMaster || (auth.podeResponderChamados !== undefined ? !!auth.podeResponderChamados : !!auth.editar);
   const responderSoProprios = !isMaster && !!auth.responderSoProprios;
+  const chamadosAbertosTotal = auth.isAdmin ? (state.chamados || []).filter((c) => c.status === "Aberto").length : 0;
+
+  // Sino, busca e painel abrem o chamado direto na tela de Chamados
+  // (antes abria numa coluna fixa à direita, que ocupava espaço em todas as telas).
+  function abrirChamadoNaTela(chamado) {
+    if (!chamado) return;
+    setUnidadeAtiva(unidadeDe(chamado));
+    setChamadoAbertoId(chamado.id);
+    setView("chamados");
+  }
 
   return (
-    <div style={{ minHeight: 640, background: COLORS.paper, fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif" }}>
+    <div className="app-admin" style={{ minHeight: "100vh", background: COLORS.paper, fontFamily: FONTE_APP }}>
       <style>{RESPONSIVE_CSS}</style>
       {(conflitoSalvar || erroSalvar) && (
         <div
@@ -6609,7 +7441,7 @@ function App() {
           )}
         </div>
       )}
-      <div className="app-topbar-mobile" style={{ alignItems: "center", gap: 10, padding: "12px 16px", background: COLORS.ink, color: "#fff", position: "sticky", top: 0, zIndex: 30 }}>
+      <div className="app-topbar-mobile" style={{ alignItems: "center", gap: 10, padding: "calc(10px + env(safe-area-inset-top)) 16px 12px", background: COLORS.ink, color: "#fff", position: "sticky", top: 0, zIndex: 30 }}>
         <button
           onClick={() => setMobileMenuOpen(true)}
           style={{ background: "none", border: "none", color: "#fff", padding: 4, cursor: "pointer", display: "flex" }}
@@ -6618,12 +7450,25 @@ function App() {
           <Menu size={22} />
         </button>
         <span style={{ fontSize: 15, fontWeight: 700 }}>{NAV_TITLES[view] || "Inventário de TI"}</span>
+        <select
+          value={unidadeAtiva}
+          onChange={(e) => setUnidadeAtiva(e.target.value)}
+          aria-label="Unidade"
+          style={{ marginLeft: "auto", maxWidth: 150, background: "rgba(255,255,255,.1)", color: "#fff", border: "1px solid rgba(255,255,255,.18)", borderRadius: 9, padding: "6px 8px", fontSize: 12.5, fontFamily: "inherit" }}
+        >
+          {UNIDADES.map((u) => (
+            <option key={u.id} value={u.id} style={{ color: COLORS.ink }}>
+              {u.nome}
+            </option>
+          ))}
+        </select>
       </div>
 
       {mobileMenuOpen && <div className="app-sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />}
 
-      <div style={{ display: "flex", minHeight: 640 }}>
+      <div style={{ display: "flex", minHeight: "100vh" }}>
         <Sidebar
+          contagens={{ chamados: chamadosAbertosTotal, inventario: (state.inventario || []).filter((r) => unidadeDe(r) === unidadeAtiva).length }}
           view={view}
           mobileOpen={mobileMenuOpen}
           nome={auth.nome}
@@ -6642,15 +7487,29 @@ function App() {
             setMobileMenuOpen(false);
           }}
         />
-        <main className="app-main" style={{ flex: 1, padding: 28, overflow: "auto" }}>
-          {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados", "importar"].includes(view) &&
-            !(view === "chamados" && auth.isAutorizado) && <UnidadeTabs unidade={unidadeAtiva} onChange={setUnidadeAtiva} />}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
+        <TopoAdmin
+          state={state}
+          unidade={unidadeAtiva}
+          onUnidade={setUnidadeAtiva}
+          mostrarSino={auth.isAdmin && allowed.has("chamados")}
+          onEquipamento={(item) => {
+            if (!allowed.has("inventario")) return;
+            setUnidadeAtiva(unidadeDe(item));
+            setPendingPatrimonio(item.id);
+            setView("inventario");
+          }}
+          onChamado={abrirChamadoNaTela}
+          onVerChamados={() => setView("chamados")}
+        />
+        <main className="app-main" style={{ flex: 1, padding: view === "chamados" ? "22px 28px" : "26px 28px 30px", minWidth: 0 }}>
           {view === "dashboard" && allowed.has("dashboard") && (
             <Dashboard
               state={state}
               setView={setView}
               unidadeAtiva={unidadeAtiva}
-              onAbrirChamado={setChamadoAbertoId}
+              onAbrirChamado={(id) => abrirChamadoNaTela((state.chamados || []).find((c) => c.id === id))}
+              meuNome={auth.nome}
               onFiltrarStatus={(status) => setPendingStatusFiltro(status)}
               onFiltrarTipoArea={(tipo) => setPendingTipoAreaFiltro(tipo)}
             />
@@ -6693,6 +7552,8 @@ function App() {
               responderSoProprios={responderSoProprios}
               meuNome={auth.nome}
               fotosSolicitantes={fotosSolicitantes}
+              abertoId={chamadoAbertoId}
+              onConsumeAberto={() => setChamadoAbertoId(null)}
             />
           )}
           {view === "chamados" && allowed.has("chamados") && auth.isAutorizado && (
@@ -6702,10 +7563,19 @@ function App() {
           {view === "usuarios" && isMaster && <Usuarios solicitantes={usuarios} sessao={sessao} onSolicitantesChanged={setUsuarios} />}
           {view === "administradores" && isMaster && <Administradores admins={admins} sessao={sessao} onAdminsChanged={setAdmins} />}
         </main>
-        {auth.isAdmin && view !== "chamados" && allowed.has("chamados") && (
-          <ChamadosDock state={state} setState={setState} abertoId={chamadoAbertoId} onAbrirChange={setChamadoAbertoId} sessao={sessao} podeResponderChamados={podeResponderChamados} responderSoProprios={responderSoProprios} meuNome={auth.nome} fotosSolicitantes={fotosSolicitantes} />
-        )}
+        </div>
       </div>
+      <AbasCelular
+        view={view}
+        allowed={allowed}
+        chamadosAbertos={auth.isAdmin ? chamadosAbertosTotal : 0}
+        onNavigate={(key) => {
+          setView(key);
+          setMobileMenuOpen(false);
+          window.scrollTo(0, 0);
+        }}
+        onMenu={() => setMobileMenuOpen(true)}
+      />
     </div>
   );
 }
