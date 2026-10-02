@@ -64,6 +64,7 @@ const ICON_PATHS = {
   lock: "M5 11h14a2 2 0 012 2v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2zM7 11V7a5 5 0 0110 0v4",
   shield: "M20 13c0 5-3.5 7.5-7.7 9a1 1 0 01-.7 0C7.5 20.5 4 18 4 13V6a1 1 0 011-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 011.5 0C14.5 3.8 17 5 19 5a1 1 0 011 1z",
   wrench: "M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.8-3.8a6 6 0 01-7.9 7.9l-6.9 6.9a2.1 2.1 0 01-3-3l6.9-6.9a6 6 0 017.9-7.9l-3.8 3.8z",
+  baby: "M9 12h.01M15 12h.01M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5M19 6.3a9 9 0 011.8 3.9 2 2 0 010 3.6 9 9 0 01-17.6 0 2 2 0 010-3.6A9 9 0 0112 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1",
   school: "M14 22v-4a2 2 0 10-4 0v4M18 10l3.4 1.7a1 1 0 01.6.9V20a2 2 0 01-2 2H4a2 2 0 01-2-2v-7.4a1 1 0 01.6-.9L6 10M18 5v17M4 6l7.1-3.6a2 2 0 011.8 0L20 6M6 5v17M12 11a2 2 0 100-4 2 2 0 000 4z",
 };
 
@@ -1382,6 +1383,7 @@ function tempoDecorrido(iso) {
 const UNIDADES = [
   { id: "colegio", nome: "Colégio Espírito Santo" },
   { id: "maternal", nome: "Maternal" },
+  { id: "tuin", nome: "TUIN" },
   { id: "bercario", nome: "Berçário" },
   { id: "madrejosefa", nome: "Madre Josefa" },
 ];
@@ -1574,51 +1576,6 @@ function useFecharAoClicarFora(ref, aberto, fechar) {
   }, [aberto]);
 }
 
-function SeletorUnidade({ unidade, onChange }) {
-  const [aberto, setAberto] = useState(false);
-  const ref = useRef(null);
-  useFecharAoClicarFora(ref, aberto, () => setAberto(false));
-  const atual = UNIDADES.find((u) => u.id === unidade) || UNIDADES[0];
-  return (
-    <div ref={ref} style={{ position: "relative", flexShrink: 0 }}>
-      <button
-        onClick={() => setAberto((v) => !v)}
-        aria-haspopup="listbox"
-        aria-expanded={aberto}
-        style={{ display: "flex", alignItems: "center", gap: 10, border: `1px solid ${COLORS.line}`, borderRadius: 10, padding: "6px 12px 6px 8px", background: "#FBFAF6", cursor: "pointer", fontFamily: "inherit", textAlign: "left" }}
-      >
-        <span style={{ width: 26, height: 26, borderRadius: 7, background: COLORS.accentSoft, color: COLORS.accentInk, display: "grid", placeItems: "center" }}>
-          <SchoolIcon size={15} />
-        </span>
-        <span>
-          <small style={{ display: "block", fontSize: 10.5, color: COLORS.faint, fontWeight: 500, lineHeight: 1.1 }}>Unidade</small>
-          <span style={{ fontSize: 13, fontWeight: 600, color: COLORS.ink }}>{atual.nome}</span>
-        </span>
-        <ChevronDown size={16} style={{ color: COLORS.faint }} />
-      </button>
-      {aberto && (
-        <div role="listbox" style={{ position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 45, background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 12, boxShadow: "0 14px 40px rgba(22,35,61,.15)", padding: 6, minWidth: 230 }}>
-          {UNIDADES.map((u) => (
-            <button
-              key={u.id}
-              role="option"
-              aria-selected={u.id === unidade}
-              onClick={() => {
-                onChange(u.id);
-                setAberto(false);
-              }}
-              style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", padding: "9px 10px", borderRadius: 8, border: "none", background: u.id === unidade ? COLORS.paper2 : "transparent", fontSize: 13, fontWeight: u.id === unidade ? 700 : 500, color: COLORS.ink, cursor: "pointer", fontFamily: "inherit" }}
-            >
-              {u.nome}
-              {u.id === unidade && <Check size={14} />}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function BuscaGlobal({ state, onEquipamento, onChamado }) {
   const [q, setQ] = useState("");
   const [aberto, setAberto] = useState(false);
@@ -1798,14 +1755,240 @@ function SinoChamados({ chamados, onAbrir, onVerTodos }) {
   );
 }
 
+// ---------- Abas de unidade por bloco ----------
+
+// As unidades aparecem agrupadas por bloco do prédio. Cada equipamento,
+// sala e chamado continua pertencendo a UMA unidade; o Bloco 2 junta duas
+// (Maternal e TUIN) numa aba só, com um seletor pra escolher qual delas.
+const BLOCOS = [
+  { id: "bloco1", nome: "Bloco 1", sub: "Colégio", unidades: ["colegio"], icone: "school" },
+  { id: "bloco2", nome: "Bloco 2", sub: "Maternal e TUIN", unidades: ["maternal", "tuin"], icone: "baby" },
+  { id: "bloco3", nome: "Bloco 3", sub: "Berçário", unidades: ["bercario"], icone: "baby" },
+  { id: "madrejosefa", nome: "Madre Josefa", sub: "", unidades: ["madrejosefa"], icone: "door" },
+];
+
+function blocoDaUnidade(unidade) {
+  return BLOCOS.find((b) => b.unidades.includes(unidade)) || BLOCOS[0];
+}
+
+// Por unidade: chamados novos (abertos e ainda sem resposta do TI) e em
+// andamento (o TI já respondeu ou mudou pra "Em andamento").
+function avisosPorUnidade(chamados) {
+  const m = {};
+  UNIDADES.forEach((u) => (m[u.id] = { novos: 0, andamento: 0, maisAntigo: null }));
+  (chamados || []).forEach((c) => {
+    if (c.status !== "Aberto" && c.status !== "Em andamento") return;
+    const u = m[unidadeDe(c)] || (m[unidadeDe(c)] = { novos: 0, andamento: 0, maisAntigo: null });
+    const respondido = (c.mensagens || []).some((x) => x.autor === "ti");
+    if (c.status === "Aberto" && !respondido) {
+      u.novos++;
+      if (!u.maisAntigo || new Date(c.criadoEm) < new Date(u.maisAntigo.criadoEm)) u.maisAntigo = c;
+    } else {
+      u.andamento++;
+    }
+  });
+  return m;
+}
+
+function somaAvisos(avisos, unidades) {
+  return unidades.reduce(
+    (acc, id) => {
+      const a = avisos[id] || { novos: 0, andamento: 0 };
+      acc.novos += a.novos;
+      acc.andamento += a.andamento;
+      if (a.maisAntigo && (!acc.maisAntigo || new Date(a.maisAntigo.criadoEm) < new Date(acc.maisAntigo.criadoEm))) acc.maisAntigo = a.maisAntigo;
+      return acc;
+    },
+    { novos: 0, andamento: 0, maisAntigo: null }
+  );
+}
+
+// Balão vermelho = chamados novos; balão claro = só em andamento.
+function BalaoAviso({ avisos, pequeno }) {
+  if (!avisos.novos && !avisos.andamento) return null;
+  const novo = avisos.novos > 0;
+  return (
+    <span
+      aria-label={novo ? avisos.novos + " chamado(s) novo(s)" : avisos.andamento + " chamado(s) em andamento"}
+      style={{
+        minWidth: pequeno ? 16 : 20,
+        height: pequeno ? 16 : 20,
+        borderRadius: 20,
+        background: novo ? COLORS.danger : COLORS.accentSoft,
+        color: novo ? "#fff" : COLORS.accentInk,
+        fontSize: pequeno ? 10.5 : 11,
+        fontWeight: 800,
+        display: "inline-grid",
+        placeItems: "center",
+        padding: "0 5px",
+        flexShrink: 0,
+      }}
+    >
+      {novo ? avisos.novos : avisos.andamento}
+    </span>
+  );
+}
+
+function AbasUnidades({ unidade, onChange, chamados, mostrarAvisos }) {
+  const avisos = useMemo(() => (mostrarAvisos ? avisosPorUnidade(chamados) : {}), [chamados, mostrarAvisos]);
+  const [dica, setDica] = useState(null); // id do bloco com o resumo aberto
+  const blocoAtivo = blocoDaUnidade(unidade);
+  const nomeUnidade = (id) => (UNIDADES.find((u) => u.id === id) || {}).nome || id;
+  const vazio = { novos: 0, andamento: 0 };
+
+  return (
+    <div className="app-abas-unidade" role="tablist" aria-label="Unidades" style={{ background: "#fff", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "flex-end", gap: 4, padding: "0 28px", height: 58 }}>
+      {BLOCOS.map((b) => {
+        const on = b.id === blocoAtivo.id;
+        const soma = mostrarAvisos ? somaAvisos(avisos, b.unidades) : vazio;
+        const temAviso = soma.novos > 0 || soma.andamento > 0;
+        return (
+          <div key={b.id} style={{ position: "relative" }} onMouseEnter={() => temAviso && setDica(b.id)} onMouseLeave={() => setDica(null)}>
+            <button
+              role="tab"
+              aria-selected={on}
+              onClick={() => !on && onChange(b.unidades[0])}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 9,
+                height: 58,
+                padding: "0 16px",
+                border: "none",
+                borderBottom: `2.5px solid ${on ? COLORS.accent : "transparent"}`,
+                background: "none",
+                color: on ? COLORS.ink : COLORS.inkSoft,
+                fontWeight: on ? 700 : 500,
+                cursor: on ? "default" : "pointer",
+                fontFamily: "inherit",
+                textAlign: "left",
+              }}
+            >
+              <span style={{ width: 24, height: 24, borderRadius: 7, display: "grid", placeItems: "center", background: on ? COLORS.accentSoft : COLORS.paper2, color: on ? COLORS.accentInk : COLORS.faint }}>
+                <Icon name={b.icone} size={14} />
+              </span>
+              <span>
+                <span style={{ display: "block", fontSize: 13.5, lineHeight: 1.15 }}>{b.nome}</span>
+                {b.sub && <small style={{ display: "block", fontSize: 11, color: COLORS.faint, fontWeight: 500, lineHeight: 1.2 }}>{b.sub}</small>}
+              </span>
+              <BalaoAviso avisos={soma} />
+            </button>
+            {dica === b.id && temAviso && (
+              <div role="tooltip" style={{ position: "absolute", top: "calc(100% + 8px)", left: 0, zIndex: 46, background: COLORS.ink, color: "#fff", fontSize: 12, lineHeight: 1.5, borderRadius: 10, padding: "9px 12px", boxShadow: "0 10px 30px rgba(22,35,61,.3)", width: 250, pointerEvents: "none" }}>
+                <b style={{ display: "block", fontSize: 12.5, marginBottom: 2 }}>
+                  {b.nome}
+                  {b.sub ? " · " + b.sub : ""}
+                </b>
+                {b.unidades.map((id) => {
+                  const a = avisos[id] || vazio;
+                  return (
+                    <span key={id} style={{ display: "flex", justifyContent: "space-between", gap: 10, color: "#C9D1DE" }}>
+                      <span>{b.unidades.length > 1 ? nomeUnidade(id) : "Chamados"}</span>
+                      <span>
+                        {a.novos} novo{a.novos === 1 ? "" : "s"} · {a.andamento} em andamento
+                      </span>
+                    </span>
+                  );
+                })}
+                {soma.maisAntigo && (
+                  <span style={{ display: "flex", justifyContent: "space-between", gap: 10, color: "#C9D1DE" }}>
+                    <span>novo mais antigo</span>
+                    <span>{tempoDecorrido(soma.maisAntigo.criadoEm)}</span>
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+
+      {blocoAtivo.unidades.length > 1 && (
+        <div style={{ marginLeft: "auto", alignSelf: "center", display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 12, color: COLORS.faint, fontWeight: 600 }}>Unidade</span>
+          <div role="radiogroup" aria-label={"Unidade do " + blocoAtivo.nome} style={{ display: "flex", gap: 3, background: COLORS.paper2, borderRadius: 10, padding: 3 }}>
+            {blocoAtivo.unidades.map((id) => {
+              const on = id === unidade;
+              return (
+                <button
+                  key={id}
+                  role="radio"
+                  aria-checked={on}
+                  onClick={() => onChange(id)}
+                  style={{ display: "flex", alignItems: "center", gap: 6, border: "none", borderRadius: 8, padding: "6px 12px", fontSize: 12.5, fontWeight: 600, background: on ? "#fff" : "transparent", boxShadow: on ? "0 1px 2px rgba(0,0,0,.08)" : "none", color: on ? COLORS.ink : COLORS.inkSoft, cursor: "pointer", fontFamily: "inherit" }}
+                >
+                  {nomeUnidade(id)}
+                  {mostrarAvisos && <BalaoAviso avisos={avisos[id] || vazio} pequeno />}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Celular: os blocos viram etiquetas dentro do topo escuro.
+function AbasUnidadesCelular({ unidade, onChange, chamados, mostrarAvisos }) {
+  const avisos = useMemo(() => (mostrarAvisos ? avisosPorUnidade(chamados) : {}), [chamados, mostrarAvisos]);
+  const blocoAtivo = blocoDaUnidade(unidade);
+  const vazio = { novos: 0, andamento: 0 };
+  const etiqueta = (on) => ({
+    flex: "none",
+    display: "flex",
+    alignItems: "center",
+    gap: 5,
+    borderRadius: 20,
+    padding: "6px 9px",
+    fontSize: 12,
+    fontWeight: 600,
+    whiteSpace: "nowrap",
+    fontFamily: "inherit",
+    cursor: "pointer",
+    color: on ? COLORS.ink : "#C9D1DE",
+    background: on ? "#fff" : "rgba(255,255,255,.08)",
+    border: `1px solid ${on ? "#fff" : "rgba(255,255,255,.12)"}`,
+  });
+  return (
+    <div style={{ padding: "0 12px 12px" }}>
+      <div className="sem-barra" role="tablist" aria-label="Unidades" style={{ display: "flex", gap: 5, overflowX: "auto", scrollbarWidth: "none" }}>
+        {BLOCOS.map((b) => {
+          const on = b.id === blocoAtivo.id;
+          return (
+            <button key={b.id} role="tab" aria-selected={on} onClick={() => !on && onChange(b.unidades[0])} style={etiqueta(on)}>
+              {b.nome}
+              <BalaoAviso avisos={mostrarAvisos ? somaAvisos(avisos, b.unidades) : vazio} pequeno />
+            </button>
+          );
+        })}
+      </div>
+      {blocoAtivo.unidades.length > 1 && (
+        <div role="radiogroup" aria-label={"Unidade do " + blocoAtivo.nome} style={{ display: "flex", gap: 5, marginTop: 8 }}>
+          {blocoAtivo.unidades.map((id) => {
+            const on = id === unidade;
+            return (
+              <button key={id} role="radio" aria-checked={on} onClick={() => onChange(id)} style={{ ...etiqueta(on), padding: "4px 10px", fontSize: 11.5, background: on ? "rgba(255,255,255,.22)" : "transparent", color: "#fff", border: `1px solid ${on ? "rgba(255,255,255,.4)" : "rgba(255,255,255,.14)"}` }}>
+                {(UNIDADES.find((u) => u.id === id) || {}).nome}
+                <BalaoAviso avisos={mostrarAvisos ? avisos[id] || vazio : vazio} pequeno />
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TopoAdmin({ state, unidade, onUnidade, onEquipamento, onChamado, onVerChamados, mostrarSino }) {
   return (
-    <header className="app-topo-desk" style={{ height: 64, background: "#fff", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 14, padding: "0 28px", position: "sticky", top: 0, zIndex: 30 }}>
-      <SeletorUnidade unidade={unidade} onChange={onUnidade} />
-      <BuscaGlobal state={state} onEquipamento={onEquipamento} onChamado={onChamado} />
-      <div style={{ flex: 1 }} />
-      {mostrarSino && <SinoChamados chamados={state.chamados} onAbrir={onChamado} onVerTodos={onVerChamados} />}
-    </header>
+    <div className="app-topo-desk" style={{ position: "sticky", top: 0, zIndex: 30 }}>
+      <header style={{ height: 64, background: "#fff", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 14, padding: "0 28px" }}>
+        <BuscaGlobal state={state} onEquipamento={onEquipamento} onChamado={onChamado} />
+        <div style={{ flex: 1 }} />
+        {mostrarSino && <SinoChamados chamados={state.chamados} onAbrir={onChamado} onVerTodos={onVerChamados} />}
+      </header>
+      <AbasUnidades unidade={unidade} onChange={onUnidade} chamados={state.chamados} mostrarAvisos={mostrarSino} />
+    </div>
   );
 }
 
@@ -3294,7 +3477,7 @@ function Inventario({ state, setState, unidadeAtiva, pendingPatrimonio, onConsum
             {isMobile && <div onClick={() => setDetalheId(null)} style={{ position: "fixed", inset: 0, background: "rgba(22,35,61,.35)", zIndex: 54 }} />}
             <aside
               aria-label={"Ficha do equipamento " + d.id}
-              style={{ position: "fixed", top: isMobile ? 0 : 64, right: 0, bottom: 0, width: isMobile ? "100%" : 392, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, boxShadow: "-18px 0 40px rgba(22,35,61,.10)", display: "flex", flexDirection: "column", zIndex: 55 }}
+              style={{ position: "fixed", top: isMobile ? 0 : 122, right: 0, bottom: 0, width: isMobile ? "100%" : 392, background: "#fff", borderLeft: `1px solid ${COLORS.line}`, boxShadow: "-18px 0 40px rgba(22,35,61,.10)", display: "flex", flexDirection: "column", zIndex: 55 }}
             >
               <div style={{ padding: "18px 20px 14px", borderBottom: `1px solid ${COLORS.line}` }}>
                 <div style={{ display: "flex", alignItems: "center" }}>
@@ -5261,7 +5444,7 @@ function Chamados({ state, setState, unidadeAtiva, sessao, podeAbrirChamados = t
           style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "1fr" : "minmax(260px, 300px) minmax(0, 1fr) minmax(240px, 280px)",
-            height: isMobile ? "auto" : "calc(100vh - 64px - 44px)",
+            height: isMobile ? "auto" : "calc(100vh - 122px - 44px)",
             minHeight: isMobile ? 0 : 560,
             background: "#fff",
             border: `1px solid ${COLORS.line}`,
@@ -6246,6 +6429,8 @@ const RESPONSIVE_CSS = `
 .app-topbar-mobile { display: none; }
 .app-abas-celular { display: none; }
 .item-busca:hover { background: #F7F5EF !important; }
+.app-abas-unidade { overflow-x: auto; scrollbar-width: none; }
+.app-abas-unidade::-webkit-scrollbar { display: none; }
 .sem-barra::-webkit-scrollbar { display: none; }
 .linha-fila:hover { background: #FBFAF6; }
 .linha-inventario:hover td { background: #FBFAF6; }
@@ -7442,27 +7627,20 @@ function App() {
           )}
         </div>
       )}
-      <div className="app-topbar-mobile" style={{ alignItems: "center", gap: 10, padding: "calc(10px + env(safe-area-inset-top)) 16px 12px", background: COLORS.ink, color: "#fff", position: "sticky", top: 0, zIndex: 30 }}>
-        <button
-          onClick={() => setMobileMenuOpen(true)}
-          style={{ background: "none", border: "none", color: "#fff", padding: 4, cursor: "pointer", display: "flex" }}
-          aria-label="Abrir menu"
-        >
-          <Menu size={22} />
-        </button>
-        <span style={{ fontSize: 15, fontWeight: 700 }}>{NAV_TITLES[view] || "Inventário de TI"}</span>
-        <select
-          value={unidadeAtiva}
-          onChange={(e) => setUnidadeAtiva(e.target.value)}
-          aria-label="Unidade"
-          style={{ marginLeft: "auto", maxWidth: 150, background: "rgba(255,255,255,.1)", color: "#fff", border: "1px solid rgba(255,255,255,.18)", borderRadius: 9, padding: "6px 8px", fontSize: 12.5, fontFamily: "inherit" }}
-        >
-          {UNIDADES.map((u) => (
-            <option key={u.id} value={u.id} style={{ color: COLORS.ink }}>
-              {u.nome}
-            </option>
-          ))}
-        </select>
+      <div className="app-topbar-mobile" style={{ flexDirection: "column", background: COLORS.ink, color: "#fff", position: "sticky", top: 0, zIndex: 30 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "calc(10px + env(safe-area-inset-top)) 16px 10px" }}>
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            style={{ background: "none", border: "none", color: "#fff", padding: 4, cursor: "pointer", display: "flex" }}
+            aria-label="Abrir menu"
+          >
+            <Menu size={22} />
+          </button>
+          <span style={{ fontSize: 15, fontWeight: 700 }}>{NAV_TITLES[view] || "Inventário de TI"}</span>
+        </div>
+        {["dashboard", "inventario", "categorias", "areas", "responsaveis", "chamados", "importar"].includes(view) && (
+          <AbasUnidadesCelular unidade={unidadeAtiva} onChange={setUnidadeAtiva} chamados={state.chamados} mostrarAvisos={!!(auth && auth.isAdmin) && allowed.has("chamados")} />
+        )}
       </div>
 
       {mobileMenuOpen && <div className="app-sidebar-backdrop" onClick={() => setMobileMenuOpen(false)} />}
