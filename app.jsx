@@ -5951,7 +5951,7 @@ function TopoSolicitante({ nome, foto, onFotoChange, onLogout, isMobile }) {
 }
 
 function novoChamadoSolicitanteForm() {
-  return { assunto: "", areaId: "", texto: "", foto: "" };
+  return { assunto: "", bloco: "", unidade: "", areaId: "", texto: "", foto: "" };
 }
 
 function AbrirChamadoModal({ areas, onClose, onEnviar, isMobile }) {
@@ -5961,9 +5961,6 @@ function AbrirChamadoModal({ areas, onClose, onEnviar, isMobile }) {
   const [fotoBusy, setFotoBusy] = useState(false);
   const fotoInputRef = useRef(null);
 
-  // Sala com o nome da unidade quando há salas de mais de uma unidade —
-  // senão "Sala 101" do Colégio e do Maternal ficavam iguais na lista.
-  const unidadesComSala = useMemo(() => [...new Set(areas.map((a) => unidadeDe(a)))], [areas]);
   const areasOrdenadas = useMemo(() => ordenarPorNome(areas, "nome"), [areas]);
 
   async function handleFoto(e) {
@@ -5980,6 +5977,7 @@ function AbrirChamadoModal({ areas, onClose, onEnviar, isMobile }) {
 
   async function enviar() {
     if (!form.assunto) return setErro("Escolha o assunto.");
+    if (!form.unidade) return setErro("Escolha o local (bloco).");
     if (!form.texto.trim()) return setErro("Conte o que está acontecendo.");
     setBusy(true);
     setErro("");
@@ -6031,26 +6029,68 @@ function AbrirChamadoModal({ areas, onClose, onEnviar, isMobile }) {
         })}
       </div>
 
+      <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, margin: "16px 0 8px" }}>Local</div>
+      <div role="radiogroup" aria-label="Local" style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 8 }}>
+        {BLOCOS.map((bl) => {
+          const on = form.bloco === bl.id;
+          return (
+            <button
+              key={bl.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => {
+                setForm({ ...form, bloco: bl.id, unidade: bl.unidades[0], areaId: "" });
+                setErro("");
+              }}
+              style={{
+                background: on ? "#FFF9F1" : "#fff",
+                border: `1.5px solid ${on ? COLORS.accent : COLORS.line}`,
+                boxShadow: on ? "0 0 0 3px rgba(201,122,43,.15)" : "none",
+                borderRadius: 12,
+                padding: "9px 6px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 2,
+                color: COLORS.ink,
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 700 }}>{bl.nome}</span>
+              {bl.sub && <span style={{ fontSize: 11, color: COLORS.faint, fontWeight: 500 }}>{bl.sub}</span>}
+            </button>
+          );
+        })}
+      </div>
+      {(() => {
+        const bl = BLOCOS.find((x) => x.id === form.bloco);
+        if (!bl || bl.unidades.length < 2) return null;
+        return (
+          <div role="radiogroup" aria-label={"Unidade do " + bl.nome} style={{ display: "flex", gap: 6, marginTop: 8 }}>
+            {bl.unidades.map((id) => {
+              const on = form.unidade === id;
+              return (
+                <button key={id} type="button" role="radio" aria-checked={on} onClick={() => setForm({ ...form, unidade: id, areaId: "" })} style={{ border: `1.5px solid ${on ? COLORS.accent : COLORS.line}`, background: on ? "#FFF9F1" : "#fff", borderRadius: 20, padding: "5px 14px", fontSize: 12.5, fontWeight: 600, color: COLORS.ink, cursor: "pointer", fontFamily: "inherit" }}>
+                  {(UNIDADES.find((u) => u.id === id) || {}).nome}
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
+
       <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, margin: "16px 0 8px" }}>Sala</div>
       <Select value={form.areaId} onChange={(e) => setForm({ ...form, areaId: e.target.value })}>
         <option value="">Não sei / outro lugar</option>
-        {unidadesComSala.length > 1
-          ? UNIDADES.filter((u) => unidadesComSala.includes(u.id)).map((u) => (
-              <optgroup key={u.id} label={u.nome}>
-                {areasOrdenadas
-                  .filter((a) => unidadeDe(a) === u.id)
-                  .map((a) => (
-                    <option key={a.id} value={a.id}>
-                      {a.nome}
-                    </option>
-                  ))}
-              </optgroup>
-            ))
-          : areasOrdenadas.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.nome}
-              </option>
-            ))}
+        {areasOrdenadas
+          .filter((a) => !form.unidade || unidadeDe(a) === form.unidade)
+          .map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.nome}
+            </option>
+          ))}
       </Select>
 
       <div style={{ fontSize: 13.5, fontWeight: 700, color: COLORS.ink, margin: "16px 0 8px" }}>O que está acontecendo?</div>
@@ -6137,7 +6177,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
       solicitante: userAuth.nome,
       criadoPor: userAuth.nome,
       tipo: "Problema técnico",
-      unidade: area ? unidadeDe(area) : "colegio",
+      unidade: form.unidade || (area ? unidadeDe(area) : "colegio"),
       sala: area ? area.nome : "",
       categoria: form.assunto,
       foto: form.foto || "",
