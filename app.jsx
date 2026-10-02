@@ -6139,6 +6139,12 @@ function AbrirChamadoModal({ areas, onClose, onEnviar, isMobile }) {
 function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange, embedded = false }) {
   const isMobile = useIsMobile();
   const chamados = state.chamados || [];
+  const veTodos = !!userAuth.veTodos;
+  const responde = !!userAuth.responde;
+  const podeAbrir = userAuth.podeAbrir !== false;
+  const meuNomeMin = String(userAuth.nome || "").trim().toLowerCase();
+  const ehMeu = (c) => String(c.criadoPor || c.solicitante || "").trim().toLowerCase() === meuNomeMin;
+  const [escopo, setEscopo] = useState(veTodos ? "todos" : "meus");
   const [selectedId, setSelectedId] = useState(null);
   const [abrindo, setAbrindo] = useState(false);
   const [replyText, setReplyText] = useState("");
@@ -6146,15 +6152,16 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
   const [erro, setErro] = useState("");
   const scrollRef = useRef(null);
 
+  const visiveis = useMemo(() => (veTodos && escopo === "todos" ? chamados : chamados.filter(ehMeu)), [chamados, escopo, veTodos, meuNomeMin]);
   const ordenados = useMemo(() => {
     // Fechados vão pro fim; o resto pela última atividade.
-    return [...chamados].sort((a, b) => {
+    return [...visiveis].sort((a, b) => {
       const fa = statusDoUsuario(a).fechado ? 1 : 0;
       const fb = statusDoUsuario(b).fechado ? 1 : 0;
       if (fa !== fb) return fa - fb;
       return new Date(ultimaAtividade(b)) - new Date(ultimaAtividade(a));
     });
-  }, [chamados]);
+  }, [visiveis]);
 
   // No computador já abre a conversa do primeiro chamado; no celular
   // começa pela lista.
@@ -6196,7 +6203,9 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
     if (!texto || !selecionado || busy) return;
     setBusy(true);
     setErro("");
-    const mensagem = { autor: "solicitante", nome: userAuth.nome, texto, data: new Date().toISOString() };
+    // Respondendo chamado de outra pessoa (acesso "responde"), a mensagem sai
+    // como do TI, com o nome de quem respondeu.
+    const mensagem = { autor: ehMeu(selecionado) ? "solicitante" : "ti", nome: userAuth.nome, texto, data: new Date().toISOString() };
     try {
       await backendPost("novaMensagem", { chamadoId: selecionado.id, mensagem, sessao: userAuth.sessao });
       setState((prev) => ({
@@ -6206,6 +6215,23 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
       setReplyText("");
     } catch (e) {
       setErro(textoDoErro_(e, "Não foi possível enviar. Tente novamente."));
+    }
+    setBusy(false);
+  }
+
+  async function mudarStatus(status) {
+    if (!selecionado || busy) return;
+    setSelectedId(selecionado.id);
+    setBusy(true);
+    setErro("");
+    try {
+      await backendPost("mudarStatusChamado", { chamadoId: selecionado.id, status, sessao: userAuth.sessao });
+      setState((prev) => ({
+        ...prev,
+        chamados: prev.chamados.map((c) => (c.id === selecionado.id ? { ...c, status, confirmacao: c.status === status ? c.confirmacao : undefined } : c)),
+      }));
+    } catch (e) {
+      setErro(textoDoErro_(e, "Não foi possível mudar o status. Tente novamente."));
     }
     setBusy(false);
   }
@@ -6228,36 +6254,67 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
     setBusy(false);
   }
 
+  const seletorEscopo = veTodos ? (
+    <div role="radiogroup" aria-label="Quais chamados" style={{ display: "flex", gap: 6, padding: isMobile ? "4px 14px 8px" : "0 20px 12px" }}>
+      {[["todos", "Todos", chamados.length], ["meus", "Meus", chamados.filter(ehMeu).length]].map(([id, nome, n]) => {
+        const on = escopo === id;
+        return (
+          <button key={id} role="radio" aria-checked={on} onClick={() => setEscopo(id)} style={{ border: `1.5px solid ${on ? COLORS.accent : COLORS.line}`, background: on ? "#FFF9F1" : "#fff", color: COLORS.ink, borderRadius: 20, padding: "5px 14px", fontSize: 12.5, fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}>
+            {nome} <span style={{ color: COLORS.faint, fontWeight: 700 }}>{n}</span>
+          </button>
+        );
+      })}
+    </div>
+  ) : null;
+
   const lista = (
     <div style={{ background: "#fff", borderRight: isMobile ? "none" : `1px solid ${COLORS.line}`, display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
       {isMobile ? (
         <div style={{ padding: 16, paddingBottom: 6 }}>
-          <Button variant="primary" icon={Plus} onClick={() => setAbrindo(true)} style={{ width: "100%", justifyContent: "center", padding: 14, fontSize: 14.5, borderRadius: 11 }}>
-            Abrir chamado
-          </Button>
-          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink, margin: "18px 2px 4px" }}>Meus chamados</div>
+          {podeAbrir && (
+            <Button variant="primary" icon={Plus} onClick={() => setAbrindo(true)} style={{ width: "100%", justifyContent: "center", padding: 14, fontSize: 14.5, borderRadius: 11 }}>
+              Abrir chamado
+            </Button>
+          )}
+          <div style={{ fontSize: 15, fontWeight: 700, color: COLORS.ink, margin: podeAbrir ? "18px 2px 4px" : "2px 2px 4px" }}>{veTodos ? "Chamados" : "Meus chamados"}</div>
+          {seletorEscopo}
         </div>
       ) : (
         <div style={{ padding: "20px 20px 14px", display: "flex", alignItems: "center" }}>
-          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: COLORS.ink }}>Meus chamados</h2>
-          <Button variant="primary" icon={Plus} onClick={() => setAbrindo(true)} style={{ marginLeft: "auto" }}>
-            Abrir chamado
-          </Button>
+          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: COLORS.ink }}>{veTodos ? "Chamados" : "Meus chamados"}</h2>
+          {podeAbrir && (
+            <Button variant="primary" icon={Plus} onClick={() => setAbrindo(true)} style={{ marginLeft: "auto" }}>
+              Abrir chamado
+            </Button>
+          )}
         </div>
       )}
+      {!isMobile && seletorEscopo}
       <div style={{ overflow: "auto", flex: 1 }}>
         {ordenados.length === 0 ? (
           <div style={{ padding: "32px 24px", textAlign: "center", color: COLORS.inkSoft, fontSize: 14, lineHeight: 1.5 }}>
-            Você ainda não abriu nenhum chamado.
-            <br />
-            Quando algo não funcionar, toque em <b>Abrir chamado</b>.
+            {veTodos && escopo === "todos" ? (
+              "Nenhum chamado por enquanto."
+            ) : (
+              <>
+                Você ainda não abriu nenhum chamado.
+                {podeAbrir && (
+                  <>
+                    <br />
+                    Quando algo não funcionar, toque em <b>Abrir chamado</b>.
+                  </>
+                )}
+              </>
+            )}
           </div>
         ) : (
           ordenados.map((c) => {
             const st = statusDoUsuario(c);
             const ativo = selecionado && selecionado.id === c.id;
             const ultima = (c.mensagens || [])[c.mensagens.length - 1];
-            const previa = st.fechado ? "Fechado" : ultima ? (ultima.autor === "ti" ? (ultima.nome || "TI") + ": " : "Você: ") + ultima.texto : "";
+            const meu = ehMeu(c);
+            const quemFalou = !ultima ? "" : ultima.autor === "ti" ? (ultima.nome || "TI") + ": " : meu ? "Você: " : (ultima.nome || c.solicitante || "Solicitante") + ": ";
+            const previa = st.fechado ? "Fechado" : ultima ? quemFalou + ultima.texto : "";
             return (
               <button
                 key={c.id}
@@ -6280,7 +6337,10 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
               >
                 <IconeDoChamado chamado={c} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.assunto}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: COLORS.ink, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {c.assunto}
+                    {veTodos && !meu && <span style={{ fontWeight: 500, color: COLORS.faint }}> · {c.solicitante || c.criadoPor}</span>}
+                  </div>
                   <div style={{ fontSize: 12.5, color: COLORS.inkSoft, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: 2 }}>{previa}</div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 5, fontSize: 11.5, color: COLORS.faint, flexShrink: 0 }}>
@@ -6299,8 +6359,9 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
   if (selecionado) {
     const st = statusDoUsuario(selecionado);
     const msgs = selecionado.mensagens || [];
-    const pedeConfirmacao = selecionado.status === "Resolvido" && !st.fechado;
-    const meta = [selecionado.categoria, selecionado.sala, "aberto " + (rotuloDia(selecionado.criadoEm) === "Hoje" ? "hoje às " + horaCurta(selecionado.criadoEm) : "em " + new Date(selecionado.criadoEm).toLocaleDateString("pt-BR"))].filter(Boolean).join(" · ");
+    const meu = ehMeu(selecionado);
+    const pedeConfirmacao = meu && selecionado.status === "Resolvido" && !st.fechado;
+    const meta = [!meu && (selecionado.solicitante || selecionado.criadoPor) ? "de " + (selecionado.solicitante || selecionado.criadoPor) : "", selecionado.categoria, selecionado.sala, "aberto " + (rotuloDia(selecionado.criadoEm) === "Hoje" ? "hoje às " + horaCurta(selecionado.criadoEm) : "em " + new Date(selecionado.criadoEm).toLocaleDateString("pt-BR"))].filter(Boolean).join(" · ");
     conversa = (
       <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1, background: COLORS.paper }}>
         <div style={{ background: "#fff", padding: isMobile ? "12px 14px" : "16px 24px", borderBottom: `1px solid ${COLORS.line}`, display: "flex", alignItems: "center", gap: 12 }}>
@@ -6318,9 +6379,11 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
 
         <div ref={scrollRef} style={{ flex: 1, overflow: "auto", padding: isMobile ? "16px 14px" : "18px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
           {msgs.map((m, i) => {
-            const minha = m.autor !== "ti";
+            // No meu chamado, "minha" é tudo que não é do TI; no dos outros, só o
+            // que eu mesmo respondi como TI.
+            const minha = meu ? m.autor !== "ti" : m.autor === "ti" && m.nome === userAuth.nome;
             const novoDia = i === 0 || rotuloDia(msgs[i - 1].data) !== rotuloDia(m.data);
-            const nomeTi = m.nome || "TI";
+            const nomeTi = m.nome || (m.autor === "ti" ? "TI" : selecionado.solicitante || "Solicitante");
             return (
               <React.Fragment key={i}>
                 {novoDia && <span style={{ alignSelf: "center", fontSize: 11.5, color: COLORS.faint, fontWeight: 600, background: "#EFECE3", padding: "3px 10px", borderRadius: 20 }}>{rotuloDia(m.data)}</span>}
@@ -6332,7 +6395,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                   )}
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 11.5, color: COLORS.faint, fontWeight: 600, marginBottom: 4, textAlign: minha ? "right" : "left" }}>
-                      {minha ? "Você" : nomeTi + " · TI"} · {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                      {minha ? "Você" : m.autor === "ti" ? nomeTi + " · TI" : nomeTi} · {new Date(m.data).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                     </div>
                     <div
                       style={{
@@ -6382,13 +6445,31 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
 
         {erro && <div style={{ color: COLORS.danger, fontSize: 13, padding: isMobile ? "0 14px 8px" : "0 24px 8px" }}>{erro}</div>}
 
-        {st.fechado ? (
+        {!meu && responde && (
+          <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "10px 14px 0" : "12px 24px 0", display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: COLORS.faint }}>Status</span>
+            {[["Em andamento", "Em atendimento"], ["Resolvido", "Marcar resolvido"], ["Aberto", "Reabrir"]]
+              .filter(([valor]) => valor !== selecionado.status)
+              .map(([valor, rotulo]) => (
+                <Button key={valor} variant="ghost" onClick={() => mudarStatus(valor)} disabled={busy} style={{ padding: "5px 10px", fontSize: 12 }}>
+                  {rotulo}
+                </Button>
+              ))}
+          </div>
+        )}
+        {meu && st.fechado ? (
           <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "14px 14px calc(14px + env(safe-area-inset-bottom))" : "14px 24px", fontSize: 13, color: COLORS.inkSoft, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <CheckCircle size={17} />
-            <span style={{ flex: 1 }}>Chamado fechado. Precisa de mais alguma coisa?</span>
-            <Button variant="ghost" icon={Plus} onClick={() => setAbrindo(true)} style={{ padding: "6px 10px", fontSize: 12 }}>
-              Abrir outro chamado
-            </Button>
+            <span style={{ flex: 1 }}>Chamado fechado.{podeAbrir ? " Precisa de mais alguma coisa?" : ""}</span>
+            {podeAbrir && (
+              <Button variant="ghost" icon={Plus} onClick={() => setAbrindo(true)} style={{ padding: "6px 10px", fontSize: 12 }}>
+                Abrir outro chamado
+              </Button>
+            )}
+          </div>
+        ) : !meu && !responde ? (
+          <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "14px 14px calc(14px + env(safe-area-inset-bottom))" : "14px 24px", fontSize: 13, color: COLORS.inkSoft }}>
+            Você pode acompanhar este chamado, mas não responder.
           </div>
         ) : (
           <div style={{ background: "#fff", borderTop: `1px solid ${COLORS.line}`, padding: isMobile ? "10px 12px calc(10px + env(safe-area-inset-bottom))" : "12px 24px 16px" }}>
@@ -6397,7 +6478,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && enviarResposta()}
-                placeholder={isMobile ? "Mensagem…" : "Escreva uma mensagem pro TI…"}
+                placeholder={isMobile ? "Mensagem…" : meu ? "Escreva uma mensagem pro TI…" : "Responder como TI…"}
                 aria-label="Mensagem para o TI"
                 style={{ flex: 1, border: "none", outline: "none", fontSize: 13.5, color: COLORS.ink, background: "transparent", minWidth: 0, padding: "6px 0" }}
               />
@@ -6415,7 +6496,7 @@ function ChamadosSolicitante({ state, setState, userAuth, onLogout, onFotoChange
     <div style={{ display: "grid", placeItems: "center", background: COLORS.paper, color: COLORS.inkSoft, fontSize: 14, padding: 40, textAlign: "center" }}>
       <div>
         <img src={LOGO_DATA_URL} alt="" style={{ width: 120, height: 120, opacity: 0.14, display: "block", margin: "0 auto 14px" }} />
-        Abra um chamado e acompanhe a conversa com o TI aqui.
+        {podeAbrir ? "Abra um chamado e acompanhe a conversa com o TI aqui." : "Escolha um chamado na lista para ver a conversa."}
       </div>
     </div>
   );
@@ -6902,7 +6983,7 @@ function Administradores({ admins, sessao, onAdminsChanged }) {
 const AUTORIZADO_PERMISSOES = "dashboard,categorias,areas,inventario";
 
 function emptyUsuarioForm() {
-  return { nome: "", email: "", senha: "", autorizado: false, autorizadoAbreChamados: false };
+  return { nome: "", email: "", senha: "", autorizado: false, autorizadoAbreChamados: false, veTodosChamados: false, respondeChamados: false };
 }
 
 function Usuarios({ solicitantes, sessao, onSolicitantesChanged }) {
@@ -6926,7 +7007,7 @@ function Usuarios({ solicitantes, sessao, onSolicitantesChanged }) {
     setModal({
       mode: "edit",
       original: u,
-      form: { nome: u.nome, email: u.email || "", senha: "", autorizado: u.tipo === "autorizado", autorizadoAbreChamados: !!u.autorizadoAbreChamados },
+      form: { nome: u.nome, email: u.email || "", senha: "", autorizado: u.tipo === "autorizado", autorizadoAbreChamados: !!u.autorizadoAbreChamados, veTodosChamados: !!u.veTodosChamados, respondeChamados: !!u.veTodosChamados && !!u.respondeChamados },
     });
     setError("");
   }
@@ -6971,6 +7052,8 @@ function Usuarios({ solicitantes, sessao, onSolicitantesChanged }) {
       foto: modal.original ? modal.original.foto || "" : "",
       aprovado,
       autorizadoAbreChamados: f.autorizado && !!f.autorizadoAbreChamados,
+      veTodosChamados: !!f.veTodosChamados,
+      respondeChamados: !!f.veTodosChamados && !!f.respondeChamados,
     };
     let novaLista;
     if (modal.mode === "new") {
@@ -7100,6 +7183,11 @@ function Usuarios({ solicitantes, sessao, onSolicitantesChanged }) {
                         + abre chamados
                       </span>
                     )}
+                    {u.veTodosChamados && (
+                      <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 999, color: COLORS.blue, background: COLORS.blueSoft, marginLeft: 6 }}>
+                        {u.respondeChamados ? "vê e responde todos" : "vê todos os chamados"}
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: "9px 6px", textAlign: "right", whiteSpace: "nowrap" }}>
                     <button onClick={() => openEdit(u)} style={{ background: "none", border: "none", cursor: "pointer", color: COLORS.inkSoft, padding: 4 }} aria-label="Editar">
@@ -7157,6 +7245,31 @@ function Usuarios({ solicitantes, sessao, onSolicitantesChanged }) {
               </p>
             </>
           )}
+          <div style={{ fontSize: 13, fontWeight: 700, color: COLORS.ink, margin: "6px 0 6px", borderTop: `1px solid ${COLORS.line}`, paddingTop: 12 }}>Chamados dos outros</div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={!!modal.form.veTodosChamados}
+              onChange={(e) => setModal({ ...modal, form: { ...modal.form, veTodosChamados: e.target.checked, respondeChamados: e.target.checked ? modal.form.respondeChamados : false } })}
+            />
+            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Pode ver os chamados de todos</span>
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: 22, marginBottom: 4, cursor: modal.form.veTodosChamados ? "pointer" : "not-allowed", opacity: modal.form.veTodosChamados ? 1 : 0.5 }}>
+            <input
+              type="checkbox"
+              disabled={!modal.form.veTodosChamados}
+              checked={!!modal.form.veTodosChamados && !!modal.form.respondeChamados}
+              onChange={(e) => setModal({ ...modal, form: { ...modal.form, respondeChamados: e.target.checked } })}
+            />
+            <span style={{ fontSize: 13.5, color: COLORS.ink }}>Também pode responder e mudar o status</span>
+          </label>
+          <p style={{ fontSize: 12, color: COLORS.inkSoft, marginTop: 0, marginBottom: 12 }}>
+            {!modal.form.veTodosChamados
+              ? "Desmarcado: vê só os próprios chamados (ou nenhum, se for autorizado sem chamados)."
+              : modal.form.respondeChamados
+                ? "Vê todos os chamados e responde como TI (a resposta aparece com o nome dele), podendo marcar em atendimento, resolvido ou reabrir."
+                : "Vê todos os chamados e a conversa, mas não responde nem muda o status."}
+          </p>
           {error && <div style={{ color: COLORS.danger, fontSize: 13, marginBottom: 10 }}>{error}</div>}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 6 }}>
             <Button variant="ghost" onClick={() => setModal(null)}>
@@ -7331,14 +7444,16 @@ function App() {
   // data = resposta do login/restauração de um solicitante ou autorizado.
   function aplicarLoginUsuario(data, sessaoUsuario) {
     const isAutorizado = !!data.isAutorizado;
-    const podeAbrirChamados = !!data.podeAbrirChamados;
+    const veTodos = !!data.veTodosChamados;
+    // Solicitante comum sempre abre chamados; autorizado só se marcado.
+    const podeAbrirChamados = isAutorizado ? !!data.podeAbrirChamados : true;
     setAuth(
       isAutorizado
         ? {
             isAdmin: false,
             isAutorizado: true,
             nome: data.nome,
-            permissoes: AUTORIZADO_PERMISSOES + (podeAbrirChamados ? ",chamados" : ""),
+            permissoes: AUTORIZADO_PERMISSOES + (podeAbrirChamados || veTodos ? ",chamados" : ""),
             editar: false,
             podeAbrirChamados,
           }
@@ -7346,7 +7461,7 @@ function App() {
     );
     // firebaseToken fica só no estado (memória), nunca no localStorage — a
     // cada visita o login/restauração manda um novo.
-    setUserAuth({ nome: data.nome, sessao: sessaoUsuario, foto: data.foto || "", firebaseToken: data.firebaseToken || "" });
+    setUserAuth({ nome: data.nome, sessao: sessaoUsuario, foto: data.foto || "", firebaseToken: data.firebaseToken || "", veTodos, responde: veTodos && !!data.respondeChamados, podeAbrir: podeAbrirChamados });
     setState(data.state);
     setView("dashboard");
     guardarSessao_(sessaoUsuario);
@@ -7531,14 +7646,16 @@ function App() {
       (meusChamados) => {
         setState((prev) => (prev ? { ...prev, chamados: meusChamados } : prev));
       },
-      userAuth.nome
+      // Quem vê os chamados de todos escuta a coleção inteira (o token dele
+      // leva a marca chamados=true); os demais, só os próprios.
+      userAuth.veTodos ? undefined : userAuth.nome
     );
     return cancelar;
-  }, [userAuth && userAuth.firebaseToken, userAuth && userAuth.nome]);
+  }, [userAuth && userAuth.firebaseToken, userAuth && userAuth.nome, userAuth && userAuth.veTodos]);
 
   // Mantém a cópia local em dia com o que está na tela.
   useEffect(() => {
-    if (!userAuth || !state || !auth || auth.isAdmin || auth.isAutorizado) return;
+    if (!userAuth || !state || !auth || auth.isAdmin || auth.isAutorizado || userAuth.veTodos) return;
     guardarCacheUsuario_(userAuth.nome, state);
   }, [userAuth && userAuth.nome, state && state.chamados]);
 

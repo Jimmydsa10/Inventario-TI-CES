@@ -428,8 +428,13 @@ function saveAdmins(list) {
 // visualização no resto, mas ganha a aba "Chamados" pra abrir e acompanhar
 // os PRÓPRIOS chamados (igual um solicitante comum) — ver authenticateSolicitante
 // e o ramo userNome de doGet. Em branco = false (comportamento de sempre).
+// Colunas "veTodosChamados"/"respondeChamados" (8ª/9ª): valem pra qualquer
+// usuário (solicitante ou autorizado). veTodosChamados = vê os chamados de
+// TODOS (não só os próprios). respondeChamados = também responde e muda o
+// status dos chamados dos outros (só vale junto com veTodosChamados). Em
+// branco = false (comportamento de sempre).
 function getSolicitantes() {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados', 'veTodosChamados', 'respondeChamados']);
   const data = sh.getDataRange().getValues();
   return data.slice(1).filter(function (r) { return r[0]; }).map(function (r) {
     const aprovadoEmBranco = r[5] === '' || r[5] === undefined || r[5] === null;
@@ -441,6 +446,8 @@ function getSolicitantes() {
       email: String(r[4] || ''),
       aprovado: aprovadoEmBranco ? true : r[5] === true,
       autorizadoAbreChamados: r[6] === true,
+      veTodosChamados: r[7] === true,
+      respondeChamados: r[7] === true && r[8] === true,
     };
   });
 }
@@ -461,7 +468,7 @@ function findSolicitante(identificador) {
 }
 
 function saveSolicitantes(list) {
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados', 'veTodosChamados', 'respondeChamados']);
   const rows = (list || []).map(function (s) {
     return [
       s.nome,
@@ -471,10 +478,12 @@ function saveSolicitantes(list) {
       s.email || '',
       s.aprovado === undefined ? true : !!s.aprovado,
       !!s.autorizadoAbreChamados,
+      !!s.veTodosChamados,
+      !!s.veTodosChamados && !!s.respondeChamados,
     ];
   });
   garantirColunasTexto_(sh, COLUNAS_TEXTO_SOLICITANTES);
-  substituirLinhasComSeguranca_(sh, rows, 7);
+  substituirLinhasComSeguranca_(sh, rows, 9);
 }
 
 // Foto de perfil vem do navegador já reduzida (240px, JPEG — uns 10-20 mil
@@ -494,7 +503,7 @@ function atualizarFotoSolicitante(nome, novaFoto) {
   if (foto && (foto.indexOf('data:image/') !== 0 || foto.length > LIMITE_FOTO_PERFIL)) {
     return { ok: false, error: 'Foto inválida ou grande demais.' };
   }
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados', 'veTodosChamados', 'respondeChamados']);
   const lastRow = sh.getLastRow();
   if (lastRow < 2) return { ok: false, error: 'Usuário não encontrado.' };
   const nomes = sh.getRange(2, 1, lastRow - 1, 1).getValues();
@@ -536,10 +545,18 @@ function authenticateSolicitante(nome, senha) {
   return usuarioPodeUsarChamados_(s) ? s : null;
 }
 
-function usuarioPodeUsarChamados_(s) {
+// Pode abrir chamados (e acompanhar os próprios): solicitante comum, ou
+// autorizado com autorizadoAbreChamados.
+function usuarioPodeAbrirChamados_(s) {
   if (!s || s.aprovado === false) return false;
   if (s.tipo === 'autorizado' && !s.autorizadoAbreChamados) return false;
   return true;
+}
+
+// Tem a tela de Chamados: quem abre chamados OU quem vê os de todos.
+function usuarioPodeUsarChamados_(s) {
+  if (!s || s.aprovado === false) return false;
+  return usuarioPodeAbrirChamados_(s) || !!s.veTodosChamados;
 }
 
 // ---------- Proteção contra força bruta no login ----------
@@ -648,9 +665,9 @@ function processarCadastroSolicitante_(nome, email, senha) {
   }
   // Acrescenta só a linha nova (mesma ordem de colunas de saveSolicitantes)
   // em vez de regravar a aba inteira a cada cadastro público.
-  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados']);
+  const sh = getOrCreateSheet('Solicitantes', ['nome', 'senha', 'tipo', 'foto', 'email', 'aprovado', 'autorizadoAbreChamados', 'veTodosChamados', 'respondeChamados']);
   garantirColunasTexto_(sh, COLUNAS_TEXTO_SOLICITANTES);
-  sh.appendRow([nome, gerarHashSenha_(senha), 'solicitante', '', email, false, false]);
+  sh.appendRow([nome, gerarHashSenha_(senha), 'solicitante', '', email, false, false, false, false]);
   return { ok: true };
 }
 
@@ -1008,8 +1025,12 @@ function gerarTokenFirebaseAdmin_(admin) {
 // Ou seja: cada solicitante enxerga ao vivo só os próprios chamados, nunca
 // os de outra pessoa — igual ao filtro "meusChamados" do doGet.
 function gerarTokenFirebaseSolicitante_(usuario) {
-  if (usuario.tipo === 'autorizado' && !usuario.autorizadoAbreChamados) return '';
-  return gerarTokenFirebase_('user', usuario.nome, { solicitante: usuario.nome });
+  if (!usuarioPodeUsarChamados_(usuario)) return '';
+  // Quem vê os chamados de todos recebe a mesma marca do admin
+  // (chamados=true), que as regras do Firestore já liberam pra leitura.
+  const claims = { solicitante: usuario.nome };
+  if (usuario.veTodosChamados) claims.chamados = true;
+  return gerarTokenFirebase_('user', usuario.nome, claims);
 }
 
 function gerarTokenFirebase_(prefixoUid, nome, claims) {
@@ -1290,15 +1311,19 @@ function montarPayloadUsuario_(usuario) {
     // solicitante comum.
     const podeAbrirChamados = !!usuario.autorizadoAbreChamados;
     const alvoAutorizado = usuario.nome.trim().toLowerCase();
-    const chamadosDoAutorizado = podeAbrirChamados
-      ? listarChamados().filter(function (c) { return (c.criadoPor || '').trim().toLowerCase() === alvoAutorizado; })
-      : [];
+    const chamadosDoAutorizado = usuario.veTodosChamados
+      ? listarChamados()
+      : podeAbrirChamados
+        ? listarChamados().filter(function (c) { return (c.criadoPor || '').trim().toLowerCase() === alvoAutorizado; })
+        : [];
     return {
       ok: true,
       isAdmin: false,
       isUser: true,
       isAutorizado: true,
       podeAbrirChamados: podeAbrirChamados,
+      veTodosChamados: !!usuario.veTodosChamados,
+      respondeChamados: !!usuario.respondeChamados,
       nome: usuario.nome,
       foto: usuario.foto || '',
       firebaseToken: gerarTokenFirebaseSolicitante_(usuario),
@@ -1317,13 +1342,17 @@ function montarPayloadUsuario_(usuario) {
   // chamados" vazio pra quem entra pelo email, já que criadoPor sempre
   // guarda o nome, nunca o email.
   const alvo = usuario.nome.trim().toLowerCase();
-  const meusChamados = listarChamados().filter(function (c) {
-    return (c.criadoPor || '').trim().toLowerCase() === alvo;
-  });
+  const meusChamados = usuario.veTodosChamados
+    ? listarChamados()
+    : listarChamados().filter(function (c) {
+        return (c.criadoPor || '').trim().toLowerCase() === alvo;
+      });
   return {
     ok: true,
     isAdmin: false,
     isUser: true,
+    veTodosChamados: !!usuario.veTodosChamados,
+    respondeChamados: !!usuario.respondeChamados,
     nome: usuario.nome,
     foto: usuario.foto || '',
     firebaseToken: gerarTokenFirebaseSolicitante_(usuario),
@@ -1592,6 +1621,9 @@ function doPostComTrava(e) {
     if (!adminPodeAbrirChamados && !solicitante) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
+    if (!adminPodeAbrirChamados && !usuarioPodeAbrirChamados_(solicitante)) {
+      return jsonOut({ ok: false, error: 'Sem permissão para abrir chamados' });
+    }
     // Antes: o chamado era gravado do jeito que o cliente mandou — id,
     // status, mensagens e tudo. Como salvarChamado_ sobrescreve a linha se o
     // id já existe, qualquer solicitante logado conseguia substituir o
@@ -1662,10 +1694,16 @@ function doPostComTrava(e) {
     if (!chamado) {
       return jsonOut({ ok: false, error: 'Chamado não encontrado' });
     }
+    // Quem tem "responde chamados" (usuário com acesso a todos) responde
+    // chamados de outras pessoas; os demais só os próprios.
+    let respondeComoSuporte = adminPodeResponderChamados;
     if (solicitante && !adminPodeResponderChamados) {
       const dono = String(chamado.criadoPor || chamado.solicitante || '').trim().toLowerCase();
       if (dono !== solicitante.nome.trim().toLowerCase()) {
-        return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
+        if (!solicitante.respondeChamados) {
+          return jsonOut({ ok: false, error: 'Sem permissão para responder este chamado' });
+        }
+        respondeComoSuporte = true;
       }
     }
     if (isAdmin && !podeMexerNesseChamado_(chamado)) {
@@ -1676,7 +1714,7 @@ function doPostComTrava(e) {
     // (ou data falsa) dentro do chamado.
     const recebida = body.mensagem || {};
     const mensagem = {
-      autor: adminPodeResponderChamados ? 'ti' : 'solicitante',
+      autor: respondeComoSuporte ? 'ti' : 'solicitante',
       // Nome de quem respondeu de verdade (nunca o que o cliente mandou) —
       // antes toda resposta de admin aparecia só como "Administrador" pra
       // todo mundo, sem dar pra saber QUAL admin respondeu.
@@ -1708,7 +1746,8 @@ function doPostComTrava(e) {
   // Agora essas duas ações leem o registro fresco na hora, igual
   // novoChamado/novaMensagem já faziam, e nunca dependem do autosave geral.
   if (body.action === 'mudarStatusChamado') {
-    if (!adminPodeResponderChamados) {
+    const usuarioQueResponde = adminPodeResponderChamados ? null : solicitanteDoPedido_();
+    if (!adminPodeResponderChamados && !(usuarioQueResponde && usuarioQueResponde.respondeChamados)) {
       return jsonOut({ ok: false, error: 'Não autenticado' });
     }
     // Mesma lista de CHAMADO_STATUS_OPTIONS no frontend — qualquer outro
