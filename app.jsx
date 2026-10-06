@@ -321,6 +321,15 @@ function jsonpRequest(url) {
   });
 }
 
+// O Apps Script "dorme" quando ninguém usa e a primeira chamada leva uns
+// 10 segundos pra acordar. Sem sessão salva (tela de login), já faz uma
+// chamada vazia ao abrir o site: o servidor acorda enquanto a pessoa
+// digita, e o login responde em poucos segundos. Quem já tem sessão não
+// precisa: o próprio carregamento do app faz a primeira chamada.
+try {
+  if (!localStorage.getItem("inventario-ti-sessao")) jsonpRequest(BACKEND_URL).catch(() => {});
+} catch (e) {}
+
 // O backend (Google Apps Script) às vezes tem lentidão/instabilidade
 // passageira (comum em implantações novas, enquanto o Google "esquenta" o
 // serviço). Uma nova tentativa automática evita mostrar erro pro usuário
